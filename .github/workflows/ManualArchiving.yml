@@ -1,0 +1,58 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Manual Archiving Closed issues
+
+  # Allows you to run this workflow manually from the Actions tab
+on:
+  workflow_dispatch:
+    inputs:
+      closed_issue_number:
+        description: '需要关闭的issue的单号，请用半角（英文）逗号分隔每一个单号'
+        required: true
+      # reopen_issue_number:
+      #   description: '需要重新打开的issue的单号，请用半角（英文）逗号分隔每一个单号（功能尚未完成）'
+      #   required: false
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  run_my_script:
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_REPOSITORY: ${{ github.repository }}
+      MY_TOKEN: ${{ secrets.MY_TOKEN }}
+      GITHUB_SHA: ${{ github.sha }} 
+      CLOSED_ISSUE_NUMBER : ${{ github.event.inputs.closed_issue_number }}
+      REOPEN_ISSUE_NUMBER : ${{ github.event.inputs.reopen_issue_number }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - name: Install dependencies
+        run: |
+          pip install -r ./issue_procesor/requirements.txt
+          pip install -r ./auto_archiving/requirements.txt
+        
+      - name: Run my script
+        run: | 
+          python script/main.py
+
+          - name: Archiving closed issues
+          env:
+            CLIENT_PAYLOAD : ${{ toJson(github.event.client_payload) }}
+            ACTION_NAME : ${{ github.event.action }}
+            WORKFLOW_URL : https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          run: |
+            cd ./
+            python ./auto_archiving/scripts/main.py -c "./auto_archiving/configs/config.json" -fr "./归档失败记录.json"
+          
+      - name: Add and commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ./修改归档.md
+          git commit -m "Closed issue#${{ github.event.client_payload.issue_id}}"
+          git push origin main
+        

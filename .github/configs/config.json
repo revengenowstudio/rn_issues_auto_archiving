@@ -1,0 +1,22 @@
+{
+    "rjust_space_width": 60,
+    "rjust_character": " ",
+    "table_separator": "|",
+    "archive_template": "|{table_id}|({issue_type}){issue_title}{rjust_space}[{issue_repository}#{issue_id}] |{introduced_version}|{archive_version}|",
+    "archive_document_path": "./修改归档.md",
+    "issue_title_processing_rules": {
+        "Bug修复": {
+            "add_prefix": "修复了",
+            "add_suffix": "的Bug",
+            "remove_keyword": []
+        }
+    },
+    "action_name_map": {
+        "dispatch_from_all_issues": "外部Issue",
+        "dispatch_from_internal_issues": "内部Issue"
+    },
+    "reopen_workflow_prefix_map": {
+        "dispatch_from_all_issues": "ALL_ISSUE_REOPEN_DISPATCH",
+        "dispatch_from_internal_issues": "INTERNAL_ISSUE_REOPEN_DISPATCH"
+    }
+}
