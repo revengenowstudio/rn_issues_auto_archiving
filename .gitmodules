@@ -1,0 +1,6 @@
+[submodule "issue_processor"]
+	path = issue_processor
+	url = git@github.com:shuiping233/issue_processor.git
+[submodule "auto_archving"]
+	path = auto_archving
+	url = git@github.com:shuiping233/auto_archving.git
