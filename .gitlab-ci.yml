@@ -15,6 +15,10 @@ variables:
   OUTPUT_PATH: "./output.json"
   ISSUE_REPOSITORY: "内部Issue"
 
+before_script:
+  - git config --global user.email "RN-Bot@gitlab.revengenow.top"
+  - git config --global user.name "$RN Bot"
+
 issue_processor:
   stage: issue_processor
   only:
@@ -22,8 +26,13 @@ issue_processor:
   image: m.daocloud.io/docker.io/library/python:3.10.13-slim-bullseye
   script:
     - |
-      echo "GITLAB_CI : $GITLAB_CI"
-      pip install -r ./issue_processor/requirements.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
-      pip install -r ./auto_archiving/requirements.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+      pip install -r ./src/issue_processor/requirements.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+      pip install -r ./src/auto_archiving/requirements.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
       export WEBHOOK_PAYLOAD=$(cat $TRIGGER_PAYLOAD);
-      python ./issue_processor/main.py -c "./config/issue_processor.json"
+      python ./src/issue_processor/main.py -c "./config/issue_processor.json"
+      python ./src/auto_archiving/main.py -c "./config/auto_archiving.json" -fr "./归档失败记录.json"
+
+      git add ./修改归档.md
+      issue_id=$(python ./test.py)
+      git commit -m "Closed $ISSUE_REPOSITORY#$issue_id"
+      git push origin main
