@@ -11,7 +11,7 @@
             "program": "issue_processor/main.py",
             "args": [
                 "--config",
-                "./.github/configs/issue_processor.json",
+                "./config/issue_processor.json",
                 "--platform-type",
                 "github"
             ],
@@ -25,7 +25,7 @@
             "program": "issue_processor/main.py",
             "args": [
                 "--config",
-                "./.gitlab/configs/issue_processor.json",
+                "./config/issue_processor.json",
                 "--platform-type",
                 "gitlab"
             ],
@@ -33,20 +33,13 @@
             "cwd": "${workspaceFolder}"
         },
         {
-            "name": "Python 调试程序: 当前文件",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal"
-        },
-        {
             "name": "auto_archiving",
             "type": "debugpy",
             "request": "launch",
-            "program": "./auto_archiving/scripts/main.py",
+            "program": "./auto_archiving/main.py",
             "args": [
                 "--config",
-                "./auto_archiving/configs/config.json",
+                "./config/auto_archiving.json",
                 "--failed-record",
                 "./归档失败记录.json"
             ],

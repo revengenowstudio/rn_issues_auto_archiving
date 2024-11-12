@@ -49,6 +49,7 @@ jobs:
           # DISPATCH_TOKEN: ${{ secrets.DISPATCH_TOKEN }}
           # DISPATCH_NAME: ${{ vars.DISPATCH_NAME }}
           OUTPUT_PATH: "./output.json"
+          ISSUE_REPOSITORY: "外部Issue"
         run: |
           cd ./
           python ./issue_processor/main.py -c "./config/issue_processor.json"
