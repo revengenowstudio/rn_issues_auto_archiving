@@ -67,7 +67,7 @@ class PlatformEnvironments():
 class Platform(ABC):
 
     @abstractmethod
-    def create_http_header(self, token: str = None) -> dict[str, str]:
+    def create_http_header(self, token: str) -> dict[str, str]:
         pass
 
     @abstractmethod
@@ -205,7 +205,6 @@ class Platform(ABC):
         if should_not_match_archive_version:
             raise ArchiveVersionError(
                 ErrorMessage.missing_archive_version
-                .format(keyword=comment_reges)
             )
 
         return True
@@ -292,7 +291,7 @@ class Platform(ABC):
             archive_version=archive_version,
             introduced_version=introduced_version,
             reopen_info=IssueInfoJson.ReopenInfo(
-                http_header=self._http_client.headers,
+                http_header=self.create_http_header(self._token),
                 reopen_url=self._urls.issues_url,
                 reopen_http_method=self.reopen_issue_method,
                 reopen_body=self.reopen_issue_body,
@@ -379,7 +378,7 @@ class Github(Platform):
         print(Log.loading_something_success
               .format(something=Log.env))
 
-    def create_http_header(self, token: str = None) -> dict[str, str]:
+    def create_http_header(self, token: str) -> dict[str, str]:
         ''' 所需http header结构详见：
         https://docs.github.com/zh/rest/using-the-rest-api/getting-started-with-the-rest-api?apiVersion=2022-11-28#example-request-using-query-parameters'''
         return {
@@ -463,7 +462,7 @@ class Gitlab(Platform):
             "state_event": "reopen"
         }
 
-    def create_http_header(self, token: str = None) -> dict[str, str]:
+    def create_http_header(self, token: str) -> dict[str, str]:
         ''' 所需http header结构详见：
         https://docs.gitlab.com/ee/api/rest/index.html#request-payload'''
         return {
