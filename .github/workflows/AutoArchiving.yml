@@ -36,7 +36,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r ./issue_processor/requirements.txt
   
-      - name: Run Python script
+      - name: Run Python script1
         env:
           TOKEN: ${{ secrets.ISSUESS_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
@@ -45,11 +45,29 @@ jobs:
           ISSUE_BODY: ${{ github.event.issue.body }}
           ISSUE_URL: "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}"
           COMMENTS_URL: "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments"
-          DISPATCH_URL: ${{ vars.DISPATCH_URL }}
-          DISPATCH_TOKEN: ${{ secrets.DISPATCH_TOKEN }}
-          DISPATCH_NAME: ${{ vars.DISPATCH_NAME }}
+          # DISPATCH_URL: ${{ vars.DISPATCH_URL }}
+          # DISPATCH_TOKEN: ${{ secrets.DISPATCH_TOKEN }}
+          # DISPATCH_NAME: ${{ vars.DISPATCH_NAME }}
+          OUTPUT_PATH: "./output.json"
         run: |
           cd ./
-          python ./issue_processor/main.py -c "./.github/configs/issue_processor.json"
+          python ./issue_processor/main.py -c "./config/issue_processor.json"
+
+      - name: Archiving closed issues
+        # env:
+        #   CLIENT_PAYLOAD : ${{ toJson(github.event.client_payload) }}
+        #   ACTION_NAME : ${{ github.event.action }}
+        #   WORKFLOW_URL : https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          cd ./
+          python ./auto_archiving/main.py -c "./config/auto_archiving.json" -fr "./归档失败记录.json"
+          
+      - name: Add and commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ./修改归档.md
+          git commit -m "Closed issue#${{ github.event.issue.number }}"
+          git push origin main
 
 

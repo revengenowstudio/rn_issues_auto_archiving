@@ -26,4 +26,4 @@ issue_processor:
       echo "GITLAB_CI : $GITLAB_CI"
       pip install -r ./issue_processor/requirements.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
       export WEBHOOK_PAYLOAD=$(cat $TRIGGER_PAYLOAD);
-      python ./issue_processor/main.py -c "./.gitlab/configs/issue_processor.json"
+      python ./issue_processor/main.py -c "./config/issue_processor.json"
