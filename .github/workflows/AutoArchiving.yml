@@ -34,8 +34,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r ./issue_processor/requirements.txt
-          pip install -r ./auto_archiving/requirements.txt
+          pip install -r ./src/issue_processor/requirements.txt
+          pip install -r ./src/auto_archiving/requirements.txt
   
       - name: Processing issue content
         env:
@@ -49,21 +49,21 @@ jobs:
           OUTPUT_PATH: "./output.json"
         run: |
           cd ./
-          python ./issue_processor/main.py -c "./config/issue_processor.json"
+          python ./src/issue_processor/main.py -c "./config/issue_processor.json"
 
       - name: Archiving closed issues
         env:
           ISSUE_REPOSITORY: "外部Issue"
         run: |
           cd ./
-          python ./auto_archiving/main.py -c "./config/auto_archiving.json" -fr "./归档失败记录.json"
+          python ./src/auto_archiving/main.py -c "./config/auto_archiving.json" -fr "./归档失败记录.json"
           
       - name: Add and commit changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add ./修改归档.md
-          git commit -m "Closed issue#${{ github.event.issue.number }}"
+          git commit -m "Closed $ISSUE_REPOSITORY#${{ github.event.issue.number }}"
           git push origin main
 
 
