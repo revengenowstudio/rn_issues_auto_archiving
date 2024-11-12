@@ -39,20 +39,16 @@ jobs:
         run: | 
           python script/main.py
 
-          - name: Archiving closed issues
-          env:
-            CLIENT_PAYLOAD : ${{ toJson(github.event.client_payload) }}
-            ACTION_NAME : ${{ github.event.action }}
-            WORKFLOW_URL : https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          run: |
-            cd ./
-            python ./auto_archiving/scripts/main.py -c "./auto_archiving/configs/config.json" -fr "./归档失败记录.json"
+      - name: Archiving closed issues
+        run: |
+          cd ./
+          python ./auto_archiving/scripts/main.py -c "./auto_archiving/configs/config.json" -fr "./归档失败记录.json"
           
       - name: Add and commit changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add ./修改归档.md
-          git commit -m "Closed issue#${{ github.event.client_payload.issue_id}}"
+          git commit -m "Closed issue#${{ }}"
           git push origin main
         

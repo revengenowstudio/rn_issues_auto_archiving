@@ -12,9 +12,6 @@ stages:
 
 variables:
   TOKEN: $TOKEN
-  DISPATCH_URL: $DISPATCH_URL
-  DISPATCH_TOKEN: $DISPATCH_TOKEN
-  DISPATCH_NAME: $DISPATCH_NAME
   OUTPUT_PATH: "./output.json"
   ISSUE_REPOSITORY: "内部Issue"
 
@@ -27,5 +24,6 @@ issue_processor:
     - |
       echo "GITLAB_CI : $GITLAB_CI"
       pip install -r ./issue_processor/requirements.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+      pip install -r ./auto_archiving/requirements.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
       export WEBHOOK_PAYLOAD=$(cat $TRIGGER_PAYLOAD);
       python ./issue_processor/main.py -c "./config/issue_processor.json"
