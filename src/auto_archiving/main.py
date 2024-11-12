@@ -1,5 +1,6 @@
 import os
 import sys
+sys.path.append(os.getcwd())
 import json
 import time
 from pathlib import Path

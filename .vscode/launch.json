@@ -8,7 +8,7 @@
             "name": "github issue_processor",
             "type": "debugpy",
             "request": "launch",
-            "program": "issue_processor/main.py",
+            "program": "src/issue_processor/main.py",
             "args": [
                 "--config",
                 "./config/issue_processor.json",
@@ -22,7 +22,7 @@
             "name": "gitlab issue_processor",
             "type": "debugpy",
             "request": "launch",
-            "program": "issue_processor/main.py",
+            "program": "src/issue_processor/main.py",
             "args": [
                 "--config",
                 "./config/issue_processor.json",
@@ -36,7 +36,7 @@
             "name": "auto_archiving",
             "type": "debugpy",
             "request": "launch",
-            "program": "./auto_archiving/main.py",
+            "program": "src/auto_archiving/main.py",
             "args": [
                 "--config",
                 "./config/auto_archiving.json",
