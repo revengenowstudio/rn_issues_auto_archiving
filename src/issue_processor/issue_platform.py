@@ -4,13 +4,12 @@ import json
 from dataclasses import dataclass
 from abc import abstractmethod, ABC
 
-
 import httpx
 
-from shared.log import Log
-from shared.env import Env
-from shared.exception import *
-from shared.issue_info import IssueInfoJson
+from src.shared.log import Log
+from src.shared.env import Env
+from src.shared.exception import *
+from src.shared.issue_info import IssueInfoJson
 
 ISSUE_STATE_MAP = {
     "closed": "closed",
@@ -102,7 +101,7 @@ class Platform(ABC):
 
     @property
     @abstractmethod
-    def reopen_issue_body(self) -> dict[str,str]:
+    def reopen_issue_body(self) -> dict[str, str]:
         pass
 
     def __init__(self):
@@ -357,7 +356,7 @@ class Github(Platform):
         return "PATCH"
 
     @property
-    def reopen_issue_body(self) -> dict[str,str]:
+    def reopen_issue_body(self) -> dict[str, str]:
         return {
             "state": "open"
         }
@@ -459,10 +458,10 @@ class Gitlab(Platform):
         return "PUT"
 
     @property
-    def reopen_issue_body(self) -> dict[str,str]:
+    def reopen_issue_body(self) -> dict[str, str]:
         return {
-                "state_event": "reopen"
-            }
+            "state_event": "reopen"
+        }
 
     def create_http_header(self, token: str = None) -> dict[str, str]:
         ''' 所需http header结构详见：

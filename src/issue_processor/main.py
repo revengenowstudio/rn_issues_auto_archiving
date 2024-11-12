@@ -2,10 +2,10 @@ import os
 import sys
 
 from issue_platform import Platform, Github, Gitlab
-from shared.log import Log
-from shared.exception import *
 from json_config import Config
-from shared.env import (should_run_in_github_action,
+from src.shared.log import Log
+from src.shared.exception import *
+from src.shared.env import (should_run_in_github_action,
                         should_run_in_gitlab_ci,
                         should_run_in_local)
 
@@ -38,6 +38,7 @@ def get_test_platform_type_from_args(args: list[str]) -> str:
         result = args[args.index("-pt") + 1]
     return result
 
+
 def main(args: list[str]) -> None:
     config = Config(get_config_path_from_args(args))
     platform: Platform
@@ -69,10 +70,9 @@ def main(args: list[str]) -> None:
                 Exit()
         else:
             print(Log.unexpected_platform_type
-                    .format(
-                        platform_type=test_platform_type
-                    ))
-            
+                  .format(
+                      platform_type=test_platform_type
+                  ))
 
     try:
         if (isinstance(platform, Gitlab)

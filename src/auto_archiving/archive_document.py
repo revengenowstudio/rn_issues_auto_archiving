@@ -1,6 +1,5 @@
-
 from json_config import IssueType, ConfigJson
-from shared.log import Log
+from src.shared.log import Log
 
 
 class ArchiveDocument():

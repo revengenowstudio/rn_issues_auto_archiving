@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import TypedDict, TypeAlias
 from pathlib import Path
 
-from shared.log import Log
+from src.shared.log import Log
 
 IssueType: TypeAlias = str
 
