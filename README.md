@@ -74,6 +74,11 @@
 - 项目包含了`launch.json`文件，用于本地调试，VSCode调试页面可以选择调试的项目，选择对应平台的流程后按下`F5`即可启动调试
 
 
+# 相关文档：
+
+- 流水线dispatch（Restful API触发流水线）
+    - Github ： https://docs.github.com/zh/rest/using-the-rest-api/getting-started-with-the-rest-api?apiVersion=2022-11-28#example-request-using-query-parameters
+    - Gitlab ： https://docs.gitlab.com/ee/ci/triggers/#use-a-webhook
 
 
 
