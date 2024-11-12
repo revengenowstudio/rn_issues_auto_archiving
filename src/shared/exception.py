@@ -41,6 +41,8 @@ class ErrorMessage():
 
     load_issue_info_failed = '''读取 {output_path} 失败，无法回溯Issue状态和记录失败内容，请检查相关代码，错误信息：{exc}'''
 
+    aggregation_error = '''抛出聚合错误：'''
+
 
 class ArchiveBaseError(Exception):
     "归档错误的基类"

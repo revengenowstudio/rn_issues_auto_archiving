@@ -32,7 +32,8 @@ class ArchiveDocument():
         self,
         table_separator: str
     ) -> int:
-        result = 1
+        # 后面的写入到归档文件函数会把归档序号+1，所以这里得0
+        result = 0
         table_last_line = self.__lines[
             self.__get_table_last_line_index()
         ]
@@ -47,8 +48,8 @@ class ArchiveDocument():
         else:
             print(Log.unexpected_archive_number
                   .format(
-                      default_number=result,
-                      line=table_last_line
+                      default_number=result +1,
+                      line=table_last_line 
                   ))
         
         return result

@@ -194,11 +194,16 @@ def main(args: list[str]):
                   .format(exc=str(exc_)
                           ))
 
-        raise ExceptionGroup(exceptions)
+        raise ExceptionGroup(
+            ErrorMessage.aggregation_error,
+            exceptions
+        )
     finally:
-        if archive_document is not None:
+        try:
             archive_document.save()
             archive_document.close()
+        except Exception:
+            pass
         failed_record.save()
 
 

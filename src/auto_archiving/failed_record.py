@@ -54,8 +54,7 @@ class FailedRecord():
         result: list[int] = []
         for record in self.__records:
             issue_id: int | str = record['issue_id']
-            if self.__parse_issue_id(issue_id) not in result:
-                result.append(self.__parse_issue_id(issue_id))
+            result.append(self.__parse_issue_id(issue_id))
         return result
 
     def __parse_issue_id(self, issue_id: int | str) -> int:
