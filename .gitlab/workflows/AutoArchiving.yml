@@ -1,7 +1,5 @@
 # 控制流水线并发，详见文档：
 # https://docs.gitlab.com/ee/ci/resource_groups/
-resource_group:
-  key: auto_archiving_group
 
 variables:
   GIT_STRATEGY: fetch

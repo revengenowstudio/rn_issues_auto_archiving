@@ -15,9 +15,10 @@ variables:
 
 rotate_access_token:
   stage: rotate_access_token
-  script: |
-    pip install -r ./src/issue_processor/requirements.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
-    python ./src/utils/rotate_access_token.py
   only:
     - schedules
     - manual
+  script: |
+    pip install -r ./src/issue_processor/requirements.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+    python ./src/utils/rotate_access_token.py
+  
