@@ -28,6 +28,11 @@ auto_archiving:
 push_archived_issues:
   stage: push_archived_issues
   resource_group: auto_archiving_group
+  # dependencies:
+  #   - auto_archiving
+  needs: 
+    - job: auto_archiving
+      artifacts: true
   script: |
     git config --global user.email "RN-Bot@gitlab.revengenow.top"
     git config --global user.name "$RN Bot"
@@ -36,5 +41,4 @@ push_archived_issues:
     git commit -m "Closed $ISSUE_REPOSITORY#$issue_id"
     git push origin main
 
-  dependencies:
-    - auto_archiving
+  
