@@ -8,10 +8,6 @@
 # https://docs.gitlab.com/ee/ci/variables/predefined_variables.html#predefined-variables
 # https://docs.gitlab.com/ee/ci/variables/index.html
 
-stages:
-  - rotate_access_token
-  - auto_archiving
-
 include:
   - local: "/.gitlab/workflows/AutoArchiving.yml"
   - local: "/.gitlab/workflows/RotateAccessToken.yml"
