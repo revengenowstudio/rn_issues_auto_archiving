@@ -13,6 +13,6 @@ stages:
   - auto_archiving
 
 include:
-  - local: .gitlab/workflows/AutoArchiving.yml
-  - local: .gitlab/workflows/RotateAccessToken.yml
+  - local: "/.gitlab/workflows/AutoArchiving.yml"
+  - local: "/.gitlab/workflows/RotateAccessToken.yml"
   
