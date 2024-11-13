@@ -7,6 +7,7 @@ class Log():
     introduced_version = "引入版本号"
     archive_version = "归档版本号"
     announcement_comment = "告警评论"
+    issue_archived_comment = "归档成功评论"
     issue_title = "Issue标题"
     issue_type = "Issue类型"
     issue_label = "Issue标签"
@@ -74,3 +75,4 @@ class Log():
     reopen_issue_request_success = '''reopen Issue请求成功'''
     read_failed_recording_success = '''成功读取归档失败记录：{failed_record_path}'''
     remove_failed_record_item_success = '''成功移除归档失败记录条目：{record}'''
+    issue_archived_success = '''Issue自动归档成功'''

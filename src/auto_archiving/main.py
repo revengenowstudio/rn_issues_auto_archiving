@@ -1,20 +1,19 @@
 import os
 import sys
-sys.path.append(os.getcwd())
-import json
 import time
-from pathlib import Path
+import json
 
 import httpx
-from exceptiongroup import ExceptionGroup
+from pathlib import Path
 
-from json_config import Config
-from archive_document import ArchiveDocument
-from failed_record import FailedRecord
-from src.shared.issue_info import (IssueInfo, IssueInfoJson)
-from src.shared.log import Log
+from src.shared.exception import ErrorMessage, IssueInfoMissing
 from src.shared.env import Env, should_run_in_github_action
-from src.shared.exception import ErrorMessage,IssueInfoMissing
+from src.shared.log import Log
+from src.shared.issue_info import (IssueInfo, IssueInfoJson)
+from failed_record import FailedRecord
+from archive_document import ArchiveDocument
+from json_config import Config
+from exceptiongroup import ExceptionGroup
 
 sys.path.append(os.getcwd())
 
@@ -64,7 +63,7 @@ def reopen_issue(
 def send_comment(
         comment_url: str,
         headers: str,
-        error_message: str
+        message: str
 
 ) -> None:
     print(Log.sending_something
@@ -76,7 +75,7 @@ def send_comment(
         url=comment_url,
         headers=headers,
         json={
-            "body": error_message
+            "body": message
         }
     )
     response.raise_for_status()
@@ -141,11 +140,24 @@ def main(args: list[str]):
             archive_version=issue_info.archive_version
         )
 
+        print(Log.sending_something
+              .format(
+                  something=Log.issue_archived_comment))
+        send_comment(
+            headers=issue_info.reopen_info.http_header,
+            comment_url=issue_info.reopen_info.comment_url,
+            message=Log.issue_archived_success
+        )
+        print(Log.sending_something_success
+              .format(
+                  something=Log.issue_archived_comment))
+
         print(Log.time_used.format(
             time="{:.4f}".format(
                 time.time() - start_time)
         ))
         print(Log.job_down)
+
     except Exception as exc:
         exceptions = [exc]
         print(ErrorMessage.archiving_failed.format(
@@ -161,7 +173,7 @@ def main(args: list[str]):
                     exc=str(exc_)
                 )
             )
-        
+
         failed_record.add_record(
             issue_id=issue_info.issue_id,
             issue_title=issue_info.issue_title,
@@ -181,13 +193,19 @@ def main(args: list[str]):
                   .format(exc=str(exc_)
                           ))
         try:
+            print(Log.sending_something
+                  .format(
+                      something=Log.announcement_comment))
             send_comment(
                 headers=issue_info.reopen_info.http_header,
                 comment_url=issue_info.reopen_info.comment_url,
-                error_message=ErrorMessage.archiving_failed.format(
+                message=ErrorMessage.archiving_failed.format(
                     exc=str(exc)
                 )
             )
+            print(Log.sending_something_success
+                  .format(
+                      something=Log.announcement_comment))
         except Exception as exc_:
             exceptions.append(exc_)
             print(ErrorMessage.send_comment_failed
