@@ -10,8 +10,13 @@ on:
   issues:
     types: [closed]
 
+# permissions是关于GITHUB_TOKEN权限的，内容详见：
+# https://docs.github.com/zh/actions/writing-workflows/workflow-syntax-for-github-actions#permissions
 permissions:
   issues: write
+
+env:
+  OUTPUT_PATH: "./output.json"
 
 jobs:
   get_issue_details:
@@ -49,7 +54,6 @@ jobs:
           ISSUE_BODY: ${{ github.event.issue.body }}
           ISSUE_URL: "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}"
           COMMENTS_URL: "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments"
-          OUTPUT_PATH: "./output.json"
         run: |
           cd ./
           python ./src/issue_processor/main.py -c "./config/issue_processor.json"
