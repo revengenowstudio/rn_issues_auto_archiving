@@ -384,7 +384,7 @@ class Github(Platform):
         ''' 所需http header结构详见：
         https://docs.github.com/zh/rest/using-the-rest-api/getting-started-with-the-rest-api?apiVersion=2022-11-28#example-request-using-query-parameters'''
         return {
-            "Authorization": "Bearer " + token,
+            "Authorization": f'Bearer {token}',
             "Accept": "application/vnd.github+json"
         }
 
@@ -407,9 +407,7 @@ class Github(Platform):
         self._http_client = httpx.Client(
             headers=self.create_http_header(self._token)
         )
-        self._issue.labels = self._get_labels_from_platform(
-
-        )
+        self._issue.labels = self._get_labels_from_platform()
         self._comments = self._get_comments_from_platform(
             self._http_client,
             self._urls.comments_url
