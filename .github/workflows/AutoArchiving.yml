@@ -14,9 +14,11 @@ on:
 # https://docs.github.com/zh/actions/writing-workflows/workflow-syntax-for-github-actions#permissions
 permissions:
   issues: write
+  contents: write
 
 env:
   OUTPUT_PATH: "./output.json"
+  ISSUE_REPOSITORY: "外部Issue"
 
 jobs:
   get_issue_details:
@@ -59,8 +61,6 @@ jobs:
           python ./src/issue_processor/main.py -c "./config/issue_processor.json"
 
       - name: Archiving closed issues
-        env:
-          ISSUE_REPOSITORY: "外部Issue"
         run: |
           cd ./
           python ./src/auto_archiving/main.py -c "./config/auto_archiving.json" -fr "./归档失败记录.json"
