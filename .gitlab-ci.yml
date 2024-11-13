@@ -7,6 +7,10 @@
 # gitlab ci里可用的预定义变量
 # https://docs.gitlab.com/ee/ci/variables/predefined_variables.html#predefined-variables
 # https://docs.gitlab.com/ee/ci/variables/index.html
+stages:
+  - rotate_access_token
+  - auto_archiving
+  - push_archived_issues
 
 include:
   - local: "/.gitlab/workflows/AutoArchiving.yml"

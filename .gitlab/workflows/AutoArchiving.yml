@@ -2,9 +2,6 @@
 # https://docs.gitlab.com/ee/ci/resource_groups/
 # https://docs.gitlab.com/ee/ci/yaml/#resource_group
 
-stages:
-  - auto_archiving
-  - push_archived_issues
 
 variables:
   GIT_STRATEGY: fetch

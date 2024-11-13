@@ -7,8 +7,7 @@
 # 流水线调度器（schedules）文档：
 # https://docs.gitlab.com/ee/ci/pipelines/schedules.html#edit-a-pipeline-schedule
 
-stages:
-  - rotate_access_token
+
 
 variables:
   GITLAB_HOST: $CI_SERVER_HOST       # example: gitlab.com
