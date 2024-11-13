@@ -10,6 +10,9 @@ on:
   issues:
     types: [closed]
 
+permissions:
+  issues: write
+
 jobs:
   get_issue_details:
     runs-on: ubuntu-latest
@@ -39,7 +42,7 @@ jobs:
   
       - name: Processing issue content
         env:
-          TOKEN: ${{ secrets.ISSUESS_TOKEN }}
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           ISSUE_TITLE: ${{ github.event.issue.title }}
           ISSUE_STATE: ${{ github.event.issue.state }}
