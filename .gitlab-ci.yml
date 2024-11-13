@@ -6,33 +6,13 @@
 # https://docs.gitlab.com/ee/ci/triggers/#use-a-webhook
 # gitlab ci里可用的预定义变量
 # https://docs.gitlab.com/ee/ci/variables/predefined_variables.html#predefined-variables
+# https://docs.gitlab.com/ee/ci/variables/index.html
 
 stages:
-  - issue_processor
+  - rotate_access_token
+  - auto_archiving
 
-variables:
-  TOKEN: $TOKEN
-  OUTPUT_PATH: "./output.json"
-  ISSUE_REPOSITORY: "内部Issue"
-
-before_script:
-  - git config --global user.email "RN-Bot@gitlab.revengenow.top"
-  - git config --global user.name "$RN Bot"
-
-issue_processor:
-  stage: issue_processor
-  only:
-    - triggers
-  image: m.daocloud.io/docker.io/library/python:3.10.13-slim-bullseye
-  script:
-    - |
-      pip install -r ./src/issue_processor/requirements.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
-      pip install -r ./src/auto_archiving/requirements.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
-      export WEBHOOK_PAYLOAD=$(cat $TRIGGER_PAYLOAD);
-      python ./src/issue_processor/main.py -c "./config/issue_processor.json"
-      python ./src/auto_archiving/main.py -c "./config/auto_archiving.json" -fr "./归档失败记录.json"
-
-      git add ./修改归档.md
-      issue_id=$(python ./test.py)
-      git commit -m "Closed $ISSUE_REPOSITORY#$issue_id"
-      git push origin main
+include:
+  - local: ./.gitlab/workflows/AutoArchiving.yml
+  - local: ./.gitlab/workflows/RotateAccessToken.yml
+  
