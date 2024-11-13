@@ -101,7 +101,7 @@ def main(args: list[str]):
 
         print(Log.print_issue_info
               .format(issue_info=json.dumps(
-                  issue_info_json,
+                  IssueInfoJson.remove_sensitive_info(issue_info_json),
                   indent=4,
                   ensure_ascii=False
               )))

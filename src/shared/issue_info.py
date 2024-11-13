@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 
 class IssueInfoJson(TypedDict):
+    
     class ReopenInfo(TypedDict):
         http_header: dict[str, str]
         reopen_url: str
@@ -18,7 +19,15 @@ class IssueInfoJson(TypedDict):
     introduced_version: str
     archive_version: str
     reopen_info: ReopenInfo
-
+    
+    
+    @staticmethod
+    def remove_sensitive_info(issue_info:dict) -> dict:
+        '''移除issue_info的敏感信息，函数不会修改传入的字典'''
+        result = issue_info.copy()
+        result.pop("reopen_info")
+        return result
+        
 
 @dataclass()
 class IssueInfo():

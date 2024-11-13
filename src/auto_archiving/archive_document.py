@@ -1,3 +1,5 @@
+from io import TextIOWrapper
+
 from json_config import IssueType, ConfigJson
 from src.shared.log import Log
 
@@ -7,6 +9,7 @@ class ArchiveDocument():
         print(Log.getting_something_from
               .format(another=path,
                       something=Log.archive_document_content))
+        self.__path = path
         with open(path, 'r', encoding="utf-8") as file:
             self.__lines = file.readlines()
             self.__new_lines: list[str] = []
@@ -15,7 +18,7 @@ class ArchiveDocument():
         print(Log.getting_something_from_success
               .format(another=path,
                       something=Log.archive_document_content))
-        self.__file = open(path, 'w', encoding="utf-8")
+        self.__file: TextIOWrapper | None = None
 
     def __add_line(self, line: str) -> None:
         self.__new_lines.append(line)
@@ -48,10 +51,10 @@ class ArchiveDocument():
         else:
             print(Log.unexpected_archive_number
                   .format(
-                      default_number=result +1,
-                      line=table_last_line 
+                      default_number=result + 1,
+                      line=table_last_line
                   ))
-        
+
         return result
 
     @staticmethod
@@ -134,6 +137,11 @@ class ArchiveDocument():
         self.__lines.insert(
             self.__get_table_last_line_index() + 1,
             *self.__new_lines
+        )
+        self.__file = open(
+            self.__path,
+            'w',
+            encoding="utf-8"
         )
         self.__file.writelines(
             self.__lines

@@ -299,9 +299,11 @@ class Platform(ABC):
             )
         )
 
+        
+
         print(Log.print_issue_json
               .format(issue_json=json.dumps(
-                  issue_json,
+                  IssueInfoJson.remove_sensitive_info(issue_json),
                   ensure_ascii=False,
                   indent=4
               )))

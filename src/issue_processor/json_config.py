@@ -36,7 +36,7 @@ def apply_place_holder(obj: dict,
                        ):
     for key, value in obj.items():
         # version_regex 为了判断版本号，用了正则的花括号语法
-        # 这回导致format_map报错
+        # 这会导致format_map报错
         if key in FORMAT_MAP_BLACK_LIST:
             continue
         if isinstance(value, dict):

@@ -50,7 +50,7 @@ class Log():
     # auto_archiving
     archive_document_content = '''归档文件内容'''
     non_github_action_env = '''未检测到 github action 环境，将读取".env"文件'''
-    print_issue_info = '''打印 issue_info ： {issue_info}'''
+    print_issue_info = '''打印读取到的issue_info ： {issue_info}'''
     format_issue_content = '''正在格式化Issue内容'''
     write_content_to_document = '''正在将内容写入归档文件'''
     time_used = '''脚本总耗时：{time} s'''
