@@ -11,19 +11,8 @@ stages:
   - rotate_access_token
   - auto_archiving
   - push_archived_issues
-  - test
 
 include:
   - local: "/.gitlab/workflows/AutoArchiving.yml"
   - local: "/.gitlab/workflows/RotateAccessToken.yml"
-  
-test:
-  stage: test
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "test"'
-      when: always
-    - if: '$CI_COMMIT_BRANCH == "test"'
-      when: manual
-  script: |
-    echo "$(pwd)"
-    ls -lha
+    
