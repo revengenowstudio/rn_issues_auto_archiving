@@ -10,10 +10,12 @@ variables:
 
 auto_archiving:
   stage: auto_archiving
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "triggers"'
-      when: always
-    - when: never
+  # rules:
+  #   - if: '$CI_PIPELINE_SOURCE == "triggers"'
+  #     when: always
+  #   - when: never
+  only:
+    - triggers
 
   image: m.daocloud.io/docker.io/library/python:3.10.13-slim-bullseye
   resource_group: auto_archiving_group
@@ -36,10 +38,7 @@ push_archived_issues:
   needs:
     - job: auto_archiving
       artifacts: true
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "trigger"'
-      when: always
-    - when: never
+  when: on_success
   script: |
     git config --global user.email "RN-Bot@gitlab.revengenow.top"
     git config --global user.name "$RN Bot"
