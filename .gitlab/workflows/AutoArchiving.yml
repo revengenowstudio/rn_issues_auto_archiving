@@ -22,8 +22,8 @@ auto_archiving:
     pip install -r ./src/issue_processor/requirements.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
     pip install -r ./src/auto_archiving/requirements.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
     export WEBHOOK_PAYLOAD=$(cat $TRIGGER_PAYLOAD);
-    python ./src/issue_processor/main.py -c "./config/issue_processor.json"
-    python ./src/auto_archiving/main.py -c "./config/auto_archiving.json" -fr "./归档失败记录.json"
+    python ./src/issue_processor_main.py  -c "./config/issue_processor.json"
+    python ./src/auto_archiving_main.py -c "./config/auto_archiving.json" -fr "./归档失败记录.json"
   artifacts:
     paths:
       - 修改归档.md

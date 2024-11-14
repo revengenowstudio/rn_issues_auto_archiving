@@ -6,13 +6,13 @@ import json
 import httpx
 from pathlib import Path
 
-from src.shared.exception import ErrorMessage, IssueInfoMissing
-from src.shared.env import Env, should_run_in_github_action
-from src.shared.log import Log
-from src.shared.issue_info import (IssueInfo, IssueInfoJson)
-from failed_record import FailedRecord
-from archive_document import ArchiveDocument
-from json_config import Config
+from shared.exception import ErrorMessage, IssueInfoMissing
+from shared.env import Env, should_run_in_github_action
+from shared.log import Log
+from shared.issue_info import (IssueInfo, IssueInfoJson)
+from auto_archiving.failed_record import FailedRecord
+from auto_archiving.archive_document import ArchiveDocument
+from auto_archiving.json_config import Config
 from exceptiongroup import ExceptionGroup
 
 sys.path.append(os.getcwd())

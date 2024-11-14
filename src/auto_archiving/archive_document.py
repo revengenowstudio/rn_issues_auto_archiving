@@ -1,7 +1,7 @@
 from io import TextIOWrapper
 
-from json_config import IssueType, ConfigJson
-from src.shared.log import Log
+from .json_config import IssueType, ConfigJson
+from shared.log import Log
 
 
 class ArchiveDocument():

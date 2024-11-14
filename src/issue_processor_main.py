@@ -1,16 +1,15 @@
 import os
 import sys
 
-
-from issue_platform import Platform, Github, Gitlab
-from json_config import Config
-from src.shared.log import Log
-from src.shared.exception import *
-from src.shared.env import (should_run_in_github_action,
+from issue_processor.issue_platform import Platform, Github, Gitlab
+from issue_processor.json_config import Config
+from shared.log import Log
+from shared.exception import *
+from shared.env import (should_run_in_github_action,
                             should_run_in_gitlab_ci,
                             should_run_in_local)
 
-sys.path.append(os.getcwd())
+# sys.path.append(os.getcwd())
 
 # TODO
 # 虽然配置文件里有black list的配置项，但是由于暂时用不到

@@ -2,7 +2,7 @@ import json
 from dataclasses import dataclass
 from typing import TypedDict, Callable
 
-from src.shared.log import Log
+from shared.log import Log
 
 FORMAT_MAP_BLACK_LIST = [
     "version_regex",

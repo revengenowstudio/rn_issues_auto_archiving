@@ -6,10 +6,10 @@ from abc import abstractmethod, ABC
 
 import httpx
 
-from src.shared.log import Log
-from src.shared.env import Env
-from src.shared.exception import *
-from src.shared.issue_info import IssueInfoJson
+from shared.log import Log
+from shared.env import Env
+from shared.exception import *
+from shared.issue_info import IssueInfoJson
 
 ISSUE_STATE_MAP = {
     "closed": "closed",

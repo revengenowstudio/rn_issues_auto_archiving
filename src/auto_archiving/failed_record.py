@@ -6,7 +6,7 @@ import datetime
 
 import json_repair
 
-from src.shared.log import Log
+from shared.log import Log
 
 
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
