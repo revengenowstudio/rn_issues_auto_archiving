@@ -44,6 +44,7 @@ push_archived_issues:
   script: |
     git config --global user.email "RN-Bot@gitlab.revengenow.top"
     git config --global user.name "$RN Bot"
+    git checkout -b main
     git add ./修改归档.md
     issue_id=$(python ./src/utils/get_issue_id.py)
     git commit -m "Closed $ISSUE_REPOSITORY#$issue_id"
