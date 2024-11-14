@@ -13,7 +13,7 @@ auto_archiving:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "triggers"'
       when: always
-    - when: nevers
+    - when: never
 
   image: m.daocloud.io/docker.io/library/python:3.10.13-slim-bullseye
   resource_group: auto_archiving_group
