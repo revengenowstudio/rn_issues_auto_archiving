@@ -11,11 +11,17 @@ variables:
 
 auto_archiving:
   stage: auto_archiving
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
   only:
     - triggers
   image: m.daocloud.io/docker.io/library/python:3.10.13-slim-bullseye
   resource_group: auto_archiving_group
   script: |
+      cd ./
       pip install -r ./src/issue_processor/requirements.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
       pip install -r ./src/auto_archiving/requirements.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
       export WEBHOOK_PAYLOAD=$(cat $TRIGGER_PAYLOAD);
