@@ -36,6 +36,10 @@ push_archived_issues:
   needs:
     - job: auto_archiving
       artifacts: true
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "trigger"'
+      when: always
+    - when: never
   script: |
     git config --global user.email "RN-Bot@gitlab.revengenow.top"
     git config --global user.name "$RN Bot"
