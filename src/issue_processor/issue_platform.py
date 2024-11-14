@@ -508,7 +508,8 @@ class Gitlab(Platform):
 
     def _read_platform_environments(self) -> None:
         print(Log.loading_something.format(something=Log.env))
-
+        
+        self._output_path = os.environ[Env.OUTPUT_PATH]
         try:
             webhook_payload = json.loads(
                 os.environ[Env.WEBHOOK_PAYLOAD])
