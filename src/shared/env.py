@@ -14,6 +14,7 @@ class Env():
 
     # gitlab ci
     GITLAB_CI = "GITLAB_CI"
+    WEBHOOK_PAYLOAD = "WEBHOOK_PAYLOAD"
 
     # 两侧均可直接读取的环境变量
     # 或者是放仓库变量的
