@@ -26,4 +26,4 @@ test:
       when: manual
   script: |
     echo "$(pwd)"
-    ls -lh
+    ls -lha
