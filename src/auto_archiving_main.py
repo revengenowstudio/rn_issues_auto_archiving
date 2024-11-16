@@ -53,6 +53,7 @@ def main(args: list[str]):
     output_path = os.environ[Env.ISSUE_OUTPUT_PATH]
     issue_repository = os.environ[Env.ISSUE_REPOSITORY]
     comment_message: str = Log.uninitialized_message
+    enable_send_comment = True
     try:
         issue_info_json: IssueInfoJson = json.loads(
             Path(output_path
@@ -75,6 +76,7 @@ def main(args: list[str]):
         
         if issue_info.issue_state == "open":
             print(Log.issue_state_is_open)
+            enable_send_comment = False
             return
         
 
@@ -169,18 +171,19 @@ def main(args: list[str]):
             exceptions
         )
     finally:
-        try:
-            send_comment(
-                http_header=issue_info.reopen_info.http_header,
-                comment_url=issue_info.reopen_info.comment_url,
-                message=comment_message
-            )
+        if enable_send_comment:
+            try:
+                send_comment(
+                    http_header=issue_info.reopen_info.http_header,
+                    comment_url=issue_info.reopen_info.comment_url,
+                    message=comment_message
+                )
 
-        except Exception as exc_:
-            exceptions.append(exc_)
-            print(ErrorMessage.send_comment_failed
-                  .format(exc=str(exc_)
-                          ))
+            except Exception as exc_:
+                exceptions.append(exc_)
+                print(ErrorMessage.send_comment_failed
+                    .format(exc=str(exc_)
+                            ))
         try:
             archive_document.save()
             archive_document.close()
