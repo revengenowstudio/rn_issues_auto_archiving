@@ -48,6 +48,8 @@ push_archived_issues:
   needs:
     - job: auto_archiving
       artifacts: true
+  only:
+    - trigger
   except:
     - pushes
     - merge_requests
