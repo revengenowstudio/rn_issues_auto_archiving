@@ -12,6 +12,7 @@ class Log():
     issue_type = "Issue类型"
     issue_label = "Issue标签"
     dispatch_request = "工作流调度请求"
+    uninitialized_message = "未初始化的信息"
 
     getting_something = '''获取 {something} 中'''
     getting_something_from = '''正在从 {another} 中获取 {something}'''
@@ -35,6 +36,7 @@ class Log():
     webhook_payload_not_found = '''webhook payload为空，无法进行后续操作'''
     save_issue_content_to_file = '''正在将Issue内容写入至 {output_path} '''
     unexpected_platform_type = '''未知的Issue平台类型 "{platform_type}"，请检查命令行参数输入和环境变量'''
+    issue_already_archived = '''{issue_repository}#{issue_id} 已存在归档记录，无需再次归档，跳过归档流程'''
     job_done = '''脚本执行完毕'''
     
     getting_something_success = '''获取 {something} 成功'''
@@ -75,4 +77,4 @@ class Log():
     reopen_issue_request_success = '''reopen Issue请求成功'''
     read_failed_recording_success = '''成功读取归档失败记录：{failed_record_path}'''
     remove_failed_record_item_success = '''成功移除归档失败记录条目：{record}'''
-    issue_archived_success = '''Issue自动归档成功'''
+    issue_archived_success = '''{issue_repository}#{issue_id} 自动归档成功'''

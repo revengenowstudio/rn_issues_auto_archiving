@@ -79,8 +79,12 @@ class ArchiveDocument():
             )
             return result
 
-    def should_issue_archived(self, issue_id: int) -> bool:
-        sub_string = f'Issue#{issue_id}]'
+    def should_issue_archived(
+        self,
+        issue_id: int,
+        issue_repository: str
+    ) -> bool:
+        sub_string = f'{issue_repository}#{issue_id}]'
         for line in self.__lines_set:
             if sub_string in line:
                 print(

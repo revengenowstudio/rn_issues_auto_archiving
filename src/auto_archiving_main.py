@@ -51,6 +51,7 @@ def main(args: list[str]):
 
     failed_record = FailedRecord(get_failed_record_path_from_args(args))
     output_path = os.environ[Env.ISSUE_OUTPUT_PATH]
+    comment_message: str = Log.uninitialized_message
     try:
         issue_info_json: IssueInfoJson = json.loads(
             Path(output_path
@@ -81,9 +82,21 @@ def main(args: list[str]):
 
         for issue_id in failed_record.get_all_issue_id():
             if archive_document.should_issue_archived(
-                issue_id
+                issue_id,
+                issue_repository
             ):
                 failed_record.remove_record(issue_id)
+
+        if archive_document.should_issue_archived(
+            issue_info.issue_id,
+            issue_repository
+        ):
+            message = (Log.issue_already_archived
+                       .format(issue_id=issue_info.issue_id,
+                               issue_repository=issue_repository))
+            print(message)
+            comment_message = message
+            return
 
         archive_document.archive_issue(
             rjust_character=config.rjust_character,
@@ -99,17 +112,10 @@ def main(args: list[str]):
             archive_version=issue_info.archive_version
         )
 
-        print(Log.sending_something
-              .format(
-                  something=Log.issue_archived_comment))
-        send_comment(
-            http_header=issue_info.reopen_info.http_header,
-            comment_url=issue_info.reopen_info.comment_url,
-            message=Log.issue_archived_success
+        comment_message = Log.issue_archived_success.format(
+            issue_id=issue_info.issue_id,
+            issue_repository=issue_repository
         )
-        print(Log.sending_something_success
-              .format(
-                  something=Log.issue_archived_comment))
 
         print(Log.time_used.format(
             time="{:.4f}".format(
@@ -119,6 +125,9 @@ def main(args: list[str]):
 
     except Exception as exc:
         exceptions = [exc]
+        comment_message = ErrorMessage.archiving_failed.format(
+            exc=str(exc)
+        )
         print(ErrorMessage.archiving_failed.format(
             exc=str(exc)
         ))
@@ -132,7 +141,6 @@ def main(args: list[str]):
                     exc=str(exc_)
                 )
             )
-
         failed_record.add_record(
             issue_id=issue_info.issue_id,
             issue_title=issue_info.issue_title,
@@ -151,31 +159,24 @@ def main(args: list[str]):
             print(ErrorMessage.reopen_issue_failed
                   .format(exc=str(exc_)
                           ))
-        try:
-            print(Log.sending_something
-                  .format(
-                      something=Log.announcement_comment))
-            send_comment(
-                http_header=issue_info.reopen_info.http_header,
-                comment_url=issue_info.reopen_info.comment_url,
-                message=ErrorMessage.archiving_failed.format(
-                    exc=str(exc)
-                )
-            )
-            print(Log.sending_something_success
-                  .format(
-                      something=Log.announcement_comment))
-        except Exception as exc_:
-            exceptions.append(exc_)
-            print(ErrorMessage.send_comment_failed
-                  .format(exc=str(exc_)
-                          ))
 
         raise ExceptionGroup(
             ErrorMessage.aggregation_error,
             exceptions
         )
     finally:
+        try:
+            send_comment(
+                http_header=issue_info.reopen_info.http_header,
+                comment_url=issue_info.reopen_info.comment_url,
+                message=comment_message
+            )
+
+        except Exception as exc_:
+            exceptions.append(exc_)
+            print(ErrorMessage.send_comment_failed
+                  .format(exc=str(exc_)
+                          ))
         try:
             archive_document.save()
             archive_document.close()
