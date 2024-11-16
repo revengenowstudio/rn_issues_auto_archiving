@@ -6,8 +6,8 @@ from issue_processor.json_config import Config
 from shared.log import Log
 from shared.exception import *
 from shared.env import (should_run_in_github_action,
-                            should_run_in_gitlab_ci,
-                            should_run_in_local)
+                        should_run_in_gitlab_ci,
+                        should_run_in_local)
 
 # sys.path.append(os.getcwd())
 
@@ -75,10 +75,6 @@ def main(args: list[str]) -> None:
                   ))
 
     try:
-        if (isinstance(platform, Gitlab)
-                and platform.should_issue_state_open()):
-            print(Log.issue_state_is_open)
-            Exit()
 
         archive_version = platform.get_archive_version(
             config.white_list.comments)

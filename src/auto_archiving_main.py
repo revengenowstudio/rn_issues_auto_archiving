@@ -51,6 +51,7 @@ def main(args: list[str]):
 
     failed_record = FailedRecord(get_failed_record_path_from_args(args))
     output_path = os.environ[Env.ISSUE_OUTPUT_PATH]
+    issue_repository = os.environ[Env.ISSUE_REPOSITORY]
     comment_message: str = Log.uninitialized_message
     try:
         issue_info_json: IssueInfoJson = json.loads(
@@ -64,15 +65,18 @@ def main(args: list[str]):
                   indent=4,
                   ensure_ascii=False
               )))
-
-        issue_repository = os.environ[Env.ISSUE_REPOSITORY]
-
+        
         issue_info = IssueInfo(
             reopen_info=IssueInfo.ReopenInfo(
                 **issue_info_json.pop("reopen_info")
             ),
             **issue_info_json
         )
+        
+        if issue_info.issue_state == "open":
+            print(Log.issue_state_is_open)
+            return
+        
 
         config = Config(get_config_path_from_args(args))
 
