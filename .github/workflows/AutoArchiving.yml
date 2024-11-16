@@ -17,7 +17,7 @@ permissions:
   contents: write
 
 env:
-  OUTPUT_PATH: "./output.json"
+  ISSUE_OUTPUT_PATH: "./output.json"
   ISSUE_REPOSITORY: "外部Issue"
 
 jobs:

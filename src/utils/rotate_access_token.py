@@ -83,11 +83,11 @@ def main():
         from dotenv import load_dotenv
         load_dotenv()
 
-    old_token = os.environ.get("TOKEN")
-    gitlab_host = os.environ.get("GITLAB_HOST")
-    project_id = os.environ.get("PROJECT_ID")
-    token_ttl_days = int(os.environ.get("TOKEN_TTL_DAYS"))
-    target_variable_name = os.environ.get("TARGET_VARIABLE_NAME")
+    old_token = os.environ["TOKEN"]
+    gitlab_host = os.environ["GITLAB_HOST"]
+    project_id = os.environ["PROJECT_ID"]
+    token_ttl_days = int(os.environ["TOKEN_TTL_DAYS"])
+    target_variable_name = os.environ["TARGET_VARIABLE_NAME"]
     if old_token is None:
         raise AccessTokenNotFound(Log.token_not_found)
 

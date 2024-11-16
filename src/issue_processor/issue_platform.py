@@ -67,10 +67,6 @@ class PlatformEnvironments():
 class Platform(ABC):
 
     @abstractmethod
-    def create_http_header(self, token: str) -> dict[str, str]:
-        pass
-
-    @abstractmethod
     def _get_labels_from_platform(self) -> list[str]:
         pass
 
@@ -103,14 +99,15 @@ class Platform(ABC):
     @abstractmethod
     def reopen_issue_body(self) -> dict[str, str]:
         pass
-
     def __init__(self):
         self._token: str
         self._issue: Issue
         self._urls: Urls
         self._comments: list[Comment]
         self._output_path: str
+        self._http_header : dict[str,str]
         self._http_client: httpx.Client
+        
 
     def _parse_issue_state(self) -> None:
         self._issue.state = ISSUE_STATE_MAP[self._issue.state]
@@ -291,7 +288,7 @@ class Platform(ABC):
             archive_version=archive_version,
             introduced_version=introduced_version,
             reopen_info=IssueInfoJson.ReopenInfo(
-                http_header=self.create_http_header(self._token),
+                http_header=self._http_header,
                 reopen_url=self._urls.issues_url,
                 reopen_http_method=self.reopen_issue_method,
                 reopen_body=self.reopen_issue_body,
@@ -361,11 +358,10 @@ class Github(Platform):
         return {
             "state": "open"
         }
-
     def _read_platform_environments(self) -> None:
         print(Log.loading_something.format(something=Log.env))
         self._token = os.environ[Env.TOKEN]
-        self._output_path = os.environ[Env.OUTPUT_PATH]
+        self._output_path = os.environ[Env.ISSUE_OUTPUT_PATH]
         self._issue = Issue(
             int(os.environ[Env.ISSUE_NUMBER]),
             os.environ[Env.ISSUE_TITLE],
@@ -380,7 +376,8 @@ class Github(Platform):
         print(Log.loading_something_success
               .format(something=Log.env))
 
-    def create_http_header(self, token: str) -> dict[str, str]:
+    @staticmethod
+    def create_http_header(token: str) -> dict[str, str]:
         ''' 所需http header结构详见：
         https://docs.github.com/zh/rest/using-the-rest-api/getting-started-with-the-rest-api?apiVersion=2022-11-28#example-request-using-query-parameters'''
         return {
@@ -404,8 +401,9 @@ class Github(Platform):
         super().__init__()
         self._read_platform_environments()
         self._parse_issue_state()
+        self._http_header = self.create_http_header(self._token)
         self._http_client = httpx.Client(
-            headers=self.create_http_header(self._token)
+            headers=self._http_header
         )
         self._issue.labels = self._get_labels_from_platform()
         self._comments = self._get_comments_from_platform(
@@ -461,8 +459,9 @@ class Gitlab(Platform):
         return {
             "state_event": "reopen"
         }
-
-    def create_http_header(self, token: str) -> dict[str, str]:
+    
+    @staticmethod
+    def create_http_header(token: str) -> dict[str, str]:
         ''' 所需http header结构详见：
         https://docs.gitlab.com/ee/api/rest/index.html#request-payload'''
         return {
@@ -509,7 +508,7 @@ class Gitlab(Platform):
     def _read_platform_environments(self) -> None:
         print(Log.loading_something.format(something=Log.env))
         
-        self._output_path = os.environ[Env.OUTPUT_PATH]
+        self._output_path = os.environ[Env.ISSUE_OUTPUT_PATH]
         try:
             webhook_payload = json.loads(
                 os.environ[Env.WEBHOOK_PAYLOAD])
@@ -547,8 +546,9 @@ class Gitlab(Platform):
         super().__init__()
         self._read_platform_environments()
         self._parse_issue_state()
+        self._http_header = self.create_http_header(self._token)
         self._http_client = httpx.Client(
-            headers=self.create_http_header(self._token)
+            headers=self._http_header
         )
         self._issue.labels = self._get_labels_from_platform()
         self._comments = self._get_comments_from_platform(

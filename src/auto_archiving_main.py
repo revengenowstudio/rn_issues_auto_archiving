@@ -2,9 +2,10 @@ import os
 import sys
 import time
 import json
+from pathlib import Path
 
 import httpx
-from pathlib import Path
+from exceptiongroup import ExceptionGroup
 
 from shared.exception import ErrorMessage, IssueInfoMissing
 from shared.env import Env, should_run_in_github_action
@@ -13,7 +14,8 @@ from shared.issue_info import (IssueInfo, IssueInfoJson)
 from auto_archiving.failed_record import FailedRecord
 from auto_archiving.archive_document import ArchiveDocument
 from auto_archiving.json_config import Config
-from exceptiongroup import ExceptionGroup
+from auto_archiving.send_comment import send_comment
+from auto_archiving.reopen_issue import reopen_issue
 
 sys.path.append(os.getcwd())
 
@@ -42,56 +44,13 @@ def get_failed_record_path_from_args(args: list[str]) -> str:
     return path
 
 
-def reopen_issue(
-    http_header: dict[str, str],
-    reopen_url: str,
-    reopen_http_method: str,
-    reopen_body: dict[str, str]
-) -> None:
-
-    print(Log.reopen_issue_request)
-    response = httpx.request(
-        method=reopen_http_method,
-        url=reopen_url,
-        headers=http_header,
-        json=reopen_body
-    )
-    response.raise_for_status()
-    print(Log.reopen_issue_request_success)
-
-
-def send_comment(
-        comment_url: str,
-        headers: str,
-        message: str
-
-) -> None:
-    print(Log.sending_something
-          .format(
-              something=Log.issue_comment
-          ))
-    response = httpx.request(
-        method="POST",
-        url=comment_url,
-        headers=headers,
-        json={
-            "body": message
-        }
-    )
-    response.raise_for_status()
-    print(Log.sending_something_success
-          .format(
-              something=Log.issue_comment
-          ))
-
-
 def main(args: list[str]):
     start_time = time.time()
     if not should_run_in_github_action():
         load_local_env()
 
     failed_record = FailedRecord(get_failed_record_path_from_args(args))
-    output_path = os.environ[Env.OUTPUT_PATH]
+    output_path = os.environ[Env.ISSUE_OUTPUT_PATH]
     try:
         issue_info_json: IssueInfoJson = json.loads(
             Path(output_path
@@ -144,7 +103,7 @@ def main(args: list[str]):
               .format(
                   something=Log.issue_archived_comment))
         send_comment(
-            headers=issue_info.reopen_info.http_header,
+            http_header=issue_info.reopen_info.http_header,
             comment_url=issue_info.reopen_info.comment_url,
             message=Log.issue_archived_success
         )
@@ -197,7 +156,7 @@ def main(args: list[str]):
                   .format(
                       something=Log.announcement_comment))
             send_comment(
-                headers=issue_info.reopen_info.http_header,
+                http_header=issue_info.reopen_info.http_header,
                 comment_url=issue_info.reopen_info.comment_url,
                 message=ErrorMessage.archiving_failed.format(
                     exc=str(exc)

@@ -43,6 +43,8 @@ class ErrorMessage():
 
     aggregation_error = '''抛出聚合错误：'''
 
+    push_document_failed = '''提交归档文档失败，错误信息：{exc}'''
+
 
 class ArchiveBaseError(Exception):
     "归档错误的基类"
