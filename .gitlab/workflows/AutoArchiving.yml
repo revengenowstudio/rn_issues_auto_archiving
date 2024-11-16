@@ -55,6 +55,7 @@ push_archived_issues:
     - merge_requests
   when: on_success
   script: |
+    pip install -r ./src/issue_processor/requirements.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
     export branch=main
     export author_email=RN-Bot-CI@gitlab.revengenow.top
     export author_name=RN-Bot-CI
