@@ -68,7 +68,7 @@ def main():
     token = os.environ[Env.TOKEN]
     http_header = Gitlab.create_http_header(token)
     issue_info_json: IssueInfoJson = json.loads(
-        Path(os.environ[Env.ARCHIVED_DOCUMENT_PATH]
+        Path(os.environ[Env.ISSUE_OUTPUT_PATH]
              ).read_text(encoding="utf-8")
     )
 
