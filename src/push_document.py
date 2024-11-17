@@ -19,6 +19,7 @@ class Log():
     pushing_document_success = '''提交归档文档成功'''
     push_document_failed = '''提交归档文档失败，错误信息：{exc}'''
     issue_state_is_open = '''Issue状态为“Open”，不执行归档文件推送流程'''
+    document_not_found = '''未找到归档文档，跳过推送流程'''
 
 
 def get_issue_id_from_webhook(webhook_path: str) -> int:
@@ -67,10 +68,14 @@ def main():
     project_id = int(os.environ[Env.PROJECT_ID])
     token = os.environ[Env.TOKEN]
     http_header = Gitlab.create_http_header(token)
-    issue_info_json: IssueInfoJson = json.loads(
-        Path(os.environ[Env.ISSUE_OUTPUT_PATH]
-             ).read_text(encoding="utf-8")
-    )
+    try:
+        issue_info_json: IssueInfoJson = json.loads(
+            Path(os.environ[Env.ISSUE_OUTPUT_PATH]
+                ).read_text(encoding="utf-8")
+        )
+    except FileNotFoundError:
+        print(Log.document_not_found)
+        return
 
     try:
         if issue_info_json["issue_state"] == "open":

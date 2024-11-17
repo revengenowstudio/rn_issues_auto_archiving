@@ -9,6 +9,7 @@ variables:
   ISSUE_REPOSITORY: "内部Issue"
   WEBHOOK_OUTPUT_PATH : "./webhook.json"
   ARCHIVED_DOCUMENT_PATH: "./修改归档.md"
+  MANUAL_ARCHIVING: "false"
   # GITLAB_HOST: $CI_SERVER_HOST # 这两个环境变量在另一个流水线定义了,但是这里也用得到
   # PROJECT_ID: $CI_PROJECT_ID # 这两个环境变量在另一个流水线定义了,但是这里也用得到
 
@@ -56,25 +57,9 @@ push_archived_issues:
     - merge_requests
   when: on_success
   script: |
-    
     pip install -r ./src/issue_processor/requirements.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
     export branch=main
     export author_email=RN-Bot-CI@gitlab.revengenow.top
     export author_name=RN-Bot-CI
     export commit_message="Close $ISSUE_REPOSITORY#{issue_id}"
     python ./src/push_document.py
-    
-  # script: |
-  #   git config --global user.email "RN-Bot@gitlab.revengenow.top"
-  #   git config --global user.name "$RN Bot"
-  #   eval $(ssh-agent -s)
-  #   cat $SSH_PRIVATE_KEY | ssh-add -
-  #   mkdir -p ~/.ssh
-  #   chmod 700 ~/.ssh
-  #   echo "[gitlab.revengenow.top]:3022 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKoLpIw8o1gu0xZa3N8+/agXOnpXBzZt3weGaOO0xJrH" >> ~/.ssh/known_hosts
-  #   chmod 644 ~/.ssh/known_hosts
-  #   git checkout -b main
-  #   git add ./修改归档.md
-  #   issue_id=$(python ./src/utils/get_issue_id.py)
-  #   git commit -m "Closed $ISSUE_REPOSITORY#$issue_id"
-  #   git push origin main

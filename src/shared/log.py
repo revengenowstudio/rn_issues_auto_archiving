@@ -18,6 +18,7 @@ class Log():
     getting_something_from = '''正在从 {another} 中获取 {something}'''
     parse_something = '''处理 {something} 中'''
     loading_something = '''加载 {something} 中'''
+    getting_issue_info = '''正在请求并获取Issue相关信息'''
     non_platform_action_env = '''未检测到流水线环境，将读取".env"文件'''
     get_test_platform_type = '''从命令行参数中读取到测试平台类型，将执行 {test_platform_type} 平台流程'''
     sending_something = '''正在发送 {something}'''
@@ -37,6 +38,7 @@ class Log():
     save_issue_content_to_file = '''正在将Issue内容写入至 {output_path} '''
     unexpected_platform_type = '''未知的Issue平台类型 "{platform_type}"，请检查命令行参数输入和环境变量'''
     issue_already_archived = '''{issue_repository}#{issue_id} 已存在归档记录，无需再次归档，跳过归档流程'''
+    issue_output_not_found = '''未找到格式化的issue信息文件，跳过归档写入流程'''
     job_done = '''脚本执行完毕'''
     
     getting_something_success = '''获取 {something} 成功'''
@@ -45,6 +47,7 @@ class Log():
     loading_something_success = '''加载 {something} 完毕'''
     sending_something_success = '''成功发送 {something}'''
     reopen_issue_success = '''重新打开Issue#{issue_number}成功'''
+    getting_issue_info_success = '''成功获取Issue相关信息'''
     archive_version_found = '''成功匹配评论中的归档关键字/归档版本号'''
     target_labels_found = '''成功匹配Issue中的归档所需标签'''
     issue_type_found = '''成功在Issue标题中找到Issue类型关键字'''

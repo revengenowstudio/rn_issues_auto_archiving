@@ -7,20 +7,21 @@ concurrency:
 name: Auto issues archiving
 run-name: "Closed 外部Issue#${{ github.event.issue.number }}"
 
-on: 
-  issues:
-    types: [closed]
-
 # permissions是关于GITHUB_TOKEN权限的，内容详见：
 # https://docs.github.com/zh/actions/writing-workflows/workflow-syntax-for-github-actions#permissions
 permissions:
   issues: write
   contents: write
 
+on: 
+  issues:
+    types: [closed]
+
 env:
   ISSUE_OUTPUT_PATH: "./output.json"
   ISSUE_REPOSITORY: "外部Issue"
   COMMIT_TITLE: "Closed 外部Issue#${{ github.event.issue.number }}"
+  MANUAL_ARCHIVING: "false"
 
 jobs:
   auto_archiving:
@@ -54,19 +55,7 @@ jobs:
           
       - name: Add and commit changes
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add ./修改归档.md
-          diff=$(git diff --cached)
-          if [[ -z $diff ]]; then
-            echo "归档文档没有发生变化，跳过提交流程"
-            exit 0
-          else
-            echo "归档文档没有发生变化，提交新内容"
-            git commit -m "${{ env.COMMIT_TITLE }}"
-            git push origin main
-            exit 0
-          fi
+          bash ./src/push_document.sh
           
 
 

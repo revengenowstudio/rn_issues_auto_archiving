@@ -55,32 +55,29 @@ def main(args: list[str]):
     issue_repository = os.environ[Env.ISSUE_REPOSITORY]
     comment_message: str = Log.uninitialized_message
     enable_send_comment = True
-    try:
-        issue_info_json: IssueInfoJson = json.loads(
+    issue_info_json : IssueInfoJson
+    try: 
+        issue_info_json = json.loads(
             Path(output_path
                  ).read_text(encoding="utf-8")
         )
-
         print(Log.print_issue_info
               .format(issue_info=json.dumps(
                   IssueInfoJson.remove_sensitive_info(issue_info_json),
                   indent=4,
                   ensure_ascii=False
               )))
-        
+    except FileNotFoundError :
+        print(Log.issue_output_not_found)
+        return
+    try:
         issue_info = IssueInfo(
             reopen_info=IssueInfo.ReopenInfo(
                 **issue_info_json.pop("reopen_info")
             ),
             **issue_info_json
         )
-        
-        if issue_info.issue_state == "open":
-            print(Log.issue_state_is_open)
-            enable_send_comment = False
-            return
-        
-
+    
         config = Config(get_config_path_from_args(args))
 
         archive_document = ArchiveDocument(

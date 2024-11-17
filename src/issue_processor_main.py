@@ -75,15 +75,23 @@ def main(args: list[str]) -> None:
                   ))
 
     try:
-
-        archive_version = platform.get_archive_version(
-            config.white_list.comments)
+        if platform.should_issue_state_open():
+            print(Log.issue_state_is_open)
+            Exit()
+            
+        platform.init_issue_info_from_platform()
+        
+        archive_version = ""
+        if platform.archive_version == "":
+            archive_version = platform.get_archive_version(
+                config.white_list.comments)
+        else :
+            archive_version = platform.archive_version
 
         if not platform.should_archive_issue(
             archive_version,
             platform.get_labels(),
-            config.white_list.labels,
-            config.white_list.comments,
+            config.white_list.labels
         ):
             print(Log.not_archive_issue)
             Exit()
@@ -96,16 +104,18 @@ def main(args: list[str]) -> None:
             config.issue_type.type_keyword
         )
 
-        introduced_version = platform.get_introduced_version(
-            config.introduced_version_reges
-        )
+        introduced_version : str = ""
+        if platform.introduced_version == "":
+            introduced_version = platform.get_introduced_version_from_description(
+                config.introduced_version_reges,
+                issue_type in config.issue_type
+                                        .need_introduced_version_issue_type
+            )
+        else:
+            introduced_version = platform.introduced_version
 
         platform.issue_content_to_json(
-            platform.parse_introduced_version(
-                introduced_version,
-                issue_type in config.issue_type
-                                    .need_introduced_version_issue_type
-            ),
+            introduced_version,
             platform.parse_archive_version(
                 archive_version
             ),
