@@ -48,8 +48,9 @@ def main(args: list[str]):
     start_time = time.time()
     if not should_run_in_github_action():
         load_local_env()
-
-    failed_record = FailedRecord(get_failed_record_path_from_args(args))
+    
+    # 因为暂时用不到，禁用 failed_record 本机记录功能
+    # failed_record = FailedRecord(get_failed_record_path_from_args(args))
     output_path = os.environ[Env.ISSUE_OUTPUT_PATH]
     issue_repository = os.environ[Env.ISSUE_REPOSITORY]
     comment_message: str = Log.uninitialized_message
@@ -85,13 +86,13 @@ def main(args: list[str]):
         archive_document = ArchiveDocument(
             config.archive_document_path
         )
-
-        for issue_id in failed_record.get_all_issue_id():
-            if archive_document.should_issue_archived(
-                issue_id,
-                issue_repository
-            ):
-                failed_record.remove_record(issue_id)
+        # 因为暂时用不到，禁用 failed_record 本机记录功能
+        # for issue_id in failed_record.get_all_issue_id():
+        #     if archive_document.should_issue_archived(
+        #         issue_id,
+        #         issue_repository
+        #     ):
+        #         failed_record.remove_record(issue_id)
 
         if archive_document.should_issue_archived(
             issue_info.issue_id,
@@ -147,12 +148,13 @@ def main(args: list[str]):
                     exc=str(exc_)
                 )
             )
-        failed_record.add_record(
-            issue_id=issue_info.issue_id,
-            issue_title=issue_info.issue_title,
-            issue_repository=issue_repository,
-            reason=str(exc)
-        )
+        # 因为暂时用不到，禁用 failed_record 本机记录功能
+        # failed_record.add_record(
+        #     issue_id=issue_info.issue_id,
+        #     issue_title=issue_info.issue_title,
+        #     issue_repository=issue_repository,
+        #     reason=str(exc)
+        # )
         try:
             reopen_issue(
                 http_header=issue_info.reopen_info.http_header,
@@ -189,7 +191,8 @@ def main(args: list[str]):
             archive_document.close()
         except Exception:
             pass
-        failed_record.save()
+        # 因为暂时用不到，禁用 failed_record 本机记录功能
+        # failed_record.save()
 
 
 if __name__ == "__main__":
