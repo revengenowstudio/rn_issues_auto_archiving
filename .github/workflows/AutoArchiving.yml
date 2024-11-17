@@ -69,7 +69,16 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add ./修改归档.md
-          git commit -m "Closed $ISSUE_REPOSITORY#${{ github.event.issue.number }}"
-          git push origin main
+          diff=$(git diff --cached)
+          if [[ -z $diff ]]; then
+            echo "归档文档没有发生变化，跳过提交流程"
+            exit 0
+          else
+            echo "归档文档没有发生变化，提交新内容"
+            git commit -m "Closed $ISSUE_REPOSITORY#${{ github.event.issue.number }}"
+            git push origin main
+            exit 0
+          fi
+          
 
 
