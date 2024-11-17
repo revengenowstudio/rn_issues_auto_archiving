@@ -19,9 +19,11 @@ permissions:
 env:
   ISSUE_OUTPUT_PATH: "./output.json"
   ISSUE_REPOSITORY: "外部Issue"
+  COMMIT_TITLE: "Closed 外部Issue#${{ github.event.issue.number }}"
 
 jobs:
-  get_issue_details:
+  auto_archiving:
+    name: "Closed 外部Issue#${{ github.event.issue.number }}"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -60,7 +62,7 @@ jobs:
             exit 0
           else
             echo "归档文档没有发生变化，提交新内容"
-            git commit -m "Closed $ISSUE_REPOSITORY#${{ github.event.issue.number }}"
+            git commit -m "${{ env.COMMIT_TITLE }}"
             git push origin main
             exit 0
           fi
