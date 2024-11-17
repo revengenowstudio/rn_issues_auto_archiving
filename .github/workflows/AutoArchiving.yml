@@ -5,8 +5,9 @@ concurrency:
   group: archiving-group
 
 name: Auto issues archiving
+run-name: "Closed 外部Issue#${{ github.event.issue.number }}"
 
-on:
+on: 
   issues:
     types: [closed]
 
