@@ -138,6 +138,8 @@ class ArchiveDocument():
 
     def save(self) -> None:
         print(Log.write_content_to_document)
+        if not self.__lines[-1].endswith('\n'):
+            self.__lines[-1] += "\n"
         self.__lines.insert(
             self.__get_table_last_line_index() + 1,
             *self.__new_lines
