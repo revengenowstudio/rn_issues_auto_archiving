@@ -378,8 +378,8 @@ class Platform(ABC):
             issue_type=issue_type,
             issue_title=self._issue.title,
             issue_state=self._issue.state,
-            archive_version=archive_version,
             introduced_version=introduced_version,
+            archive_version=archive_version,
             reopen_info=IssueInfoJson.ReopenInfo(
                 http_header=self._http_header,
                 reopen_url=self._urls.issue_url,
