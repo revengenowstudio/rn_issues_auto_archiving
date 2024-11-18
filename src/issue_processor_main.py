@@ -89,12 +89,17 @@ def main(args: list[str]) -> None:
 
         platform.init_issue_info_from_platform()
 
+        issue_type = platform.get_issue_type_from_labels(
+            config.issue_type.label_map
+        )
+
         # 自动触发流水线必须从描述中获取引入版本号
         # 手动触发流水线如果没有填引入版本号，
         # 那么还得从描述里获取引入版本号
         introduced_version: str = ""
         if not platform.should_introduced_version_input:
             introduced_version = platform.get_introduced_version_from_description(
+                issue_type,
                 config.introduced_version_reges,
                 config.issue_type.need_introduced_version_issue_type
             )
@@ -135,10 +140,6 @@ def main(args: list[str]) -> None:
             archive_version = platform.parse_archive_version(
                 temp
             )
-
-        issue_type = platform.get_issue_type_from_labels(
-            config.issue_type.label_map
-        )
 
         platform.remove_type_in_issue_title(
             config.issue_type.type_keyword

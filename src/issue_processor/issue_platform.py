@@ -103,7 +103,7 @@ class Platform(ABC):
     @abstractmethod
     def get_issue_info_from_platform(self) -> Issue:
         pass
-    
+
     @abstractmethod
     def should_issue_state_open(self) -> bool:
         pass
@@ -137,7 +137,7 @@ class Platform(ABC):
     @property
     def should_archived_version_input(self) -> bool:
         return self._issue.archive_version != ""
-    
+
     @property
     def should_introduced_version_input(self) -> bool:
         return self._issue.introduced_version != ""
@@ -145,6 +145,7 @@ class Platform(ABC):
     @property
     def archived_version(self) -> str:
         return self._issue.archive_version
+
     @property
     def introduced_version(self) -> str:
         return self._issue.introduced_version
@@ -184,10 +185,9 @@ class Platform(ABC):
             # 因为gitlab的webhook载荷里有标签了，没必要在打一次请求
             self._issue.labels = self._get_labels_from_platform()
 
-
-
     def get_introduced_version_from_description(
         self,
+        issue_type: str,
         introduced_version_reges: list[str],
         need_introduced_version_issue_type: list[str]
     ) -> str:
@@ -203,8 +203,8 @@ class Platform(ABC):
             )
         introduced_versions = [item.strip() for item in introduced_versions]
         if len(introduced_versions) == 0:
-            if any([issue_type in self._issue.labels
-                    for issue_type in need_introduced_version_issue_type]):
+            if any([issue_type == target_issue_type
+                    for target_issue_type in need_introduced_version_issue_type]):
                 print(Log.introduced_version_not_found)
                 raise IntroducedVersionError(
                     ErrorMessage.missing_introduced_version
@@ -369,7 +369,7 @@ class Platform(ABC):
     def issue_content_to_json(
         self,
         archive_version: str,
-        introduced_version:str,
+        introduced_version: str,
         issue_type: str
     ) -> None:
         json_path = self._output_path
@@ -441,7 +441,8 @@ class Github(Platform):
         self._ci_event_type = os.environ[Env.CI_EVENT_TYPE]
         if self.should_ci_running_in_manual:
             self._issue = Issue(
-                id=Platform.issue_number_to_int(os.environ[Env.MANUAL_ISSUE_NUMBER]),
+                id=Platform.issue_number_to_int(
+                    os.environ[Env.MANUAL_ISSUE_NUMBER]),
                 title=os.environ[Env.MANUAL_ISSUE_TITLE],
                 state=parse_issue_state(os.environ[Env.MANUAL_ISSUE_STATE]),
                 body="",
@@ -513,7 +514,7 @@ class Github(Platform):
         return [Comment(author=comment["user"]["login"],
                         body=comment["body"])
                 for comment in raw_json]
-    
+
     def should_issue_state_open(self) -> bool:
         '''Github流水线的不会被issue reopen事件触发
         所以在Github流水线中不考虑issue状态'''
@@ -652,7 +653,7 @@ class Gitlab(Platform):
                 print(Log.webhook_payload_not_found)
                 raise WebhookPayloadError(Log.webhook_payload_not_found)
 
-            issue_id : int = webhook_payload["object_attributes"]["iid"]
+            issue_id: int = webhook_payload["object_attributes"]["iid"]
             self._issue = Issue(
                 # webhook里是json，iid一定是int
                 id=issue_id,
@@ -667,7 +668,7 @@ class Gitlab(Platform):
                 introduced_version="",
                 archive_version=""
             )
-            
+
             issue_url = f'{os.environ[Env.API_BASE_URL]}{Urls.ApiPath.issues}/{issue_id}'
             self._urls = Urls(
                 issue_url=issue_url,
