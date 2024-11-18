@@ -22,7 +22,7 @@ on:
         description: "需要关闭的issue的单号（仅数字），只允许输入一个单号,"
         required: true
       issue_title:
-        description: "此值将影响对应单号的issue在归档文件中的描述，为空则自动获取issue标题"
+        description: "issue标题,此值将成为对应单号的issue在归档文件中的描述，为空则自动获取issue标题"
         required: false
         default: ""
       introduced_version:
