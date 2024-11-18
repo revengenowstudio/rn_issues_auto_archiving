@@ -81,3 +81,6 @@ class WebhookPayloadError(Exception):
 class IssueInfoMissing(Exception):
     '''找不到IssueInfo文件'''
     
+class MissingIssueNumber(Exception):
+    '''Issue Number为空'''
+    pass

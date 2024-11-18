@@ -14,14 +14,23 @@ from shared.issue_info import IssueInfoJson
 from shared.issue_state import IssueState, parse_issue_state
 
 
+class CiEventType():
+    '''流水线触发类型 :\n
+    github:https://docs.github.com/zh/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#about-events-that-trigger-workflows
+    gitlab:https://docs.gitlab.com/ee/ci/jobs/job_rules.html#ci_pipeline_source-predefined-variable'''
+    manual = ["web", "workflow_dispatch"]
+    issue_event = ["trigger", "issues"]
+
+
 @dataclass()
 class Urls():
-    issues_url: str
+    issue_url: str
     comments_url: str
 
     class ApiPath():
         base = "api/v4"
         projects = "projects"
+        issues = "issues"
         notes = "notes"
 
 
@@ -38,6 +47,8 @@ class Issue():
     state: str
     body: str
     labels: list[str]
+    introduced_version: str = ""
+    archive_version: str = ""
 
 
 @dataclass()
@@ -52,6 +63,14 @@ class PlatformEnvironments():
 
 
 class Platform(ABC):
+
+    @staticmethod
+    def issue_number_to_int(issue_number: str):
+        if not issue_number.isdigit():
+            raise ValueError(
+                Log.invalid_issue_number
+                .format(issues_number_var=issue_number))
+        return int(issue_number.strip())
 
     @abstractmethod
     def _get_labels_from_platform(self) -> list[str]:
@@ -97,15 +116,34 @@ class Platform(ABC):
 
     @property
     def introduced_version(self) -> str:
-        return self._introduced_version
+        return self._issue.introduced_version
 
     @property
     def archive_version(self) -> str:
-        return self._archive_version
+        return self._issue.archive_version
 
     @property
-    def should_manual_archiving(self) -> bool:
-        return self._manual_archiving
+    def should_ci_running_in_manual(self) -> bool:
+        return self._ci_event_type in CiEventType.manual
+
+    @property
+    def should_ci_running_in_issue_event(self) -> bool:
+        return self._ci_event_type in CiEventType.issue_event
+
+    @property
+    def should_archived_version_input(self) -> bool:
+        return self._issue.archive_version != ""
+    
+    @property
+    def should_introduced_version_input(self) -> bool:
+        return self._issue.introduced_version != ""
+
+    @property
+    def archived_version(self) -> str:
+        return self._issue.archive_version
+    @property
+    def introduced_version(self) -> str:
+        return self._issue.introduced_version
 
     def __init__(self):
         self._token: str
@@ -115,22 +153,34 @@ class Platform(ABC):
         self._output_path: str
         self._http_header: dict[str, str]
         self._http_client: httpx.Client
-        self._manual_archiving: bool
-        self._introduced_version: str
-        self._archive_version: str
+        self._ci_event_type: str
 
-    def init_issue_info_from_platform(self) -> None:
-        if not self.should_manual_archiving:
+    def init_issue_info_from_platform(
+        self
+    ) -> None:
+
+        self._comments = self._get_comments_from_platform(
+            self._http_client,
+            self._urls.comments_url
+        )
+
+        if self.should_ci_running_in_manual:
+            # 手动触发流水线的情况
+            # 以防可选项为空，需要打一个请请求获取issue信息
+            issue_info = self.get_issue_info_from_platform()
+            self._issue.labels = issue_info.labels
+            if self._issue.title == "":
+                self._issue.title = issue_info.title
+            if self._issue.body == "":
+                self._issue.body = issue_info.body
+
+        else:
+            # issue事件触发流水线的情况
+            # 至于为什么要留着_get_labels_from_platform
+            # 因为gitlab的webhook载荷里有标签了，没必要在打一次请求
             self._issue.labels = self._get_labels_from_platform()
-            self._comments = self._get_comments_from_platform(
-                self._http_client,
-                self._urls.comments_url
-            )
-            return None
 
-        issue_info = self.get_issue_info_from_platform()
-        if self._issue.title == "":
-            self._issue.title = issue_info.title
+
 
     def get_introduced_version_from_description(
         self,
@@ -149,15 +199,15 @@ class Platform(ABC):
             )
         introduced_versions = [item.strip() for item in introduced_versions]
         if len(introduced_versions) == 0:
-            if not need_introduced_version_issue_type:
+            if any([issue_type in self._issue.labels
+                    for issue_type in need_introduced_version_issue_type]):
+                print(Log.introduced_version_not_found)
+                raise IntroducedVersionError(
+                    ErrorMessage.missing_introduced_version
+                )
+            else:
                 print(Log.introduced_version_not_found)
                 return ""
-            for issue_type in need_introduced_version_issue_type:
-                if issue_type in self._issue.labels:
-                    print(Log.introduced_version_not_found)
-                    raise IntroducedVersionError(
-                        ErrorMessage.missing_introduced_version
-                    )
 
         elif len(introduced_versions) >= 2:
             print(Log.too_many_introduced_version)
@@ -314,8 +364,8 @@ class Platform(ABC):
 
     def issue_content_to_json(
         self,
-        introduced_version: str,
         archive_version: str,
+        introduced_version:str,
         issue_type: str
     ) -> None:
         json_path = self._output_path
@@ -328,7 +378,7 @@ class Platform(ABC):
             introduced_version=introduced_version,
             reopen_info=IssueInfoJson.ReopenInfo(
                 http_header=self._http_header,
-                reopen_url=self._urls.issues_url,
+                reopen_url=self._urls.issue_url,
                 reopen_http_method=self.reopen_issue_method,
                 reopen_body=self.reopen_issue_body,
                 comment_url=self._urls.comments_url,
@@ -380,25 +430,43 @@ class Github(Platform):
 
     def _read_platform_environments(self) -> None:
         print(Log.loading_something.format(something=Log.env))
+
         self._token = os.environ[Env.TOKEN]
         self._output_path = os.environ[Env.ISSUE_OUTPUT_PATH]
-        self._manual_archiving = strtobool(
-            os.environ[Env.MANUAL_ARCHIVING])
-        self._issue = Issue(
-            id=int(os.environ.get(Env.ISSUE_NUMBER)),
-            title=os.environ.get(Env.ISSUE_TITLE, ""),
-            state=parse_issue_state(os.environ[Env.ISSUE_STATE]),
-            body=os.environ.get(Env.ISSUE_BODY, ""),
-            labels=[]
-        )
-        self._urls = Urls(
-            os.environ[Env.ISSUE_URL],
-            os.environ[Env.COMMENTS_URL],
-        )
-        self._introduced_version: str = os.environ.get(
-            Env.INTRODUCED_VERSION, "")
-        self._archive_version: str = os.environ.get(
-            Env.ARCHIVE_VERSION, "")
+
+        self._ci_event_type = os.environ[Env.CI_EVENT_TYPE]
+        if self.should_ci_running_in_manual:
+            self._issue = Issue(
+                id=Platform.issue_number_to_int(os.environ[Env.MANUAL_ISSUE_NUMBER]),
+                title=os.environ[Env.MANUAL_ISSUE_TITLE],
+                state=parse_issue_state(os.environ[Env.MANUAL_ISSUE_STATE]),
+                body="",
+                labels=[],
+                introduced_version=os.environ[
+                    Env.INTRODUCED_VERSION],
+                archive_version=os.environ[
+                    Env.ARCHIVE_VERSION]
+            )
+            self._urls = Urls(
+                os.environ[Env.MANUAL_ISSUE_URL],
+                os.environ[Env.MANUAL_COMMENTS_URL],
+            )
+
+        else:
+            self._issue = Issue(
+                id=int(os.environ.get(Env.ISSUE_NUMBER)),
+                title=os.environ.get[Env.ISSUE_TITLE],
+                state=parse_issue_state(os.environ[Env.ISSUE_STATE]),
+                body=os.environ.get[Env.ISSUE_BODY],
+                labels=[],
+                introduced_version="",
+                archive_version=""
+            )
+            self._urls = Urls(
+                os.environ[Env.ISSUE_URL],
+                os.environ[Env.COMMENTS_URL],
+            )
+
         print(Log.loading_something_success
               .format(something=Log.env))
 
@@ -407,7 +475,7 @@ class Github(Platform):
         https://docs.github.com/zh/rest/issues/issues?apiVersion=2022-11-28#get-an-issue'''
         print(Log.getting_something.
               format(something=Log.issue_label))
-        response = self._http_client.get(url=self._urls.issues_url)
+        response = self._http_client.get(url=self._urls.issue_url)
         response.raise_for_status()
         print(Log.getting_something_success.
               format(something=Log.issue_label))
@@ -446,7 +514,7 @@ class Github(Platform):
         ''' 所需http header结构详见：
         https://docs.github.com/zh/rest/issues/issues?apiVersion=2022-11-28#get-an-issue'''
         print(Log.getting_issue_info)
-        response = self._http_client.get(url=self._urls.issues_url)
+        response = self._http_client.get(url=self._urls.issue_url)
         response.raise_for_status()
         print(Log.getting_issue_info_success)
         raw_json = response.json()
@@ -462,7 +530,7 @@ class Github(Platform):
     def reopen_issue(self) -> None:
         ''' api结构详见：
         https://docs.github.com/zh/rest/issues/issues?apiVersion=2022-11-28#update-an-issue'''
-        url = self._urls.issues_url
+        url = self._urls.issue_url
         print(Log.reopen_issue
               .format(issue_number=self._issue.id))
         response = self._http_client.request(
@@ -539,43 +607,63 @@ class Gitlab(Platform):
     def _read_platform_environments(self) -> None:
         print(Log.loading_something.format(something=Log.env))
 
+        self._ci_event_type = os.environ[Env.CI_EVENT_TYPE]
         self._output_path = os.environ[Env.ISSUE_OUTPUT_PATH]
-        self._manual_archiving = strtobool(
-            os.environ[Env.MANUAL_ARCHIVING])
-        try:
-            webhook_payload = json.loads(
-                os.environ[Env.WEBHOOK_PAYLOAD])
-            self._token = os.environ[Env.TOKEN]
-        except Exception:
-            print(Log.webhook_payload_not_found)
-            raise WebhookPayloadError()
 
-        self._issue = Issue(
-            id=int(webhook_payload["object_attributes"]["iid"]),
-            title=webhook_payload["object_attributes"]["title"],
-            state=parse_issue_state(
-                webhook_payload["object_attributes"]["action"]),
-            body=webhook_payload["object_attributes"]["description"],
-            labels=[
-                label_json["title"]
-                for label_json in
-                webhook_payload["object_attributes"]["labels"]]
-        )
+        if self.should_ci_running_in_manual:
+            issue_id = os.environ.get(Env.ISSUE_NUMBER, "")
+            if issue_id == "":
+                raise MissingIssueNumber(
+                    Log.missing_issue_number
+                    .format(issues_number_var=Env.ISSUE_NUMBER))
+            self._issue = Issue(
+                id=Platform.issue_number_to_int(issue_id),
+                title=os.environ[Env.ISSUE_TITLE],
+                state=parse_issue_state(
+                    os.environ[Env.ISSUE_STATE]),
+                body="",
+                labels=[],
+                introduced_version=os.environ[
+                    Env.INTRODUCED_VERSION],
+                archive_version=os.environ[
+                    Env.ARCHIVE_VERSION]
+            )
+            issue_url = f'{os.environ[Env.API_BASE_URL]}{Urls.ApiPath.issues}/{issue_id}'
+            self._urls = Urls(
+                issue_url=issue_url,
+                comments_url=issue_url + '/' + Urls.ApiPath.notes,
+            )
 
-        project_id: int = webhook_payload["object_attributes"]["project_id"]
-        issue_web_url: int = webhook_payload["object_attributes"]["url"]
+        else:
+            try:
+                webhook_payload = json.loads(
+                    os.environ[Env.WEBHOOK_PAYLOAD])
+                self._token = os.environ[Env.TOKEN]
+            except Exception:
+                print(Log.webhook_payload_not_found)
+                raise WebhookPayloadError(Log.webhook_payload_not_found)
 
-        issues_url = self.issue_web_url_to_issue_api_url(
-            issue_web_url, project_id
-        )
-        self._urls = Urls(
-            issues_url=issues_url,
-            comments_url=issues_url + '/' + Urls.ApiPath.notes,
-        )
-        self._introduced_version: str = os.environ.get(
-            Env.INTRODUCED_VERSION, "")
-        self._archive_version: str = os.environ.get(
-            Env.ARCHIVE_VERSION, "")
+            issue_id : int = webhook_payload["object_attributes"]["iid"]
+            self._issue = Issue(
+                # webhook里是json，iid一定是int
+                id=issue_id,
+                title=webhook_payload["object_attributes"]["title"],
+                state=parse_issue_state(
+                    webhook_payload["object_attributes"]["action"]),
+                body=webhook_payload["object_attributes"]["description"],
+                labels=[
+                    label_json["title"]
+                    for label_json in
+                    webhook_payload["object_attributes"]["labels"]],
+                introduced_version="",
+                archive_version=""
+            )
+            
+            issue_url = f'{os.environ[Env.API_BASE_URL]}{Urls.ApiPath.issues}/{issue_id}'
+            self._urls = Urls(
+                issue_url=issue_url,
+                comments_url=issue_url + '/' + Urls.ApiPath.notes,
+            )
 
         print(Log.loading_something_success
               .format(something=Log.env))
@@ -612,7 +700,7 @@ class Gitlab(Platform):
         ''' 所需http header结构详见：
         https://docs.gitlab.com/ee/api/issues.html#single-issue'''
         print(Log.getting_issue_info)
-        response = self._http_client.get(url=self._urls.issues_url)
+        response = self._http_client.get(url=self._urls.issue_url)
         response.raise_for_status()
         print(Log.getting_issue_info_success)
         raw_json = response.json()
@@ -621,7 +709,9 @@ class Gitlab(Platform):
             title=raw_json["title"],
             state=parse_issue_state(raw_json["state"]),
             body=raw_json["description"],
-            labels=raw_json["labels"]
+            labels=raw_json["labels"],
+            introduced_version="",
+            archive_version=""
         )
 
     def should_issue_state_open(self) -> bool:
@@ -630,7 +720,7 @@ class Gitlab(Platform):
     def reopen_issue(self) -> None:
         ''' api结构详见：
         https://docs.gitlab.com/ee/api/issues.html#edit-an-issue'''
-        url = self._urls.issues_url
+        url = self._urls.issue_url
         print(Log.reopen_issue
               .format(issue_number=self._issue.id))
         response = self._http_client.request(

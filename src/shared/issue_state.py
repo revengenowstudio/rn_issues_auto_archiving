@@ -13,4 +13,4 @@ class IssueState():
     open = "open"
 
 def parse_issue_state(state: str) -> str:
-    return ISSUE_STATE_MAP[state]
+    return ISSUE_STATE_MAP[state.lower()]

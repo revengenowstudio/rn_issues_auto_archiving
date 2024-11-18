@@ -9,17 +9,19 @@ variables:
   ISSUE_REPOSITORY: "内部Issue"
   WEBHOOK_OUTPUT_PATH : "./webhook.json"
   ARCHIVED_DOCUMENT_PATH: "./修改归档.md"
-  MANUAL_ARCHIVING: "false"
+  CI_EVENT_TYPE: $CI_PIPELINE_SOURCE
   # GITLAB_HOST: $CI_SERVER_HOST # 这两个环境变量在另一个流水线定义了,但是这里也用得到
   # PROJECT_ID: $CI_PROJECT_ID # 这两个环境变量在另一个流水线定义了,但是这里也用得到
+  ISSUE_NUMBER: ${ISSUE_NUMBER:-""}
+  ISSUE_TITLE: ${ISSUE_TITLE:-""}
+  INTRODUCED_VERSION: ${INTRODUCED_VERSION:-""}
+  ARCHIVE_VERSION: ${ARCHIVE_VERSION:-""}
+  API_BASE_URL: https://$CI_SERVER_HOST/api/v4/projects/$CI_PROJECT_ID/
 
 auto_archiving:
   stage: auto_archiving
-  # rules:
-  #   - if: '$CI_PIPELINE_SOURCE == "triggers"'
-  #     when: always
-  #   - when: never
   only:
+    - manual
     - triggers
   except:
     - pushes
@@ -51,6 +53,7 @@ push_archived_issues:
     - job: auto_archiving
       artifacts: true
   only:
+    - manual
     - trigger
   except:
     - pushes

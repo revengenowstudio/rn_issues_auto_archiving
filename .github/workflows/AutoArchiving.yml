@@ -5,7 +5,7 @@ concurrency:
   group: archiving-group
 
 name: Auto issues archiving
-run-name: "Closed 外部Issue#${{ github.event.issue.number }}"
+run-name: "Closed 外部Issue"
 
 # permissions是关于GITHUB_TOKEN权限的，内容详见：
 # https://docs.github.com/zh/actions/writing-workflows/workflow-syntax-for-github-actions#permissions
@@ -16,16 +16,34 @@ permissions:
 on: 
   issues:
     types: [closed]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: "需要关闭的issue的单号（仅数字），只允许输入一个单号,"
+        required: true
+      issue_title:
+        description: "此值将影响对应单号的issue在归档文件中的描述，为空则自动获取issue标题"
+        required: false
+        default: ""
+      introduced_version:
+        description: "引入版本号，为空则自动从对应的issue描述中获取引入版本号"
+        required: false
+        default: ""
+      archive_version:
+        description: "归档版本号，为空则自动从对应的issue评论中获取归档版本号"
+        required: false
+        default: ""
 
 env:
   ISSUE_OUTPUT_PATH: "./output.json"
   ISSUE_REPOSITORY: "外部Issue"
-  COMMIT_TITLE: "Closed 外部Issue#${{ github.event.issue.number }}"
-  MANUAL_ARCHIVING: "false"
+  COMMIT_TITLE: "Closed 外部Issue#"
+  CI_EVENT_TYPE: ${{ github.event_name }} 
+  # 具体有什么事件类型：https://docs.github.com/zh/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#about-events-that-trigger-workflows
 
 jobs:
   auto_archiving:
-    name: "Closed 外部Issue#${{ github.event.issue.number }}"
+    name: "Closed 外部Issue"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -38,6 +56,7 @@ jobs:
           pip install -r ./src/auto_archiving/requirements.txt
   
       - name: Processing issue content
+        if: ${{ github.event_name == 'issues' }}
         env:
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
@@ -46,6 +65,13 @@ jobs:
           ISSUE_BODY: ${{ github.event.issue.body }}
           ISSUE_URL: "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}"
           COMMENTS_URL: "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments"
+          MANUAL_ISSUE_NUMBER: ${{ github.event.inputs.issue_number }}
+          MANUAL_ISSUE_TITLE: ${{ github.event.inputs.issue_title }}
+          MANUAL_ISSUE_STATE: "closed"
+          ARCHIVE_VERSION: ${{ github.event.inputs.archive_version }}
+          INTRODUCED_VERSION: ${{ github.event.inputs.introduced_version }}
+          MANUAL_ISSUE_URL: "https://api.github.com/repos/${{ github.repository }}/issues/${{ env.MANUAL_ISSUE_NUMBER }}"
+          MANUAL_COMMENTS_URL: "https://api.github.com/repos/${{ github.repository }}/issues/${{ env.MANUAL_ISSUE_NUMBER }}/comments"
         run: |
           python ./src/issue_processor_main.py -c "./config/issue_processor.json"
 

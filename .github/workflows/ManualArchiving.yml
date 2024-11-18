@@ -38,7 +38,7 @@ env:
   ISSUE_OUTPUT_PATH: "./output.json"
   ISSUE_REPOSITORY: "外部Issue"
   COMMIT_TITLE: "Closed 外部Issue#${{ github.event.inputs.issue_number }}"
-  MANUAL_ARCHIVING: "true"
+  CI_EVENT_TYPE: "true"
 
 jobs:
   archiving_issue_manually:

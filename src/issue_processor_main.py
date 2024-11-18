@@ -78,23 +78,56 @@ def main(args: list[str]) -> None:
         if platform.should_issue_state_open():
             print(Log.issue_state_is_open)
             Exit()
-            
-        platform.init_issue_info_from_platform()
-        
-        archive_version = ""
-        if platform.archive_version == "":
-            archive_version = platform.get_archive_version(
-                config.white_list.comments)
-        else :
-            archive_version = platform.archive_version
 
-        if not platform.should_archive_issue(
-            archive_version,
-            platform.get_labels(),
-            config.white_list.labels
-        ):
-            print(Log.not_archive_issue)
-            Exit()
+        platform.init_issue_info_from_platform()
+
+        # 自动触发流水线必须从描述中获取引入版本号
+        # 手动触发流水线如果没有填引入版本号，
+        # 那么还得从描述里获取引入版本号
+        introduced_version: str = ""
+        if not platform.should_introduced_version_input:
+            introduced_version = platform.get_introduced_version_from_description(
+                config.introduced_version_reges,
+                config.issue_type.need_introduced_version_issue_type
+            )
+        else:
+            introduced_version = platform.introduced_version
+
+        archive_version: str = ""
+        if platform.should_ci_running_in_manual:
+            temp = platform.get_archive_version(
+                config.white_list.comments
+            )
+            if not platform.should_archive_issue(
+                temp,
+                platform.get_labels(),
+                config.white_list.labels
+            ):
+                print(Log.not_archive_issue)
+                Exit()
+            archive_version = platform.parse_archive_version(
+                temp
+            )
+        else:
+            # TODO 这里有待讨论
+            # 需要根据讨论结果决定是否手动归档流程也进行“是否为归档issue”的判断
+            if not platform.should_archived_version_input:
+                temp = platform.get_archive_version(
+                    config.white_list.comments
+                )
+                # if not platform.should_archive_issue(
+                #     temp,
+                #     platform.get_labels(),
+                #     config.white_list.labels
+                # ):
+                #     print(Log.not_archive_issue)
+                #     Exit()
+                archive_version = platform.parse_archive_version(
+                    temp
+                )
+            else:
+                archive_version = platform.archive_version
+
 
         issue_type = platform.get_issue_type_from_labels(
             config.issue_type.label_map
@@ -104,21 +137,9 @@ def main(args: list[str]) -> None:
             config.issue_type.type_keyword
         )
 
-        introduced_version : str = ""
-        if platform.introduced_version == "":
-            introduced_version = platform.get_introduced_version_from_description(
-                config.introduced_version_reges,
-                issue_type in config.issue_type
-                                        .need_introduced_version_issue_type
-            )
-        else:
-            introduced_version = platform.introduced_version
-
         platform.issue_content_to_json(
+            archive_version,
             introduced_version,
-            platform.parse_archive_version(
-                archive_version
-            ),
             issue_type
         )
 
