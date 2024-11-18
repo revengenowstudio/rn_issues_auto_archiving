@@ -41,6 +41,8 @@ class Log():
     issue_output_not_found = '''未找到格式化的issue信息文件，跳过归档写入流程'''
     missing_issue_number = '''"{issues_number_var}"变量为空，必须填写"{issues_number_var}"才能执行归档流程'''
     invalid_issue_number = '''"{issues_number_var}"的值不能转换成整数，请检查输入参数是否正确'''
+    running_ci_by_manual = '''流水线触发触发方式：手动'''
+    running_ci_by_automated = '''流水线触发触发方式：自动'''
     job_done = '''脚本执行完毕'''
     
     getting_something_success = '''获取 {something} 成功'''

@@ -69,8 +69,8 @@ jobs:
           MANUAL_ISSUE_STATE: "closed"
           ARCHIVE_VERSION: ${{ github.event.inputs.archive_version }}
           INTRODUCED_VERSION: ${{ github.event.inputs.introduced_version }}
-          MANUAL_ISSUE_URL: "https://api.github.com/repos/${{ github.repository }}/issues/${{ env.MANUAL_ISSUE_NUMBER }}"
-          MANUAL_COMMENTS_URL: "https://api.github.com/repos/${{ github.repository }}/issues/${{ env.MANUAL_ISSUE_NUMBER }}/comments"
+          MANUAL_ISSUE_URL: "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.inputs.issue_number }}"
+          MANUAL_COMMENTS_URL: "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.inputs.issue_number }}/comments"
         run: |
           python ./src/issue_processor_main.py -c "./config/issue_processor.json"
 

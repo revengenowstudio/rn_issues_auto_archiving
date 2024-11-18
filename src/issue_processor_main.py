@@ -1,8 +1,12 @@
 import os
 import sys
 
-from issue_processor.issue_platform import Platform, Github, Gitlab
+from issue_processor.issue_platform import (Platform,
+                                            Github,
+                                            Gitlab,
+                                            CiEventType)
 from issue_processor.json_config import Config
+from shared.env import Env
 from shared.log import Log
 from shared.exception import *
 from shared.env import (should_run_in_github_action,
@@ -40,6 +44,10 @@ def get_test_platform_type_from_args(args: list[str]) -> str:
 
 
 def main(args: list[str]) -> None:
+    if os.environ[Env.CI_EVENT_TYPE] in CiEventType.manual:
+        print(Log.running_ci_by_manual)
+    else:
+        print(Log.running_ci_by_automated)
     config = Config(get_config_path_from_args(args))
     platform: Platform
 
@@ -95,20 +103,6 @@ def main(args: list[str]) -> None:
 
         archive_version: str = ""
         if platform.should_ci_running_in_manual:
-            temp = platform.get_archive_version(
-                config.white_list.comments
-            )
-            if not platform.should_archive_issue(
-                temp,
-                platform.get_labels(),
-                config.white_list.labels
-            ):
-                print(Log.not_archive_issue)
-                Exit()
-            archive_version = platform.parse_archive_version(
-                temp
-            )
-        else:
             # TODO 这里有待讨论
             # 需要根据讨论结果决定是否手动归档流程也进行“是否为归档issue”的判断
             if not platform.should_archived_version_input:
@@ -127,7 +121,20 @@ def main(args: list[str]) -> None:
                 )
             else:
                 archive_version = platform.archive_version
-
+        else:
+            temp = platform.get_archive_version(
+                config.white_list.comments
+            )
+            if not platform.should_archive_issue(
+                temp,
+                platform.get_labels(),
+                config.white_list.labels
+            ):
+                print(Log.not_archive_issue)
+                Exit()
+            archive_version = platform.parse_archive_version(
+                temp
+            )
 
         issue_type = platform.get_issue_type_from_labels(
             config.issue_type.label_map

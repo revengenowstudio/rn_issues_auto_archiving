@@ -458,10 +458,10 @@ class Github(Platform):
 
         else:
             self._issue = Issue(
-                id=int(os.environ.get(Env.ISSUE_NUMBER)),
-                title=os.environ.get[Env.ISSUE_TITLE],
+                id=int(os.environ[Env.ISSUE_NUMBER]),
+                title=os.environ[Env.ISSUE_TITLE],
                 state=parse_issue_state(os.environ[Env.ISSUE_STATE]),
-                body=os.environ.get[Env.ISSUE_BODY],
+                body=os.environ[Env.ISSUE_BODY],
                 labels=[],
                 introduced_version="",
                 archive_version=""
