@@ -19,7 +19,7 @@ on:
   workflow_dispatch:
     inputs:
       issue_number:
-        description: "需要关闭的issue的单号（仅数字），只允许输入一个单号,"
+        description: "需要关闭的issue的单号（仅数字），只允许输入一个单号"
         required: true
       issue_title:
         description: "issue标题,此值将成为对应单号的issue在归档文件中的描述，为空则自动获取issue标题"
@@ -56,7 +56,6 @@ jobs:
           pip install -r ./src/auto_archiving/requirements.txt
   
       - name: Processing issue content
-        if: ${{ github.event_name == 'issues' }}
         env:
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
