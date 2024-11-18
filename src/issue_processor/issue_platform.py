@@ -103,6 +103,10 @@ class Platform(ABC):
     @abstractmethod
     def get_issue_info_from_platform(self) -> Issue:
         pass
+    
+    @abstractmethod
+    def should_issue_state_open(self) -> bool:
+        pass
 
     @property
     @abstractmethod
@@ -509,6 +513,11 @@ class Github(Platform):
         return [Comment(author=comment["user"]["login"],
                         body=comment["body"])
                 for comment in raw_json]
+    
+    def should_issue_state_open(self) -> bool:
+        '''Github流水线的不会被issue reopen事件触发
+        所以在Github流水线中不考虑issue状态'''
+        return False
 
     def get_issue_info_from_platform(self) -> Issue:
         ''' 所需http header结构详见：
