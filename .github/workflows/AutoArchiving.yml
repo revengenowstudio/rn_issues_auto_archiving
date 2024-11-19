@@ -19,9 +19,7 @@ on:
   workflow_dispatch:
     inputs:
       issue_number:
-        description: |
-          Issue单号：仅正整数，只允许一个单号
-          描述：需要关闭的issue的单号（仅数字），只允许输入一个单号
+        description: "Issue单号：仅正整数，只允许一个单号\n\n描述：需要关闭的issue的单号（仅数字）"
         required: true
       issue_title:
         description: |
