@@ -3,7 +3,6 @@ import re
 import json
 from dataclasses import dataclass
 from abc import abstractmethod, ABC
-from distutils.util import strtobool
 
 import httpx
 
@@ -12,14 +11,9 @@ from shared.env import Env
 from shared.exception import *
 from shared.issue_info import IssueInfoJson
 from shared.issue_state import IssueState, parse_issue_state
+from shared.ci_event_type import CiEventType
 
-
-class CiEventType():
-    '''流水线触发类型 :\n
-    github:https://docs.github.com/zh/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#about-events-that-trigger-workflows
-    gitlab:https://docs.gitlab.com/ee/ci/jobs/job_rules.html#ci_pipeline_source-predefined-variable'''
-    manual = ["web", "workflow_dispatch"]
-    issue_event = ["trigger", "issues"]
+AUTO_ISSUE_TYPE = "自动判断"
 
 
 @dataclass()
@@ -49,6 +43,7 @@ class Issue():
     labels: list[str]
     introduced_version: str = ""
     archive_version: str = ""
+    issue_type: str = AUTO_ISSUE_TYPE
 
 
 @dataclass()
@@ -143,12 +138,20 @@ class Platform(ABC):
         return self._issue.introduced_version != ""
 
     @property
+    def should_issue_type_auto_detect(self) -> bool:
+        return self._issue.issue_type == AUTO_ISSUE_TYPE
+
+    @property
     def archived_version(self) -> str:
         return self._issue.archive_version
 
     @property
     def introduced_version(self) -> str:
         return self._issue.introduced_version
+
+    @property
+    def issue_type(self) -> str:
+        return self._issue.issue_type
 
     def __init__(self):
         self._token: str
@@ -263,19 +266,23 @@ class Platform(ABC):
         self,
         archive_version: list[str],
         issue_labels: list[str],
-        target_labels: list[str]
+        target_labels: list[str],
+        check_labels: bool = True,
+        check_archive_version: bool = True
     ) -> bool:
 
-        if should_not_match_archive_version := (
-                len(archive_version) == 0):
+        if (should_not_match_archive_version := (
+                len(archive_version) == 0)
+                and check_archive_version):
             print(Log.archive_version_not_found)
         else:
             print(Log.archive_version_found)
 
         # issue所挂标签必须匹配所有白名单标签
-        if should_label_not_in_target := (
+        if (should_label_not_in_target := (
                 set(issue_labels) & set(target_labels)
-                != set(target_labels)):
+                != set(target_labels))
+                and check_labels):
             print(Log.target_labels_not_found)
         else:
             print(Log.target_labels_found)
@@ -283,16 +290,21 @@ class Platform(ABC):
         # 未匹配到归档关键字应则不进行归档流程
         # 因为这有可能是用户自行关闭的issue或者无需归档的issue
 
-        if all([should_label_not_in_target, should_not_match_archive_version]):
+        if all([should_label_not_in_target,
+                should_not_match_archive_version,
+                check_labels,
+                check_archive_version]):
             return False
 
-        if should_label_not_in_target:
+        if (should_label_not_in_target
+                and check_labels):
             raise ArchiveLabelError(
                 ErrorMessage.missing_archive_labels
                 .format(labels=target_labels)
             )
 
-        if should_not_match_archive_version:
+        if (should_not_match_archive_version
+                and check_archive_version):
             raise ArchiveVersionError(
                 ErrorMessage.missing_archive_version
             )
@@ -380,6 +392,7 @@ class Platform(ABC):
             issue_state=self._issue.state,
             introduced_version=introduced_version,
             archive_version=archive_version,
+            ci_event_type=self._ci_event_type,
             reopen_info=IssueInfoJson.ReopenInfo(
                 http_header=self._http_header,
                 reopen_url=self._urls.issue_url,
@@ -443,14 +456,15 @@ class Github(Platform):
             self._issue = Issue(
                 id=Platform.issue_number_to_int(
                     os.environ[Env.MANUAL_ISSUE_NUMBER]),
-                title=os.environ[Env.MANUAL_ISSUE_TITLE],
+                title=os.environ[Env.MANUAL_ISSUE_TITLE].strip(),
                 state=parse_issue_state(os.environ[Env.MANUAL_ISSUE_STATE]),
                 body="",
                 labels=[],
                 introduced_version=os.environ[
-                    Env.INTRODUCED_VERSION],
+                    Env.INTRODUCED_VERSION].strip(),
                 archive_version=os.environ[
-                    Env.ARCHIVE_VERSION]
+                    Env.ARCHIVE_VERSION].strip(),
+                issue_type=os.environ[Env.ISSUE_TYPE],
             )
             self._urls = Urls(
                 os.environ[Env.MANUAL_ISSUE_URL],
@@ -465,7 +479,8 @@ class Github(Platform):
                 body=os.environ[Env.ISSUE_BODY],
                 labels=[],
                 introduced_version="",
-                archive_version=""
+                archive_version="",
+                issue_type=AUTO_ISSUE_TYPE
             )
             self._urls = Urls(
                 os.environ[Env.ISSUE_URL],
@@ -616,7 +631,8 @@ class Gitlab(Platform):
 
     def _read_platform_environments(self) -> None:
         print(Log.loading_something.format(something=Log.env))
-
+        
+        self._token = os.environ[Env.TOKEN]
         self._ci_event_type = os.environ[Env.CI_EVENT_TYPE]
         self._output_path = os.environ[Env.ISSUE_OUTPUT_PATH]
 
@@ -628,15 +644,16 @@ class Gitlab(Platform):
                     .format(issues_number_var=Env.ISSUE_NUMBER))
             self._issue = Issue(
                 id=Platform.issue_number_to_int(issue_id),
-                title=os.environ[Env.ISSUE_TITLE],
+                title=os.environ.get(Env.ISSUE_TITLE, "").strip(),
                 state=parse_issue_state(
-                    os.environ[Env.ISSUE_STATE]),
+                    os.environ.get(Env.ISSUE_STATE, "")),
                 body="",
                 labels=[],
-                introduced_version=os.environ[
-                    Env.INTRODUCED_VERSION],
-                archive_version=os.environ[
-                    Env.ARCHIVE_VERSION]
+                introduced_version=os.environ.get(
+                    Env.INTRODUCED_VERSION, "").strip(),
+                archive_version=os.environ.get(
+                    Env.ARCHIVE_VERSION, "").strip(),
+                issue_type=os.environ.get(Env.ISSUE_TYPE, "").strip(),
             )
             issue_url = f'{os.environ[Env.API_BASE_URL]}{Urls.ApiPath.issues}/{issue_id}'
             self._urls = Urls(
@@ -666,7 +683,8 @@ class Gitlab(Platform):
                     for label_json in
                     webhook_payload["object_attributes"]["labels"]],
                 introduced_version="",
-                archive_version=""
+                archive_version="",
+                issue_type=AUTO_ISSUE_TYPE
             )
 
             issue_url = f'{os.environ[Env.API_BASE_URL]}{Urls.ApiPath.issues}/{issue_id}'

@@ -18,6 +18,7 @@ class IssueInfoJson(TypedDict):
     '''值只可能为 open 或 closed'''
     introduced_version: str
     archive_version: str
+    ci_event_type: str
     reopen_info: ReopenInfo
     
     
@@ -46,10 +47,6 @@ class IssueInfo():
     '''值只可能为 open 或 closed'''
     introduced_version: str
     archive_version: str
+    ci_event_type:str
     reopen_info: ReopenInfo
-
-
-class ReopenIssueIssueInfoJson(TypedDict):
-    '''归档流程失败时触发的issue reopen流水线payload'''
-    reopen_issue_id: int
-    reason: str
+    

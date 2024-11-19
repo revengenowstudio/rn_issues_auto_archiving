@@ -4,7 +4,9 @@ from datetime import datetime, timedelta
 
 import httpx
 
-
+# 由于这个脚本专为gitlab使用
+# 且不属于归档流程范围内
+# 所以并没有将这里的log信息放到shared.log里
 class Log():
     token_not_found = '''token为空或者不存在'''
     rotate_token = '''正在轮换token'''

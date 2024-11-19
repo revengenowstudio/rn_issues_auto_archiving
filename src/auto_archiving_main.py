@@ -11,11 +11,13 @@ from shared.exception import ErrorMessage, IssueInfoMissing
 from shared.env import Env, should_run_in_github_action
 from shared.log import Log
 from shared.issue_info import (IssueInfo, IssueInfoJson)
-from auto_archiving.failed_record import FailedRecord
+from shared.ci_event_type import CiEventType
+# from auto_archiving.failed_record import FailedRecord
 from auto_archiving.archive_document import ArchiveDocument
 from auto_archiving.json_config import Config
 from auto_archiving.send_comment import send_comment
 from auto_archiving.reopen_issue import reopen_issue
+
 
 sys.path.append(os.getcwd())
 
@@ -48,15 +50,15 @@ def main(args: list[str]):
     start_time = time.time()
     if not should_run_in_github_action():
         load_local_env()
-    
+
     # 因为暂时用不到，禁用 failed_record 本机记录功能
     # failed_record = FailedRecord(get_failed_record_path_from_args(args))
     output_path = os.environ[Env.ISSUE_OUTPUT_PATH]
     issue_repository = os.environ[Env.ISSUE_REPOSITORY]
     comment_message: str = Log.uninitialized_message
     enable_send_comment = True
-    issue_info_json : IssueInfoJson
-    try: 
+    issue_info_json: IssueInfoJson
+    try:
         issue_info_json = json.loads(
             Path(output_path
                  ).read_text(encoding="utf-8")
@@ -67,7 +69,7 @@ def main(args: list[str]):
                   indent=4,
                   ensure_ascii=False
               )))
-    except FileNotFoundError :
+    except FileNotFoundError:
         print(Log.issue_output_not_found)
         return
     try:
@@ -77,7 +79,7 @@ def main(args: list[str]):
             ),
             **issue_info_json
         )
-    
+
         config = Config(get_config_path_from_args(args))
 
         archive_document = ArchiveDocument(
@@ -91,10 +93,12 @@ def main(args: list[str]):
         #     ):
         #         failed_record.remove_record(issue_id)
 
-        if archive_document.should_issue_archived(
-            issue_info.issue_id,
-            issue_repository
-        ):
+        if (issue_info.ci_event_type in CiEventType.issue_event
+                and archive_document.should_issue_archived(
+                    issue_info.issue_id,
+                    issue_repository
+                )
+            ):
             message = (Log.issue_already_archived
                        .format(issue_id=issue_info.issue_id,
                                issue_repository=issue_repository))
@@ -113,19 +117,16 @@ def main(args: list[str]):
             issue_title=issue_info.issue_title,
             issue_repository=issue_repository,
             introduced_version=issue_info.introduced_version,
-            archive_version=issue_info.archive_version
+            archive_version=issue_info.archive_version,
+            replace_mode=(
+                issue_info.ci_event_type in CiEventType.manual
+            )
         )
 
         comment_message = Log.issue_archived_success.format(
             issue_id=issue_info.issue_id,
             issue_repository=issue_repository
         )
-
-        print(Log.time_used.format(
-            time="{:.4f}".format(
-                time.time() - start_time)
-        ))
-        print(Log.job_down)
 
     except Exception as exc:
         exceptions = [exc]
@@ -181,8 +182,8 @@ def main(args: list[str]):
             except Exception as exc_:
                 exceptions.append(exc_)
                 print(ErrorMessage.send_comment_failed
-                    .format(exc=str(exc_)
-                            ))
+                      .format(exc=str(exc_)
+                              ))
         try:
             archive_document.save()
             archive_document.close()
@@ -190,6 +191,11 @@ def main(args: list[str]):
             pass
         # 因为暂时用不到，禁用 failed_record 本机记录功能
         # failed_record.save()
+        print(Log.time_used.format(
+            time="{:.4f}".format(
+                time.time() - start_time)
+        ))
+        print(Log.job_down)
 
 
 if __name__ == "__main__":

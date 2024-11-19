@@ -77,6 +77,10 @@ class Log():
     issue_id_not_found_in_archive_record = "找不到issue_id为 {issue_id} 的归档记录"
     unexpected_archive_number = '''匹配到无法使用的非整数的归档序号字符串，将使用归档序号默认值 {default_number} 进行归档。匹配到移仓归档序号的行内容为： {line}'''
     got_archive_number = '''成功匹配到归档序号字符串，归档序号为 {archive_number}'''
+    enable_replace_mode = '''检测到本次归档流水线是手动触发的，启用归档内容替换模式'''
+    replace_old_issue_record = '''正在替换 "{issue_repository}#{issue_id}" 旧归档记录'''
+    replaced_line_index = '''替换的行号为 {line_index}'''
+    add_new_line = '''正在添加新行'''
     job_down = '''归档任务执行完毕'''
     
     format_issue_content_success = '''格式化Issue内容成功'''

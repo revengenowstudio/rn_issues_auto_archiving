@@ -4,7 +4,8 @@ import sys
 from issue_processor.issue_platform import (Platform,
                                             Github,
                                             Gitlab,
-                                            CiEventType)
+                                            )
+from shared.ci_event_type import CiEventType
 from issue_processor.json_config import Config
 from shared.env import Env
 from shared.log import Log
@@ -89,9 +90,14 @@ def main(args: list[str]) -> None:
 
         platform.init_issue_info_from_platform()
 
-        issue_type = platform.get_issue_type_from_labels(
-            config.issue_type.label_map
-        )
+        issue_type: str = ""
+        if platform.should_issue_type_auto_detect:
+            issue_type = platform.get_issue_type_from_labels(
+                config.issue_type.label_map
+            )
+        else:
+            issue_type = platform.issue_type
+            
 
         # 自动触发流水线必须从描述中获取引入版本号
         # 手动触发流水线如果没有填引入版本号，
@@ -107,25 +113,27 @@ def main(args: list[str]) -> None:
             introduced_version = platform.introduced_version
 
         archive_version: str = ""
+        # 手动流水线的情况
         if platform.should_ci_running_in_manual:
-            # TODO 这里有待讨论
-            # 需要根据讨论结果决定是否手动归档流程也进行“是否为归档issue”的判断
             if not platform.should_archived_version_input:
                 temp = platform.get_archive_version(
                     config.white_list.comments
                 )
-                # if not platform.should_archive_issue(
-                #     temp,
-                #     platform.get_labels(),
-                #     config.white_list.labels
-                # ):
-                #     print(Log.not_archive_issue)
-                #     Exit()
+                if not platform.should_archive_issue(
+                    temp,
+                    platform.get_labels(),
+                    config.white_list.labels
+                ):
+                    raise MissingArchiveVersionAndArchiveLabel(
+                        ErrorMessage.missing_labels_and_archive_version
+                    )
                 archive_version = platform.parse_archive_version(
                     temp
                 )
             else:
                 archive_version = platform.archive_version
+        # 自动流水线要判断是否是非归档issue被正常关闭了
+        # 例如格式错误的issue被创建者手动关闭了
         else:
             temp = platform.get_archive_version(
                 config.white_list.comments

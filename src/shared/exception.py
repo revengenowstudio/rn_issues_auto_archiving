@@ -26,6 +26,8 @@ class ErrorMessage():
     missing_issue_type_from_label = '''Issue标签中找不到Issue类型标签，请给Issue打上Issue类型标签。补全必要信息后请再次关闭Issue重新触发归档流程。
     可匹配的Issue类型标签有：{issue_type}
     '''
+    missing_labels_and_archive_version = '''手动归档流水线试图归档此Issue，但并未手动填写归档版本号且未在Issue信息中获取到有效的归档版本号和归档所需标签，请重新执行手动归档流水线并输入归档版本号且为此Issue打上Issue归档所需标签。
+    '''
 
     unknown_action_name = '''未知的action类型：{action_name}，无法找到与之对应的issue仓库类型
     '''
@@ -73,6 +75,9 @@ class InBlackList(ArchiveBaseError):
     '''匹配到无法继续执行归档任务的黑名单内容'''
     pass
 
+class MissingArchiveVersionAndArchiveLabel(ArchiveBaseError):
+    '''Issue Archive Version和关键的归档标签都缺失'''
+    pass
 
 class WebhookPayloadError(Exception):
     '''webhook payload为空'''
