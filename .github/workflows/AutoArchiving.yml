@@ -19,20 +19,39 @@ on:
   workflow_dispatch:
     inputs:
       issue_number:
-        description: "需要关闭的issue的单号（仅数字），只允许输入一个单号"
+        description: |
+          Issue单号：仅正整数，只允许一个单号
+          描述：需要关闭的issue的单号（仅数字），只允许输入一个单号
         required: true
       issue_title:
-        description: "issue标题,此值将成为对应单号的issue在归档文件中的描述，为空则自动获取issue标题"
+        description: |
+          Issue标题：字符串
+          描述：Issue归档所需内容，此值将成为对应单号的Issue在归档文件中的描述，若为空则自动从Issue标题中获取
         required: false
         default: ""
       introduced_version:
-        description: "引入版本号，为空则自动从对应的issue描述中获取引入版本号"
+        description: |
+          引入版本号：字符串
+          描述：Issue归档所需内容，此值为空则自动从对应的Issue描述中获取引入版本号
         required: false
         default: ""
       archive_version:
-        description: "归档版本号，为空则自动从对应的issue评论中获取归档版本号"
+        description: |
+          归档版本号：字符串
+          描述：Issue归档所需内容，此值为空则自动从对应的Issue评论中获取归档版本号
         required: false
         default: ""
+      issue_type:
+        description: |
+          归档版本号：字符串
+          描述：Issue归档所需内容，此值为空则自动从对应的Issue评论中获取归档版本号
+        required: false
+        default: ""
+        type: choice
+        options: 
+          - Bug修复
+          - 设定引入
+          - 设定调整
 
 env:
   ISSUE_OUTPUT_PATH: "./output.json"
