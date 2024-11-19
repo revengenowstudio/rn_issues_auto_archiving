@@ -19,32 +19,22 @@ on:
   workflow_dispatch:
     inputs:
       issue_number:
-        description: |
-          Issue单号：仅正整数，只允许一个单号
-          描述：需要关闭的issue的单号，必填
+        description: Issue单号
         required: true
       issue_title:
-        description: |
-          Issue标题：字符串
-          描述：此值将成为对应单号的Issue在归档文件中的描述，若为空则自动从Issue标题中获取
+        description: Issue标题
         required: false
         default: ""
       introduced_version:
-        description: |
-          引入版本号：字符串
-          描述：此值将成为对应单号的Issue在归档文件中的引入版本号，此值为空则自动从对应的Issue描述中获取引入版本号
+        description: 引入版本号
         required: false
         default: ""
       archive_version:
-        description: |
-          归档版本号：字符串
-          描述：此值将成为对应单号的Issue在归档文件中的归档版本号，此值为空则自动从对应的Issue评论中获取归档版本号
+        description: 归档版本号
         required: false
         default: ""
       issue_type:
-        description: |
-          归档版本号：枚举选项
-          描述：此值将成为对应单号的Issue在归档文件中的Issue类型，选择"自动判断"在自动从对应的Issue标签中获取Issue类型
+        description: 归档版本号
         required: false
         default: "自动判断"
         type: choice
@@ -89,7 +79,7 @@ jobs:
           MANUAL_ISSUE_STATE: "closed"
           ARCHIVE_VERSION: ${{ github.event.inputs.archive_version }}
           INTRODUCED_VERSION: ${{ github.event.inputs.introduced_version }}
-          MANUAL_ISSUE_TYPE: ${{ github.event.inputs.issue_type }}
+          ISSUE_TYPE: ${{ github.event.inputs.issue_type }}
           MANUAL_ISSUE_URL: "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.inputs.issue_number }}"
           MANUAL_COMMENTS_URL: "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.inputs.issue_number }}/comments"
         run: |
