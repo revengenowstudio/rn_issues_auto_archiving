@@ -34,7 +34,7 @@ on:
         required: false
         default: ""
       issue_type:
-        description: 归档版本号：
+        description: Issue类型：
         required: false
         default: "自动判断"
         type: choice
