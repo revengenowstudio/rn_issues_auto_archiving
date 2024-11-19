@@ -7,19 +7,12 @@ from pathlib import Path
 import httpx
 
 from shared.env import Env
+from shared.log import Log
 from shared.exception import ErrorMessage
 from auto_archiving.send_comment import send_comment
 from auto_archiving.reopen_issue import reopen_issue
 from issue_processor.issue_platform import Gitlab
 from shared.issue_info import IssueInfoJson
-
-
-class Log():
-    pushing_document = '''正在提交归档文档'''
-    pushing_document_success = '''提交归档文档成功'''
-    push_document_failed = '''提交归档文档失败，错误信息：{exc}'''
-    issue_state_is_open = '''Issue状态为“Open”，不执行归档文件推送流程'''
-    document_not_found = '''未找到归档文档，跳过推送流程'''
 
 
 def get_issue_id_from_webhook(webhook_path: str) -> int:
@@ -71,7 +64,7 @@ def main():
     try:
         issue_info_json: IssueInfoJson = json.loads(
             Path(os.environ[Env.ISSUE_OUTPUT_PATH]
-                ).read_text(encoding="utf-8")
+                 ).read_text(encoding="utf-8")
         )
     except FileNotFoundError:
         print(Log.document_not_found)

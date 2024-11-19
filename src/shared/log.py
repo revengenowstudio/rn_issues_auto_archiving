@@ -85,3 +85,10 @@ class Log():
     read_failed_recording_success = '''成功读取归档失败记录：{failed_record_path}'''
     remove_failed_record_item_success = '''成功移除归档失败记录条目：{record}'''
     issue_archived_success = '''{issue_repository}#{issue_id} 自动归档成功'''
+
+    # push_document
+    pushing_document = '''正在提交归档文档'''
+    pushing_document_success = '''提交归档文档成功'''
+    push_document_failed = '''提交归档文档失败，错误信息：{exc}'''
+    issue_state_is_open = '''Issue状态为“Open”，不执行归档文件推送流程'''
+    document_not_found = '''未找到归档文档，跳过推送流程'''
