@@ -1,7 +1,7 @@
 import os
 import re
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass,asdict
 from abc import abstractmethod, ABC
 
 import httpx
@@ -466,6 +466,12 @@ class Github(Platform):
                     Env.ARCHIVE_VERSION].strip(),
                 issue_type=os.environ[Env.ISSUE_TYPE],
             )
+            print(Log.print_input_variables
+                  .format(input_variables=json.dumps(
+                      asdict(self._issue),
+                      ensure_ascii=False,
+                      indent=4
+                  )))
             self._urls = Urls(
                 os.environ[Env.MANUAL_ISSUE_URL],
                 os.environ[Env.MANUAL_COMMENTS_URL],
@@ -656,6 +662,12 @@ class Gitlab(Platform):
                 issue_type=os.environ.get(Env.ISSUE_TYPE,
                                           AUTO_ISSUE_TYPE).strip(),
             )
+            print(Log.print_input_variables
+                  .format(input_variables=json.dumps(
+                      asdict(self._issue),
+                      ensure_ascii=False,
+                      indent=4
+                  )))
             issue_url = f'{os.environ[Env.API_BASE_URL]}{Urls.ApiPath.issues}/{issue_id}'
             self._urls = Urls(
                 issue_url=issue_url,

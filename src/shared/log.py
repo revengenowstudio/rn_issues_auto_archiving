@@ -31,6 +31,7 @@ class Log():
     too_many_archive_version = '''匹配到多个归档关键字/归档版本号'''
     issue_type_not_found = '''未在Issue标题中找到Issue类型关键字'''
     not_archive_issue = '''未满足归档Issue条件，不对此Issue进行归档处理'''
+    print_input_variables = '''打印输入信息 ： {input_variables}'''
     print_issue_json = '''打印issue_json内容 ： 
     {issue_json}'''
     issue_state_is_open = '''Issue状态为“Open”，此issue不是归档对象'''
