@@ -646,7 +646,7 @@ class Gitlab(Platform):
                 id=Platform.issue_number_to_int(issue_id),
                 title=os.environ.get(Env.ISSUE_TITLE, "").strip(),
                 state=parse_issue_state(
-                    os.environ.get(Env.ISSUE_STATE, "")),
+                    os.environ[Env.ISSUE_STATE]),
                 body="",
                 labels=[],
                 introduced_version=os.environ.get(

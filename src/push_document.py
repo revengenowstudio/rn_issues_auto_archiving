@@ -3,6 +3,7 @@
 import os
 import json
 from pathlib import Path
+import hashlib
 
 import httpx
 
@@ -20,6 +21,50 @@ def get_issue_id_from_webhook(webhook_path: str) -> int:
         Path(webhook_path).read_text(encoding="utf-8")
     )
     return payload["object_attributes"]["iid"]
+
+
+def should_no_change(
+    local_sha256: str,
+    remote_sha256: str,
+) -> bool:
+    return local_sha256 == remote_sha256
+
+
+def get_file_sha256(
+    file_path: str
+) -> str:
+    print(Log.get_local_file_sha256
+          .format(file_path=file_path))
+    result = hashlib.sha256(
+        Path(file_path).read_bytes()
+    ).hexdigest()
+    print(Log.get_local_file_sha256_success
+          .format(file_path=file_path, sha256=result),
+          )
+    return result
+
+
+def get_remote_file_sha256(
+    http_header: dict[str, str],
+    gitlab_host: str,
+    project_id: int,
+    file_path: str,
+    branch_name: str
+) -> str:
+    '''获取某仓库某分支下某文件的元数据：
+    https://docs.gitlab.com/ee/api/repository_files.html#get-file-metadata-only'''
+    print(Log.get_remote_file_sha256
+          .format(file_path=file_path))
+    response = httpx.head(
+        headers=http_header,
+        url=f'https://{gitlab_host}/api/v4/projects/{project_id}/repository/files/{file_path}?ref={branch_name}'
+    )
+    response.raise_for_status()
+    result = response.headers.get("X-Gitlab-Content-Sha256")
+    print(Log.get_remote_file_sha256_success
+          .format(file_path=file_path,
+                  sha256=result))
+    return result
 
 
 def push_document(
@@ -74,6 +119,22 @@ def main():
         if issue_info_json["issue_state"] == "open":
             print(Log.issue_state_is_open)
             return
+
+        local_sha256 = get_file_sha256(
+            archived_document_path
+        )
+        remote_sha256 = get_remote_file_sha256(
+            http_header,
+            gitlab_host,
+            project_id,
+            archived_document_path,
+            os.environ["branch"]
+        )
+        if should_no_change(local_sha256, remote_sha256):
+            print(Log.not_need_to_push_document)
+            return
+        else:
+            print(Log.need_to_push_document)
 
         push_document(
             http_header,
