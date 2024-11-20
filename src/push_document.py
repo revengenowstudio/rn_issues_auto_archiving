@@ -16,11 +16,11 @@ from issue_processor.issue_platform import Gitlab
 from shared.issue_info import IssueInfoJson
 
 
-def get_issue_id_from_webhook(webhook_path: str) -> int:
-    payload: dict[str, dict] = json.loads(
+def get_issue_id_from_issue_info(webhook_path: str) -> int:
+    payload: IssueInfoJson = json.loads(
         Path(webhook_path).read_text(encoding="utf-8")
     )
-    return payload["object_attributes"]["iid"]
+    return payload["issue_id"]
 
 
 def should_no_change(
@@ -107,8 +107,8 @@ def push_document(
 
 def main():
     archived_document_path = os.environ[Env.ARCHIVED_DOCUMENT_PATH]
-    issue_id = get_issue_id_from_webhook(
-        os.environ[Env.WEBHOOK_OUTPUT_PATH])
+    issue_id = get_issue_id_from_issue_info(
+        os.environ[Env.ISSUE_OUTPUT_PATH])
     gitlab_host = os.environ[Env.GITLAB_HOST]
     project_id = int(os.environ[Env.PROJECT_ID])
     token = os.environ[Env.TOKEN]
