@@ -631,7 +631,7 @@ class Gitlab(Platform):
 
     def _read_platform_environments(self) -> None:
         print(Log.loading_something.format(something=Log.env))
-        
+
         self._token = os.environ[Env.TOKEN]
         self._ci_event_type = os.environ[Env.CI_EVENT_TYPE]
         self._output_path = os.environ[Env.ISSUE_OUTPUT_PATH]
@@ -653,7 +653,8 @@ class Gitlab(Platform):
                     Env.INTRODUCED_VERSION, "").strip(),
                 archive_version=os.environ.get(
                     Env.ARCHIVE_VERSION, "").strip(),
-                issue_type=os.environ.get(Env.ISSUE_TYPE, "").strip(),
+                issue_type=os.environ.get(Env.ISSUE_TYPE,
+                                          AUTO_ISSUE_TYPE).strip(),
             )
             issue_url = f'{os.environ[Env.API_BASE_URL]}{Urls.ApiPath.issues}/{issue_id}'
             self._urls = Urls(
