@@ -1,7 +1,7 @@
 import os
 import re
 import json
-from dataclasses import dataclass,asdict
+from dataclasses import dataclass, asdict
 from abc import abstractmethod, ABC
 
 import httpx
@@ -527,14 +527,26 @@ class Github(Platform):
         ''' api结构详见：
         https://docs.github.com/zh/rest/issues/comments?apiVersion=2022-11-28#create-an-issue-comment'''
         print(Log.getting_something.format(something=Log.issue_comment))
-        response = http.get(url=url)
-        response.raise_for_status()
+        comments: list[Comment] = []
+        page = 1
+        while True:
+            response = http.get(
+                url=url,
+                params={"page": page}
+            )
+            response.raise_for_status()
+            raw_json: list[dict[str, str]] = response.json()
+            if len(raw_json) == 0:
+                break
+            comments.extend(
+                [Comment(author=comment["user"]["login"],
+                         body=comment["body"])
+                 for comment in raw_json])
+            page += 1
+
         print(Log.getting_something_success.
               format(something=Log.issue_comment))
-        raw_json: list[dict[str, str]] = response.json()
-        return [Comment(author=comment["user"]["login"],
-                        body=comment["body"])
-                for comment in raw_json]
+        return comments
 
     def should_issue_state_open(self) -> bool:
         '''Github流水线的不会被issue reopen事件触发
@@ -726,16 +738,30 @@ class Gitlab(Platform):
         url: str,
     ) -> list[Comment]:
         ''' api结构详见：
-        https://docs.gitlab.com/ee/api/notes.html#list-project-issue-notes'''
+        https://docs.gitlab.com/ee/api/notes.html#list-project-issue-notes\n
+        page参数：
+        https://docs.gitlab.com/ee/api/rest/index.html#pagination
+        '''
         print(Log.getting_something.format(something=Log.issue_comment))
-        response = http.get(url=url)
-        response.raise_for_status()
+        comments: list[Comment] = []
+        page = 1
+        while True:
+            response = http.get(
+                url=url,
+                params={"page": page}
+            )
+            response.raise_for_status()
+            raw_json: list[dict[str, str]] = response.json()
+            if len(raw_json) == 0:
+                break
+            comments.extend(
+                [Comment(author=comment["author"]["username"],
+                         body=comment["body"])
+                 for comment in raw_json])
+            page += 1
         print(Log.getting_something_success.
               format(something=Log.issue_comment))
-        raw_json: list[dict[str, str]] = response.json()
-        return [Comment(author=comment["author"]["username"],
-                        body=comment["body"])
-                for comment in raw_json]
+        return comments
 
     def get_issue_info_from_platform(self) -> Issue:
         ''' 所需http header结构详见：

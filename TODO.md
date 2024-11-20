@@ -24,3 +24,5 @@
 - [ ] 手动归档如果查到目标issue单号已经归档过，有填其他参数则将参数覆盖进旧归档内容，没有填写的其他参数则直接使用issue信息，已完成编写，gitlab侧待测试，github测待测试
 
 - [x] 手动归档也判断label标签
+
+- [x] comment超过20个可能判断不到归档comment，需要把全部comment都request出来
