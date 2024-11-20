@@ -1,6 +1,7 @@
 import httpx
 
 from shared.log import Log
+from auto_archiving.http_request import http_request
 
 
 def send_comment(
@@ -17,15 +18,14 @@ def send_comment(
           .format(
               something=Log.issue_comment
           ))
-    response = httpx.request(
+    http_request(
         method="POST",
         url=comment_url,
         headers=http_header,
         json={
             "body": message
-        }
+        },
     )
-    response.raise_for_status()
     print(Log.sending_something_success
           .format(
               something=Log.issue_comment

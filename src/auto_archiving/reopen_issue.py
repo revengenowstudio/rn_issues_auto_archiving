@@ -1,6 +1,7 @@
 import httpx
 
 from shared.log import Log
+from auto_archiving.http_request import http_request
 
 
 def reopen_issue(
@@ -12,11 +13,10 @@ def reopen_issue(
     '''api结构详见：
         https://docs.gitlab.com/ee/api/issues.html#edit-an-issue'''
     print(Log.reopen_issue_request)
-    response = httpx.request(
+    http_request(
         method=reopen_http_method,
         url=reopen_url,
         headers=http_header,
         json=reopen_body
     )
-    response.raise_for_status()
     print(Log.reopen_issue_request_success)

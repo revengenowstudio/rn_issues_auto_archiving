@@ -12,6 +12,7 @@ from shared.log import Log
 from shared.exception import ErrorMessage
 from auto_archiving.send_comment import send_comment
 from auto_archiving.reopen_issue import reopen_issue
+from auto_archiving.http_request import http_request
 from issue_processor.issue_platform import Gitlab
 from shared.issue_info import IssueInfoJson
 
@@ -42,7 +43,7 @@ def get_file_sha256(
     result = hashlib.sha256(
         string=Path(file_path).read_text(
             encoding="utf-8"
-            ).encode("utf-8"),
+        ).encode("utf-8"),
         usedforsecurity=True
     ).hexdigest()
     print(Log.get_local_file_sha256_success
@@ -62,11 +63,12 @@ def get_remote_file_sha256(
     https://docs.gitlab.com/ee/api/repository_files.html#get-file-metadata-only'''
     print(Log.get_remote_file_sha256
           .format(file_path=file_path))
-    response = httpx.head(
-        headers=http_header,
-        url=f'https://{gitlab_host}/api/v4/projects/{project_id}/repository/files/{file_path}?ref={branch_name}'
+
+    response: httpx.Response = http_request(
+        method="HEAD",
+        url=f'https://{gitlab_host}/api/v4/projects/{project_id}/repository/files/{file_path}?ref={branch_name}',
+        headers=http_header
     )
-    response.raise_for_status()
     result = response.headers.get("X-Gitlab-Content-Sha256")
     print(Log.get_remote_file_sha256_success
           .format(file_path=file_path,
@@ -89,8 +91,8 @@ def push_document(
     https://docs.gitlab.com/ee/api/repository_files.html#update-existing-file-in-repository 
     '''
     print(Log.pushing_document)
-    response = httpx.put(
-        headers=http_header,
+    http_request(
+        method="PUT",
         url=f'https://{gitlab_host}/api/v4/projects/{project_id}/repository/files/{file_path}',
         json={
             "branch": branch_name,
@@ -100,8 +102,6 @@ def push_document(
             "commit_message": commit_message
         }
     )
-    response.raise_for_status()
-
     print(Log.pushing_document_success)
 
 

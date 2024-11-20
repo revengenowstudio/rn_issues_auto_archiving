@@ -58,6 +58,7 @@ def main(args: list[str]):
     comment_message: str = Log.uninitialized_message
     enable_send_comment = True
     issue_info_json: IssueInfoJson
+    exceptions = []
     try:
         issue_info_json = json.loads(
             Path(output_path
@@ -127,9 +128,8 @@ def main(args: list[str]):
             issue_id=issue_info.issue_id,
             issue_repository=issue_repository
         )
-
     except Exception as exc:
-        exceptions = [exc]
+        exceptions.append(exc)
         comment_message = ErrorMessage.archiving_failed.format(
             exc=str(exc)
         )

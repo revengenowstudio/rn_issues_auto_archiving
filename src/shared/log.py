@@ -44,6 +44,7 @@ class Log():
     invalid_issue_number = '''"{issues_number_var}"的值不能转换成整数，请检查输入参数是否正确'''
     running_ci_by_manual = '''流水线触发触发方式：手动'''
     running_ci_by_automated = '''流水线触发触发方式：自动'''
+    http_404_not_found = '''无法请求到对应资源，请检查输入的Issue单号是否正确'''
     job_done = '''脚本执行完毕'''
     
     getting_something_success = '''获取 {something} 成功'''

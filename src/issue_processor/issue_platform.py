@@ -3,6 +3,7 @@ import re
 import json
 from dataclasses import dataclass, asdict
 from abc import abstractmethod, ABC
+from http import HTTPStatus
 
 import httpx
 
@@ -163,6 +164,34 @@ class Platform(ABC):
         self._http_client: httpx.Client
         self._ci_event_type: str
 
+    def http_request(
+        self,
+        url: str,
+        method: str = "GET",
+        params: dict[str, str] = None,
+        json: dict[str, str] = None,
+        retry_times: int = 3,
+    ) -> httpx.Response:
+        error = None
+        for _ in range(retry_times):
+            try:
+                response = self._http_client.request(
+                    method=method,
+                    url=url,
+                    params=params,
+                    json=json,
+                    follow_redirects=True,
+                )
+                if response.status_code == HTTPStatus.NOT_FOUND:
+                    print(Log.http_404_not_found)
+                response.raise_for_status()
+                return response
+            except httpx.HTTPStatusError:
+                raise
+            except Exception as e:
+                error = e
+        raise error
+
     def init_issue_info_from_platform(
         self
     ) -> None:
@@ -252,13 +281,13 @@ class Platform(ABC):
         '''
         print(Log.sending_something.format(
             something=Log.announcement_comment))
-        response = self._http_client.post(
+        self.http_request(
+            method="POST",
             url=self._urls.comments_url,
             json={
                 "body": comment_body
             }
         )
-        response.raise_for_status()
         print(Log.sending_something_success
               .format(something=Log.announcement_comment))
 
@@ -501,8 +530,10 @@ class Github(Platform):
         https://docs.github.com/zh/rest/issues/issues?apiVersion=2022-11-28#get-an-issue'''
         print(Log.getting_something.
               format(something=Log.issue_label))
-        response = self._http_client.get(url=self._urls.issue_url)
-        response.raise_for_status()
+        response = self.http_request(
+            url=self._urls.issue_url,
+            method="GET"
+        )
         print(Log.getting_something_success.
               format(something=Log.issue_label))
         return [label["name"]
@@ -530,11 +561,10 @@ class Github(Platform):
         comments: list[Comment] = []
         page = 1
         while True:
-            response = http.get(
+            response: httpx.Response = self.http_request(
                 url=url,
                 params={"page": page}
             )
-            response.raise_for_status()
             raw_json: list[dict[str, str]] = response.json()
             if len(raw_json) == 0:
                 break
@@ -557,8 +587,10 @@ class Github(Platform):
         ''' 所需http header结构详见：
         https://docs.github.com/zh/rest/issues/issues?apiVersion=2022-11-28#get-an-issue'''
         print(Log.getting_issue_info)
-        response = self._http_client.get(url=self._urls.issue_url)
-        response.raise_for_status()
+        response = self.http_request(
+            url=self._urls.issue_url,
+            method="GET"
+        )
         print(Log.getting_issue_info_success)
         raw_json = response.json()
         return Issue(
@@ -576,12 +608,11 @@ class Github(Platform):
         url = self._urls.issue_url
         print(Log.reopen_issue
               .format(issue_number=self._issue.id))
-        response = self._http_client.request(
+        self.http_request(
             method=self.reopen_issue_method,
             url=url,
             json=self.reopen_issue_body
         )
-        response.raise_for_status()
         print(Log.reopen_issue_success
               .format(issue_number=self._issue.id)
               )
@@ -746,11 +777,10 @@ class Gitlab(Platform):
         comments: list[Comment] = []
         page = 1
         while True:
-            response = http.get(
+            response: httpx.Response = self.http_request(
                 url=url,
                 params={"page": page}
             )
-            response.raise_for_status()
             raw_json: list[dict[str, str]] = response.json()
             if len(raw_json) == 0:
                 break
@@ -767,8 +797,10 @@ class Gitlab(Platform):
         ''' 所需http header结构详见：
         https://docs.gitlab.com/ee/api/issues.html#single-issue'''
         print(Log.getting_issue_info)
-        response = self._http_client.get(url=self._urls.issue_url)
-        response.raise_for_status()
+        response = self.http_request(
+            method="GET",
+            url=self._urls.issue_url
+        )
         print(Log.getting_issue_info_success)
         raw_json = response.json()
         return Issue(
@@ -790,12 +822,11 @@ class Gitlab(Platform):
         url = self._urls.issue_url
         print(Log.reopen_issue
               .format(issue_number=self._issue.id))
-        response = self._http_client.request(
+        self.http_request(
             method=self.reopen_issue_method,
             url=url,
             json=self.reopen_issue_body
         )
-        response.raise_for_status()
         print(Log.reopen_issue_success
               .format(issue_number=self._issue.id)
               )
