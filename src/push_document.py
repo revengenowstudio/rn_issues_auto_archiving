@@ -35,8 +35,15 @@ def get_file_sha256(
 ) -> str:
     print(Log.get_local_file_sha256
           .format(file_path=file_path))
+    # 不能直接把read_bytes的内容去计算sha256
+    # 即使两边内容一样，read_bytes算出来的sha256与
+    # 远端文件的sha256值还是不一致的
+    # 用utf-8编码读取再用utf-8去解码就能和远端文件sha256值一致
     result = hashlib.sha256(
-        Path(file_path).read_bytes()
+        string=Path(file_path).read_text(
+            encoding="utf-8"
+            ).encode("utf-8"),
+        usedforsecurity=True
     ).hexdigest()
     print(Log.get_local_file_sha256_success
           .format(file_path=file_path, sha256=result),
@@ -131,10 +138,12 @@ def main():
             os.environ["branch"]
         )
         if should_no_change(local_sha256, remote_sha256):
-            print(Log.not_need_to_push_document)
+            print(Log.not_need_to_push_document
+                  .format(file_path=archived_document_path))
             return
         else:
-            print(Log.need_to_push_document)
+            print(Log.need_to_push_document
+                  .format(file_path=archived_document_path))
 
         push_document(
             http_header,
