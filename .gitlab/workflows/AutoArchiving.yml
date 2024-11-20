@@ -22,12 +22,24 @@ variables:
 
 auto_archiving:
   stage: auto_archiving
-  only:
-    - manual
-    - triggers
-  except:
-    - pushes
-    - merge_requests
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "trigger" 
+      when: always
+    - if: $CI_PIPELINE_SOURCE == "web"
+      when: always
+    - if: $CI_PIPELINE_SOURCE == "push"
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: never
+    # - when: manual
+    # - when: triggers
+  # when:
+  #   - manual
+  # only:
+  #   - triggers
+  # except:
+  #   - pushes
+  #   - merge_requests
 
   image: m.daocloud.io/docker.io/library/python:3.10.13-slim-bullseye
   resource_group: auto_archiving_group
@@ -54,13 +66,22 @@ push_archived_issues:
   needs:
     - job: auto_archiving
       artifacts: true
-  only:
-    - manual
-    - trigger
-  except:
-    - pushes
-    - merge_requests
-  when: on_success
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "trigger" 
+      when: always
+    - if: $CI_PIPELINE_SOURCE == "web"
+      when: always
+    - if: $CI_PIPELINE_SOURCE == "push"
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: never
+  # only:
+  #   - manual
+  #   - trigger
+  # except:
+  #   - pushes
+  #   - merge_requests
+  # when: on_success
   script: |
     pip install -r ./src/issue_processor/requirements.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
     export branch=main
