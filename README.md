@@ -1,7 +1,7 @@
 # 复仇时刻自动归档流水线
 
 - 归档流水线将自动处理Issue关闭事件，并将被关闭的Issue信息格式化后写入归档文件后提交至仓库中。
-- 归档流水线可以手动触发，若要手动触发归档流水线请参考下文[手动流水线相关变量](./README.md#手动流水线相关变量)
+- 归档流水线可以手动触发，若要手动触发归档流水线请参考下文[手动流水线相关变量](#手动流水线相关变量)
 
 - 系统架构图：
 
@@ -59,7 +59,7 @@
 - Python脚本全部位于`./src/`目录下
 - Github流水线脚本全部位于`./.github/workflows/`目录下，配置文件则在`./.github/configs/`
 - Gitlab流水线脚本全部位于`./gitlab-ci.yml`，配置文件则在`./.gitlab/configs/`
-- 脚本配置文件`issue_processor.json`负责存储脚本处理Issue的行为，例如匹配所需的关键字，匹配Issue标签的类型等等。部分配置支持正则表达式，具体详情参见下文[Config配置](./README.md#Config配置)
+- 脚本配置文件`issue_processor.json`负责存储脚本处理Issue的行为，例如匹配所需的关键字，匹配Issue标签的类型等等。部分配置支持正则表达式，具体详情参见下文[Config配置](#Config配置)
 
 ## github侧
 
