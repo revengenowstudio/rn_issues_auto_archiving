@@ -74,13 +74,15 @@ jobs:
       - name: Processing issue content
         env:
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # 自动流水线变量
           ISSUE_TITLE: ${{ github.event.issue.title }}
           ISSUE_STATE: ${{ github.event.issue.state }}
           ISSUE_BODY: ${{ github.event.issue.body }}
           ISSUE_URL: "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}"
           COMMENTS_URL: "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments"
+          # 手动流水线变量
           MANUAL_ISSUE_TITLE: ${{ github.event.inputs.issue_title }}
-          MANUAL_ISSUE_STATE: "closed"
+          MANUAL_ISSUE_STATE: "open"
           ARCHIVE_VERSION: ${{ github.event.inputs.archive_version }}
           INTRODUCED_VERSION: ${{ github.event.inputs.introduced_version }}
           ISSUE_TYPE: ${{ github.event.inputs.issue_type }}

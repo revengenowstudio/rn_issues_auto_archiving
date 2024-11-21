@@ -3,23 +3,25 @@
 # https://docs.gitlab.com/ee/ci/yaml/#resource_group
 
 variables:
+  # GITLAB_HOST: $CI_SERVER_HOST # 这两个环境变量在另一个流水线定义了,但是这里也用得到
+  # PROJECT_ID: $CI_PROJECT_ID # 这两个环境变量在另一个流水线定义了,但是这里也用得到
   WORK_DIRECTORY: "./"
   GIT_STRATEGY: fetch
   TOKEN: $TOKEN
   ISSUE_OUTPUT_PATH: "./output.json"
   ISSUE_REPOSITORY: "内部Issue"
-  WEBHOOK_OUTPUT_PATH : "./webhook.json"
-  ARCHIVED_DOCUMENT_PATH: "./修改归档.md"
   CI_EVENT_TYPE: $CI_PIPELINE_SOURCE
-  # GITLAB_HOST: $CI_SERVER_HOST # 这两个环境变量在另一个流水线定义了,但是这里也用得到
-  # PROJECT_ID: $CI_PROJECT_ID # 这两个环境变量在另一个流水线定义了,但是这里也用得到
+  ARCHIVED_DOCUMENT_PATH: "./修改归档.md"
+  API_BASE_URL: https://$CI_SERVER_HOST/api/v4/projects/$CI_PROJECT_ID/
+  WEBHOOK_OUTPUT_PATH : "./webhook.json"
+  # 手动流水线变量
   ISSUE_NUMBER: ""
   ISSUE_TITLE: ""
-  ISSUE_STATE: "closed"
+  ISSUE_STATE: "open"
   INTRODUCED_VERSION: ""
   ARCHIVE_VERSION: ""
   ISSUE_TYPE: "自动判断"
-  API_BASE_URL: https://$CI_SERVER_HOST/api/v4/projects/$CI_PROJECT_ID/
+  
 
 auto_archiving:
   stage: auto_archiving
