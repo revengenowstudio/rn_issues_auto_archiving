@@ -2,12 +2,16 @@
 name: Auto issues archiving
 run-name: "Closed 外部Issue"
 
+# 在拉取请求合并时运行 pull_request 工作流
+# https://docs.github.com/zh/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#running-your-pull_request-workflow-when-a-pull-request-merges
 on: 
   push: 
     branches: 
       - main
   pull_request:
-    types: closed
+    # types: closed
+    branches: 
+      - main
     paths: 
       - '**.json'
 
@@ -16,7 +20,6 @@ env:
 
 jobs:
   check_config:
-    if: github.event.pull_request.merged == true
     runs-on:  ubuntu-latest
     steps:
       - name: Checkout repository
