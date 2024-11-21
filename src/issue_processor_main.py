@@ -71,7 +71,11 @@ def main() -> None:
                   ))
 
     try:
-        if platform.should_issue_state_open():
+        # gitlab的issue webhook是会相应issue reopen事件的
+        # gitlab的reopen issue事件应该被跳过
+        # 而手动触发的流水线有可能目标Issue是还没被closed的
+        if (not platform.should_ci_running_in_manual
+            and platform.should_issue_state_open()):
             print(Log.issue_state_is_open)
             Exit()
 
@@ -145,6 +149,10 @@ def main() -> None:
             introduced_version,
             issue_type
         )
+
+        if (platform.should_ci_running_in_manual
+            and platform.should_issue_state_open):
+            platform.close_issue()
 
     except (
         ArchiveBaseError

@@ -85,6 +85,10 @@ class Platform(ABC):
         pass
 
     @abstractmethod
+    def close_issue(self) -> None:
+        pass
+
+    @abstractmethod
     def close(self):
         pass
 
@@ -100,10 +104,6 @@ class Platform(ABC):
     def get_issue_info_from_platform(self) -> Issue:
         pass
 
-    @abstractmethod
-    def should_issue_state_open(self) -> bool:
-        pass
-
     @property
     @abstractmethod
     def reopen_issue_method(self) -> str:
@@ -115,12 +115,26 @@ class Platform(ABC):
         pass
 
     @property
+    @abstractmethod
+    def close_issue_method(self) -> str:
+        pass
+
+    @property
+    @abstractmethod
+    def close_issue_body(self) -> dict[str, str]:
+        pass
+
+    @property
     def introduced_version(self) -> str:
         return self._issue.introduced_version
 
     @property
     def archive_version(self) -> str:
         return self._issue.archive_version
+
+    @property
+    def should_issue_state_open(self) -> bool:
+        return self._issue.state == IssueState.open
 
     @property
     def should_ci_running_in_manual(self) -> bool:
@@ -206,6 +220,7 @@ class Platform(ABC):
             # 以防可选项为空，需要打一个请请求获取issue信息
             issue_info = self.get_issue_info_from_platform()
             self._issue.labels = issue_info.labels
+            self._issue.state = issue_info.state
             if self._issue.title == "":
                 self._issue.title = issue_info.title
             if self._issue.body == "":
@@ -474,6 +489,16 @@ class Github(Platform):
             "state": "open"
         }
 
+    @property
+    def close_issue_method(self) -> str:
+        return self.reopen_issue_method
+
+    @property
+    def close_issue_body(self) -> dict[str, str]:
+        return {
+            "state": "closed"
+        }
+
     def _read_platform_environments(self) -> None:
         print(Log.loading_something.format(something=Log.env))
 
@@ -578,11 +603,6 @@ class Github(Platform):
               format(something=Log.issue_comment))
         return comments
 
-    def should_issue_state_open(self) -> bool:
-        '''Github流水线的不会被issue reopen事件触发
-        所以在Github流水线中不考虑issue状态'''
-        return False
-
     def get_issue_info_from_platform(self) -> Issue:
         ''' 所需http header结构详见：
         https://docs.github.com/zh/rest/issues/issues?apiVersion=2022-11-28#get-an-issue'''
@@ -596,7 +616,7 @@ class Github(Platform):
         return Issue(
             id=raw_json["id"],
             title=raw_json["title"],
-            state=raw_json["state"],
+            state=parse_issue_state(raw_json["state"]),
             body=raw_json["body"],
             labels=[label["name"]
                     for label in raw_json["labels"]],
@@ -614,6 +634,21 @@ class Github(Platform):
             json=self.reopen_issue_body
         )
         print(Log.reopen_issue_success
+              .format(issue_number=self._issue.id)
+              )
+
+    def close_issue(self) -> None:
+        ''' api结构详见：
+        https://docs.github.com/zh/rest/issues/issues?apiVersion=2022-11-28#update-an-issue'''
+        url = self._urls.issue_url
+        print(Log.close_issue
+              .format(issue_number=self._issue.id))
+        self.http_request(
+            method=self.close_issue_method,
+            url=url,
+            json=self.close_issue_body
+        )
+        print(Log.close_issue_success
               .format(issue_number=self._issue.id)
               )
 
@@ -640,6 +675,16 @@ class Gitlab(Platform):
     def reopen_issue_body(self) -> dict[str, str]:
         return {
             "state_event": "reopen"
+        }
+
+    @property
+    def close_issue_method(self) -> str:
+        return self.reopen_issue_method
+
+    @property
+    def close_issue_body(self) -> dict[str, str]:
+        return {
+            "state_event": "close"
         }
 
     def issue_web_url_to_issue_api_url(self,
@@ -813,9 +858,6 @@ class Gitlab(Platform):
             archive_version=""
         )
 
-    def should_issue_state_open(self) -> bool:
-        return self._issue.state == IssueState.open
-
     def reopen_issue(self) -> None:
         ''' api结构详见：
         https://docs.gitlab.com/ee/api/issues.html#edit-an-issue'''
@@ -828,6 +870,21 @@ class Gitlab(Platform):
             json=self.reopen_issue_body
         )
         print(Log.reopen_issue_success
+              .format(issue_number=self._issue.id)
+              )
+
+    def close_issue(self) -> None:
+        ''' api结构详见：
+        https://docs.gitlab.com/ee/api/issues.html#edit-an-issue'''
+        url = self._urls.issue_url
+        print(Log.close_issue
+              .format(issue_number=self._issue.id))
+        self.http_request(
+            method=self.close_issue_method,
+            url=url,
+            json=self.close_issue_body
+        )
+        print(Log.close_issue_success
               .format(issue_number=self._issue.id)
               )
 
