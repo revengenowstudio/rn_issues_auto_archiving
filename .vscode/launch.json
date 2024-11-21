@@ -55,6 +55,18 @@
             "cwd": "${workspaceFolder}"
         },
         {
+            "name": "check_config",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "src/utils/check_config.py",
+            "args": [
+                "--config-dir",
+                "./config"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}"
+        },
+        {
             "name": "Python 调试程序: 当前文件",
             "type": "debugpy",
             "request": "launch",

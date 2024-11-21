@@ -1,0 +1,33 @@
+
+name: Auto issues archiving
+run-name: "Closed 外部Issue"
+
+on: 
+  push: 
+    branches: 
+      - main
+  pull_request:
+    types: closed
+    paths: 
+      - '**.json'
+
+env:
+  WORK_DIRECTORY: "./"
+
+jobs:
+  check_config:
+    if: github.event.pull_request.merged == true
+    runs-on:  ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python and install dependencies
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      
+      - name: Check config
+        run: |
+          cd ${{ env.WORK_DIRECTORY }}
+          python ./src/utils/check_config.py --config-dir "./config"

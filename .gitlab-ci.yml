@@ -11,8 +11,10 @@ stages:
   - rotate_access_token
   - auto_archiving
   - push_archived_issues
+  - check_config
 
 include:
   - local: "/.gitlab/workflows/AutoArchiving.yml"
   - local: "/.gitlab/workflows/RotateAccessToken.yml"
+  - local: "/.gitlab/workflows/CheckConfig.yml"
     
