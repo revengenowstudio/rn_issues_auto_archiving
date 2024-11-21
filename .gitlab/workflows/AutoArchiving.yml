@@ -3,6 +3,7 @@
 # https://docs.gitlab.com/ee/ci/yaml/#resource_group
 
 variables:
+  WORK_DIRECTORY: "./"
   GIT_STRATEGY: fetch
   TOKEN: $TOKEN
   ISSUE_OUTPUT_PATH: "./output.json"
@@ -44,7 +45,7 @@ auto_archiving:
   image: m.daocloud.io/docker.io/library/python:3.10.13-slim-bullseye
   resource_group: auto_archiving_group
   script: |
-    cd ./
+    cd $WORK_DIRECTORY
     pip install -r ./src/issue_processor/requirements.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
     pip install -r ./src/auto_archiving/requirements.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
     if [ -e "$TRIGGER_PAYLOAD" ]; then
@@ -85,7 +86,7 @@ push_archived_issues:
   #   - merge_requests
   # when: on_success
   script: |
-    cd ./
+    cd $WORK_DIRECTORY
     pip install -r ./src/issue_processor/requirements.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
     export branch=main
     export author_email=RN-Bot-CI@gitlab.revengenow.top
