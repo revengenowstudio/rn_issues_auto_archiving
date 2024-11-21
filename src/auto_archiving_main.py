@@ -1,10 +1,8 @@
 import os
-import sys
 import time
 import json
 from pathlib import Path
 
-import httpx
 from exceptiongroup import ExceptionGroup
 
 from shared.exception import ErrorMessage, IssueInfoMissing
@@ -17,42 +15,23 @@ from auto_archiving.archive_document import ArchiveDocument
 from auto_archiving.json_config import Config
 from auto_archiving.send_comment import send_comment
 from auto_archiving.reopen_issue import reopen_issue
-
-
-sys.path.append(os.getcwd())
-
+from shared.get_args import get_value_from_args
 
 def load_local_env() -> None:
     print(Log.non_github_action_env)
     from dotenv import load_dotenv
     load_dotenv()
 
-
-def get_config_path_from_args(args: list[str]) -> str:
-    path = None
-    if ((long_str := "--config") in args):
-        path = args[args.index(long_str) + 1]
-    if ((short_str := "-c") in args != -1):
-        path = args[args.index(short_str) + 1]
-    return path
-
-
-def get_failed_record_path_from_args(args: list[str]) -> str:
-    path = None
-    if ((long_str := "--failed-record") in args):
-        path = args[args.index(long_str) + 1]
-    if ((short_str := "-fr") in args != -1):
-        path = args[args.index(short_str) + 1]
-    return path
-
-
-def main(args: list[str]):
+def main():
     start_time = time.time()
     if not should_run_in_github_action():
         load_local_env()
 
     # 因为暂时用不到，禁用 failed_record 本机记录功能
-    # failed_record = FailedRecord(get_failed_record_path_from_args(args))
+    # failed_record = FailedRecord(get_value_from_args(
+    #     short_arg="-fr",
+    #     long_arg="--failed-record"
+    # ))
     output_path = os.environ[Env.ISSUE_OUTPUT_PATH]
     issue_repository = os.environ[Env.ISSUE_REPOSITORY]
     comment_message: str = Log.uninitialized_message
@@ -81,7 +60,10 @@ def main(args: list[str]):
             **issue_info_json
         )
 
-        config = Config(get_config_path_from_args(args))
+        config = Config(get_value_from_args(
+            short_arg="-c",
+            long_arg="--config"
+        ))
 
         archive_document = ArchiveDocument(
             config.archive_document_path
@@ -199,4 +181,4 @@ def main(args: list[str]):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
