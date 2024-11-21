@@ -13,4 +13,4 @@ check_config:
   image: m.daocloud.io/docker.io/library/python:3.10.13-slim-bullseye
   script: |
     cd $WORK_DIRECTORY
-    python ./src/uitils/check_config.py --config-dir "./config/"
+    python ./src/utils/check_config.py --config-dir "./config/"
