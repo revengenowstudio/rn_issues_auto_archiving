@@ -68,6 +68,7 @@ jobs:
           python-version: "3.10"
           cache: 'pip' # caching pip dependencies
       - run: |
+          cd ${{ env.WORK_DIRECTORY }}
           pip install -r ./src/issue_processor/requirements.txt
           pip install -r ./src/auto_archiving/requirements.txt
   
