@@ -1,5 +1,6 @@
 
 check_config:
+  tags: ubuntu
   stage: check_config
   rules:
     - if: $CI_PIPELINE_SOURCE == "trigger"

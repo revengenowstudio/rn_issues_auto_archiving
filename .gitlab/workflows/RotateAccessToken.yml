@@ -10,6 +10,7 @@
 
 
 variables:
+  tags: ubuntu
   GITLAB_HOST: $CI_SERVER_HOST       # example: gitlab.com
   PROJECT_ID: $CI_PROJECT_ID         # example: 123456  
   TOKEN_TTL_DAYS: 93                 # 单位：天
