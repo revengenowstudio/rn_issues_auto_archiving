@@ -4,6 +4,7 @@ import json
 import httpx
 
 from shared.log import Log
+from shared.json_dumps import json_dumps
 
 
 def http_request(
@@ -32,10 +33,8 @@ def http_request(
         except httpx.HTTPStatusError:
             print(Log.http_status_error
                       .format(
-                          reason=json.dumps(
+                          reason=json_dumps(
                               response.json(),
-                              indent=4,
-                              ensure_ascii=False
                           ),
                       ))
             raise

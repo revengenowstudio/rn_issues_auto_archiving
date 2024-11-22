@@ -13,6 +13,7 @@ from shared.exception import *
 from shared.issue_info import IssueInfoJson
 from shared.issue_state import IssueState, parse_issue_state
 from shared.ci_event_type import CiEventType
+from shared.json_dumps import json_dumps
 
 AUTO_ISSUE_TYPE = "自动判断"
 
@@ -203,10 +204,8 @@ class Platform(ABC):
             except httpx.HTTPStatusError:
                 print(Log.http_status_error
                       .format(
-                          reason=json.dumps(
+                          reason=json_dumps(
                               response.json(),
-                              indent=4,
-                              ensure_ascii=False
                           ),
                       ))
                 raise
@@ -455,11 +454,12 @@ class Platform(ABC):
         )
 
         print(Log.print_issue_json
-              .format(issue_json_content=json.dumps(
-                  issue_json=IssueInfoJson.remove_sensitive_info(issue_json),
-                  ensure_ascii=False,
-                  indent=4
-              )))
+              .format(
+                  issue_json=json_dumps(
+                      IssueInfoJson.remove_sensitive_info(
+                          issue_json)
+                  ),
+              ))
         print(Log.save_issue_content_to_file
               .format(output_path=json_path))
 
@@ -529,10 +529,8 @@ class Github(Platform):
                 issue_type=os.environ[Env.ISSUE_TYPE],
             )
             print(Log.print_input_variables
-                  .format(input_variables=json.dumps(
+                  .format(input_variables=json_dumps(
                       asdict(self._issue),
-                      ensure_ascii=False,
-                      indent=4
                   )))
             self._urls = Urls(
                 os.environ[Env.MANUAL_ISSUE_URL],
@@ -759,10 +757,8 @@ class Gitlab(Platform):
                                           AUTO_ISSUE_TYPE).strip(),
             )
             print(Log.print_input_variables
-                  .format(input_variables=json.dumps(
+                  .format(input_variables=json_dumps(
                       asdict(self._issue),
-                      ensure_ascii=False,
-                      indent=4
                   )))
             issue_url = f'{os.environ[Env.API_BASE_URL]}{Urls.ApiPath.issues}/{issue_id}'
             self._urls = Urls(

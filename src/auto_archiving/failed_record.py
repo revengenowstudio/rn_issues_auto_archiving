@@ -7,6 +7,7 @@ import datetime
 import json_repair
 
 from shared.log import Log
+from shared.json_dumps import json_dumps
 
 
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
@@ -92,19 +93,15 @@ class FailedRecord():
         for record in self.__records:
             if record['issue_id'] == issue_id:
                 print(Log.remove_failed_record_item
-                      .format(record=json.dumps(
+                      .format(record=json_dumps(
                           record,
-                          indent=4,
-                          ensure_ascii=False
                       )))
 
                 self.__records.remove(record)
 
                 print(Log.remove_failed_record_item_success
-                      .format(record=json.dumps(
+                      .format(record=json_dumps(
                           record,
-                          indent=4,
-                          ensure_ascii=False
                       )))
                 return
         print(Log.failed_record_issue_id_not_found
@@ -128,10 +125,8 @@ class FailedRecord():
 
     def save(self) -> None:
         self.__path.write_text(
-            json.dumps(
+            json_dumps(
                 self.__records,
-                indent=4,
-                ensure_ascii=False
             )
             ,encoding="utf-8"
         )

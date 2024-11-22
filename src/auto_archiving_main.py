@@ -10,6 +10,7 @@ from shared.env import Env, should_run_in_github_action
 from shared.log import Log
 from shared.issue_info import (IssueInfo, IssueInfoJson)
 from shared.ci_event_type import CiEventType
+from shared.json_dumps import json_dumps
 # from auto_archiving.failed_record import FailedRecord
 from auto_archiving.archive_document import ArchiveDocument
 from auto_archiving.json_config import Config
@@ -44,10 +45,8 @@ def main():
                  ).read_text(encoding="utf-8")
         )
         print(Log.print_issue_info
-              .format(issue_info=json.dumps(
-                  IssueInfoJson.remove_sensitive_info(issue_info_json),
-                  indent=4,
-                  ensure_ascii=False
+              .format(issue_info=json_dumps(
+                  IssueInfoJson.remove_sensitive_info(issue_info_json)
               )))
     except FileNotFoundError:
         print(Log.issue_output_not_found)
