@@ -102,6 +102,7 @@ class Log():
     push_document_failed = '''提交归档文档失败，错误信息：{exc}'''
     issue_state_is_open_skip_push = '''Issue状态为“Open”，不执行归档文件推送流程'''
     document_not_found = '''未找到归档文档，跳过推送流程'''
+    issue_output_not_found_skip_push = '''未找到格式化的issue信息文件，不执行归档文件推送流程'''
     get_remote_file_sha256 = '''正在获取远程仓库文件 {file_path} 的sha256值'''
     get_remote_file_sha256_success = '''成功获取远程仓库文件 {file_path} 的sha256值：{sha256}'''
     not_need_to_push_document = '''本地文件 {file_path} 的sha256值与远程仓库文件 {file_path} 的sha256值一致，跳过推送流程'''

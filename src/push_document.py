@@ -19,10 +19,15 @@ from shared.issue_state import IssueState
 
 
 def get_issue_id_from_issue_info(webhook_path: str) -> int:
-    payload: IssueInfoJson = json.loads(
-        Path(webhook_path).read_text(encoding="utf-8")
-    )
-    return payload["issue_id"]
+    try:
+        payload: IssueInfoJson = json.loads(
+            Path(webhook_path).read_text(encoding="utf-8")
+        )
+        return payload["issue_id"]
+    except FileNotFoundError:
+        print(Log.issue_output_not_found_skip_push)
+        return -1
+
 
 
 def should_no_change(
@@ -93,6 +98,7 @@ def push_document(
     '''
     print(Log.pushing_document)
     http_request(
+        headers=http_header,
         method="PUT",
         url=f'https://{gitlab_host}/api/v4/projects/{project_id}/repository/files/{file_path}',
         json_content={
@@ -107,9 +113,12 @@ def push_document(
 
 
 def main():
-    archived_document_path = os.environ[Env.ARCHIVED_DOCUMENT_PATH]
     issue_id = get_issue_id_from_issue_info(
         os.environ[Env.ISSUE_OUTPUT_PATH])
+    if issue_id == -1:
+        return
+    
+    archived_document_path = os.environ[Env.ARCHIVED_DOCUMENT_PATH]
     gitlab_host = os.environ[Env.GITLAB_HOST]
     project_id = int(os.environ[Env.PROJECT_ID])
     token = os.environ[Env.TOKEN]
