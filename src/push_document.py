@@ -29,7 +29,6 @@ def get_issue_id_from_issue_info(webhook_path: str) -> int:
         return -1
 
 
-
 def should_no_change(
     local_sha256: str,
     remote_sha256: str,
@@ -117,25 +116,14 @@ def main():
         os.environ[Env.ISSUE_OUTPUT_PATH])
     if issue_id == -1:
         return
-    
+
     archived_document_path = os.environ[Env.ARCHIVED_DOCUMENT_PATH]
     gitlab_host = os.environ[Env.GITLAB_HOST]
     project_id = int(os.environ[Env.PROJECT_ID])
     token = os.environ[Env.TOKEN]
     http_header = Gitlab.create_http_header(token)
-    try:
-        issue_info_json: IssueInfoJson = json.loads(
-            Path(os.environ[Env.ISSUE_OUTPUT_PATH]
-                 ).read_text(encoding="utf-8")
-        )
-    except FileNotFoundError:
-        print(Log.document_not_found)
-        return
 
     try:
-        if issue_info_json["issue_state"] == IssueState.open:
-            print(Log.issue_state_is_open_skip_push)
-            return
 
         local_sha256 = get_file_sha256(
             archived_document_path
