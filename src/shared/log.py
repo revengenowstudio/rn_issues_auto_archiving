@@ -25,12 +25,12 @@ class Log():
     archiving_condition_not_satisfied = '''归档条件不满足，无法继续进行归档流程'''
     reopen_issue = '''正在重新打开Issue#{issue_number}'''
     close_issue = '''正在关闭Issue#{issue_number}'''
-    archive_version_not_found = '''未在评论中找到归档关键字/归档版本号'''
-    introduced_version_not_found = '''未在Issue描述中找到引入版本号'''
-    target_labels_not_found = '''未在Issue中找到归档所需标签'''
+    archive_version_not_found = '''未在 评论 中找到 归档关键字/归档版本号'''
+    introduced_version_not_found = '''未在 Issue描述 中找到 引入版本号'''
+    target_labels_not_found = '''未在 Issue 中找到 归档所需标签'''
     too_many_introduced_version = '''匹配到多个引入版本号'''
-    too_many_archive_version = '''匹配到多个归档关键字/归档版本号'''
-    issue_type_not_found = '''未在Issue标题中找到Issue类型关键字'''
+    too_many_archive_version = '''匹配到多个 归档关键字/归档版本号'''
+    issue_type_not_found = '''未在 Issue标题 中找到 Issue类型关键字'''
     not_archive_issue = '''未满足归档Issue条件，不对此Issue进行归档处理'''
     print_input_variables = '''打印输入信息 ： {input_variables}'''
     print_issue_json = '''打印issue_json内容 ： 
@@ -57,10 +57,10 @@ class Log():
     reopen_issue_success = '''重新打开Issue#{issue_number}成功'''
     close_issue_success = '''关闭Issue#{issue_number}成功'''
     getting_issue_info_success = '''成功获取Issue相关信息'''
-    archive_version_found = '''成功匹配评论中的归档关键字/归档版本号'''
-    target_labels_found = '''成功匹配Issue中的归档所需标签'''
-    issue_type_found = '''成功在Issue标题中找到Issue类型关键字'''
-    save_issue_content_to_file_success = "成功将Issue内容写入至 {output_path}"
+    archive_version_found = '''成功匹配评论中的 归档关键字/归档版本号'''
+    target_labels_found = '''成功匹配 Issue 中的 归档所需标签'''
+    issue_type_found = '''成功在 Issue标题 中找到 Issue类型关键字'''
+    save_issue_content_to_file_success = "成功将 Issue内容 写入至 {output_path}"
     
     # auto_archiving
     archive_document_content = '''归档文件内容'''

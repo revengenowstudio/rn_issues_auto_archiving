@@ -75,7 +75,7 @@ def main() -> None:
         # gitlab的reopen issue事件应该被跳过
         # 而手动触发的流水线有可能目标Issue是还没被closed的
         if (not platform.should_ci_running_in_manual
-            and platform.should_issue_state_open):
+                and platform.should_issue_state_open):
             print(Log.issue_state_is_open)
             Exit()
 
@@ -88,7 +88,6 @@ def main() -> None:
             )
         else:
             issue_type = platform.issue_type
-            
 
         # 自动触发流水线必须从描述中获取引入版本号
         # 手动触发流水线如果没有填引入版本号，
@@ -107,11 +106,13 @@ def main() -> None:
         # 手动流水线的情况
         if platform.should_ci_running_in_manual:
             if not platform.should_archived_version_input:
-                temp = platform.get_archive_version(
+                archive_version_list = platform.get_archive_version(
                     config.white_list.comments
                 )
                 if not platform.should_archive_issue(
-                    temp,
+                    issue_type,
+                    config.issue_type.label_map,
+                    archive_version_list,
                     platform.get_labels(),
                     config.white_list.labels
                 ):
@@ -119,25 +120,27 @@ def main() -> None:
                         ErrorMessage.missing_labels_and_archive_version
                     )
                 archive_version = platform.parse_archive_version(
-                    temp
+                    archive_version_list
                 )
             else:
                 archive_version = platform.archive_version
         # 自动流水线要判断是否是非归档issue被正常关闭了
         # 例如格式错误的issue被创建者手动关闭了
         else:
-            temp = platform.get_archive_version(
+            archive_version_list = platform.get_archive_version(
                 config.white_list.comments
             )
             if not platform.should_archive_issue(
-                temp,
+                issue_type,
+                config.issue_type.label_map,
+                archive_version_list,
                 platform.get_labels(),
                 config.white_list.labels
             ):
                 print(Log.not_archive_issue)
                 Exit()
             archive_version = platform.parse_archive_version(
-                temp
+                archive_version_list
             )
 
         platform.remove_type_in_issue_title(
@@ -151,7 +154,7 @@ def main() -> None:
         )
 
         if (platform.should_ci_running_in_manual
-            and platform.should_issue_state_open):
+                and platform.should_issue_state_open):
             platform.close_issue()
 
     except (
