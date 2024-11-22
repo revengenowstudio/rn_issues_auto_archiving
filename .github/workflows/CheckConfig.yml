@@ -17,7 +17,7 @@ on:
       - '**.json'
 
 env:
-  WORK_DIRECTORY: "./"
+  WORK_DIRECTORY: "."
 
 jobs:
   check_config:

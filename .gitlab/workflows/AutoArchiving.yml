@@ -5,7 +5,7 @@
 variables:
   # GITLAB_HOST: $CI_SERVER_HOST # 这两个环境变量在另一个流水线定义了,但是这里也用得到
   # PROJECT_ID: $CI_PROJECT_ID # 这两个环境变量在另一个流水线定义了,但是这里也用得到
-  WORK_DIRECTORY: "./"
+  WORK_DIRECTORY: "."
   GIT_STRATEGY: fetch
   TOKEN: $TOKEN
   ISSUE_OUTPUT_PATH: "./output.json"

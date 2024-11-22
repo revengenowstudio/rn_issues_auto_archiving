@@ -52,7 +52,7 @@ env:
   # 具体有什么事件类型：https://docs.github.com/zh/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#about-events-that-trigger-workflows
   ISSUE_NUMBER: ${{ github.event.issue.number }}
   MANUAL_ISSUE_NUMBER: ${{ github.event.inputs.issue_number }}
-  WORK_DIRECTORY: "./"
+  WORK_DIRECTORY: "."
 
 jobs:
   auto_archiving:
