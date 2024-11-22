@@ -183,7 +183,7 @@ class Platform(ABC):
         url: str,
         method: str = "GET",
         params: dict[str, str] = None,
-        json: dict[str, str] = None,
+        json_content: dict[str, str] = None,
         retry_times: int = 3,
     ) -> httpx.Response:
         error = None
@@ -193,7 +193,7 @@ class Platform(ABC):
                     method=method,
                     url=url,
                     params=params,
-                    json=json,
+                    json=json_content,
                     follow_redirects=True,
                 )
                 if response.status_code == HTTPStatus.NOT_FOUND:
@@ -201,6 +201,14 @@ class Platform(ABC):
                 response.raise_for_status()
                 return response
             except httpx.HTTPStatusError:
+                print(Log.http_status_error
+                      .format(
+                          reason=json.dumps(
+                              response.json(),
+                              indent=4,
+                              ensure_ascii=False
+                          ),
+                      ))
                 raise
             except Exception as e:
                 error = e
@@ -299,7 +307,7 @@ class Platform(ABC):
         self.http_request(
             method="POST",
             url=self._urls.comments_url,
-            json={
+            json_content={
                 "body": comment_body
             }
         )
@@ -447,7 +455,7 @@ class Platform(ABC):
         )
 
         print(Log.print_issue_json
-              .format(issue_json=json.dumps(
+              .format(issue_json_content=json.dumps(
                   IssueInfoJson.remove_sensitive_info(issue_json),
                   ensure_ascii=False,
                   indent=4
@@ -631,7 +639,7 @@ class Github(Platform):
         self.http_request(
             method=self.reopen_issue_method,
             url=url,
-            json=self.reopen_issue_body
+            json_content=self.reopen_issue_body
         )
         print(Log.reopen_issue_success
               .format(issue_number=self._issue.id)
@@ -646,7 +654,7 @@ class Github(Platform):
         self.http_request(
             method=self.close_issue_method,
             url=url,
-            json=self.close_issue_body
+            json_content=self.close_issue_body
         )
         print(Log.close_issue_success
               .format(issue_number=self._issue.id)
@@ -867,7 +875,7 @@ class Gitlab(Platform):
         self.http_request(
             method=self.reopen_issue_method,
             url=url,
-            json=self.reopen_issue_body
+            json_content=self.reopen_issue_body
         )
         print(Log.reopen_issue_success
               .format(issue_number=self._issue.id)
@@ -882,7 +890,7 @@ class Gitlab(Platform):
         self.http_request(
             method=self.close_issue_method,
             url=url,
-            json=self.close_issue_body
+            json_content=self.close_issue_body
         )
         print(Log.close_issue_success
               .format(issue_number=self._issue.id)

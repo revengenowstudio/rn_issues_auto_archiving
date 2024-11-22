@@ -94,7 +94,7 @@ def push_document(
     http_request(
         method="PUT",
         url=f'https://{gitlab_host}/api/v4/projects/{project_id}/repository/files/{file_path}',
-        json={
+        json_content={
             "branch": branch_name,
             "author_email": author_email,
             "author_name": author_name,

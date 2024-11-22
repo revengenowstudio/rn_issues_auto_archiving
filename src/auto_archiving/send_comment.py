@@ -22,7 +22,7 @@ def send_comment(
         method="POST",
         url=comment_url,
         headers=http_header,
-        json={
+        json_content={
             "body": message
         },
     )

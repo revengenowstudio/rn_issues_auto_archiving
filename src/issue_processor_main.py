@@ -75,7 +75,7 @@ def main() -> None:
         # gitlab的reopen issue事件应该被跳过
         # 而手动触发的流水线有可能目标Issue是还没被closed的
         if (not platform.should_ci_running_in_manual
-            and platform.should_issue_state_open()):
+            and platform.should_issue_state_open):
             print(Log.issue_state_is_open)
             Exit()
 

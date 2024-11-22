@@ -1,4 +1,5 @@
 from http import HTTPStatus
+import json
 
 import httpx
 
@@ -10,7 +11,7 @@ def http_request(
     url: str,
     method: str,
     params: dict[str, str] = None,
-    json: dict[str, str] = None,
+    json_content: dict[str, str] = None,
     retry_times: int = 3,
 ) -> httpx.Response:
     error = None
@@ -21,7 +22,7 @@ def http_request(
                 method=method,
                 url=url,
                 params=params,
-                json=json,
+                json=json_content,
                 follow_redirects=True,
             )
             if response.status_code == HTTPStatus.NOT_FOUND:
@@ -29,6 +30,14 @@ def http_request(
             response.raise_for_status()
             return response
         except httpx.HTTPStatusError:
+            print(Log.http_status_error
+                      .format(
+                          reason=json.dumps(
+                              response.json(),
+                              indent=4,
+                              ensure_ascii=False
+                          ),
+                      ))
             raise
         except Exception as e:
             error = e

@@ -46,6 +46,7 @@ class Log():
     running_ci_by_manual = '''流水线触发触发方式：手动'''
     running_ci_by_automated = '''流水线触发触发方式：自动'''
     http_404_not_found = '''无法请求到对应资源，请检查输入的Issue单号是否正确'''
+    http_status_error = '''HTTP请求返回状态码错误，原因：{reason}'''
     job_done = '''脚本执行完毕'''
     
     getting_something_success = '''获取 {something} 成功'''

@@ -17,6 +17,6 @@ def reopen_issue(
         method=reopen_http_method,
         url=reopen_url,
         headers=http_header,
-        json=reopen_body
+        json_content=reopen_body
     )
     print(Log.reopen_issue_request_success)
