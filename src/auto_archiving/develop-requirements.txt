@@ -11,4 +11,3 @@ typing_extensions==4.12.2
 
 # Development tools
 python-dotenv==1.0.1
-pre-commit
