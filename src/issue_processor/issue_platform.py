@@ -456,7 +456,7 @@ class Platform(ABC):
 
         print(Log.print_issue_json
               .format(issue_json_content=json.dumps(
-                  IssueInfoJson.remove_sensitive_info(issue_json),
+                  issue_json=IssueInfoJson.remove_sensitive_info(issue_json),
                   ensure_ascii=False,
                   indent=4
               )))
