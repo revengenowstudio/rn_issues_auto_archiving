@@ -10,13 +10,14 @@
 
 
 variables:
-  tags: ubuntu
   GITLAB_HOST: $CI_SERVER_HOST       # example: gitlab.com
   PROJECT_ID: $CI_PROJECT_ID         # example: 123456  
   TOKEN_TTL_DAYS: 93                 # 单位：天
   TARGET_VARIABLE_NAME: TOKEN
 
 rotate_access_token:
+  tags: 
+    - ubuntu
   stage: rotate_access_token
   only:
     - schedules

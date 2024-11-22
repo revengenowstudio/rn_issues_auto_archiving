@@ -24,7 +24,8 @@ variables:
   
 
 auto_archiving:
-  tags: ubuntu
+  tags: 
+    - ubuntu
   stage: auto_archiving
   rules:
     - if: $CI_PIPELINE_SOURCE == "trigger" 
