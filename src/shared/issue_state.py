@@ -9,6 +9,9 @@ ISSUE_STATE_MAP = {
 open或closed'''
 
 class IssueState():
+    '''gitlab webhook的事件关键字：
+    https://docs.gitlab.com/ee/user/project/integrations/webhook_events.html#work-item-events
+    '''
     closed = "closed"
     open = "open"
     # gitlab 的 webhook 的事件
