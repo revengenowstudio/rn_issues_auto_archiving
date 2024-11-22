@@ -78,6 +78,10 @@ def main() -> None:
                 and platform.should_issue_state_open):
             print(Log.issue_state_is_open)
             Exit()
+        
+        if platform.should_issue_state_update:
+            print(Log.issue_state_is_update)
+            Exit()
 
         platform.init_issue_info_from_platform()
 

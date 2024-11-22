@@ -138,6 +138,10 @@ class Platform(ABC):
         return self._issue.state == IssueState.open
 
     @property
+    def should_issue_state_update(self) -> bool:
+        return self._issue.state == IssueState.update
+
+    @property
     def should_ci_running_in_manual(self) -> bool:
         return self._ci_event_type in CiEventType.manual
 
@@ -339,7 +343,7 @@ class Platform(ABC):
             print(Log.target_labels_not_found)
         else:
             print(Log.target_labels_found)
-            
+
         # 未匹配到归档关键字应则不进行归档流程
         # 因为这有可能是用户自行关闭的issue或者无需归档的issue
         if all([should_label_not_in_target,
@@ -360,13 +364,12 @@ class Platform(ABC):
             raise ArchiveVersionError(
                 ErrorMessage.missing_archive_version
             )
-        
+
         if issue_type == "":
             raise IssueTypeError(
-            ErrorMessage.missing_issue_type_from_label
-            .format(issue_type=list(label_map.keys()))
-        )
-
+                ErrorMessage.missing_issue_type_from_label
+                .format(issue_type=list(label_map.keys()))
+            )
 
         return True
 

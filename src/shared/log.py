@@ -36,6 +36,7 @@ class Log():
     print_issue_json = '''打印issue_json内容 ： 
     {issue_json}'''
     issue_state_is_open = '''Issue状态为“Open”，此issue不是归档对象'''
+    issue_state_is_update = '''Issue状态为“update，此issue不是归档对象'''
     webhook_payload_not_found = '''webhook payload为空，无法进行后续操作'''
     save_issue_content_to_file = '''正在将Issue内容写入至 {output_path} '''
     unexpected_platform_type = '''未知的Issue平台类型 "{platform_type}"，请检查命令行参数输入和环境变量'''
@@ -99,7 +100,7 @@ class Log():
     pushing_document = '''正在提交归档文档'''
     pushing_document_success = '''提交归档文档成功'''
     push_document_failed = '''提交归档文档失败，错误信息：{exc}'''
-    issue_state_is_open = '''Issue状态为“Open”，不执行归档文件推送流程'''
+    issue_state_is_open_skip_push = '''Issue状态为“Open”，不执行归档文件推送流程'''
     document_not_found = '''未找到归档文档，跳过推送流程'''
     get_remote_file_sha256 = '''正在获取远程仓库文件 {file_path} 的sha256值'''
     get_remote_file_sha256_success = '''成功获取远程仓库文件 {file_path} 的sha256值：{sha256}'''
