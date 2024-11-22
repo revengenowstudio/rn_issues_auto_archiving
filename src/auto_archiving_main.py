@@ -6,7 +6,7 @@ from pathlib import Path
 from exceptiongroup import ExceptionGroup
 
 from shared.exception import ErrorMessage, IssueInfoMissing
-from shared.env import Env, should_run_in_github_action
+from shared.env import Env, should_run_in_github_action,should_run_in_gitlab_ci
 from shared.log import Log
 from shared.issue_info import (IssueInfo, IssueInfoJson)
 from shared.ci_event_type import CiEventType
@@ -25,7 +25,8 @@ def load_local_env() -> None:
 
 def main():
     start_time = time.time()
-    if not should_run_in_github_action():
+    if (not should_run_in_github_action()
+        and not should_run_in_gitlab_ci()):
         load_local_env()
 
     # 因为暂时用不到，禁用 failed_record 本机记录功能
