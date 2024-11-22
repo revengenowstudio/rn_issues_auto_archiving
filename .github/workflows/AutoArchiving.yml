@@ -5,7 +5,7 @@ concurrency:
   group: archiving-group
 
 name: Auto issues archiving
-run-name: "Closed 外部Issue${{ github.event.issue.number }}${{ github.event.inputs.issue_number }}"
+run-name: "Closed 外部Issue#${{ github.event.issue.number }}${{ github.event.inputs.issue_number }}"
 
 # permissions是关于GITHUB_TOKEN权限的，内容详见：
 # https://docs.github.com/zh/actions/writing-workflows/workflow-syntax-for-github-actions#permissions
