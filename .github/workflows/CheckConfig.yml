@@ -16,9 +16,6 @@ on:
     paths: 
       - '**.json'
 
-env:
-  WORK_DIRECTORY: "."
-
 jobs:
   check_config:
     runs-on:  ubuntu-latest
@@ -33,5 +30,4 @@ jobs:
       
       - name: Check config files
         run: |
-          cd ${{ env.WORK_DIRECTORY }}
-          python ./src/utils/check_config.py --config-dir "./config"
+          python ./rn_issue_auto_archiving/utils/check_config.py --config-dir "./config"

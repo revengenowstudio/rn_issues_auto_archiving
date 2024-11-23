@@ -22,7 +22,6 @@ rotate_access_token:
   only:
     - schedules
   script: |
-    cd $WORK_DIRECTORY
-    pip install -r ./src/issue_processor/requirements.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
-    python ./src/utils/rotate_access_token.py
+    pip install -r ./rn_issue_auto_archiving/issue_processor/requirements.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+    python ./rn_issue_auto_archiving/utils/rotate_access_token.py
   
