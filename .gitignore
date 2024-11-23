@@ -5,3 +5,6 @@ __pycache__
 !example.env
 *output*
 webhook.json
+!output.sh
+!output.ps1
+output
