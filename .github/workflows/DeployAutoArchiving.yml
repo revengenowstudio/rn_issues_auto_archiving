@@ -1,0 +1,39 @@
+
+name: Deploy auto archiving script to rn_all_issues
+run-name: Deploy auto archiving script to rn_all_issues
+
+on:
+  push: 
+    branches: 
+      - main
+  merge_group: 
+    branches: 
+      - main
+
+
+permissions:
+  contents: write
+
+env:
+  TARGET_DISPATCH_URL : "https://api.github.com/repos/OWNER/REPO/dispatches"
+  COMMIT_MESSAGE: ${{ github.event.commits.message }}
+
+jobs:
+  deploy:
+    name: Deploy auto archiving script
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Pull auto archiving script
+        run: |
+          apt install curl -y
+          curl -L \
+          -X POST \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          ${{ env.TARGET_DISPATCH_URL }} \
+          -d '{"event_type":"deploy","client_payload":{"commit_message": "${{ env.COMMIT_MESSAGE }}"}}'
+
