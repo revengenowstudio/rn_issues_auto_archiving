@@ -15,7 +15,7 @@ permissions:
   contents: write
 
 env:
-  TARGET_DISPATCH_URL : "https://api.github.com/repos/OWNER/REPO/dispatches"
+  TARGET_DISPATCH_URL : "https://api.github.com/repos/Zero-Fanker/RN_All_Issues/dispatches"
   COMMIT_MESSAGE: ${{ github.event.commits.message }}
 
 jobs:
