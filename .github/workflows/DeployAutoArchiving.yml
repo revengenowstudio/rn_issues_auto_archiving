@@ -28,7 +28,6 @@ jobs:
 
       - name: Pull auto archiving script
         run: |
-          apt install curl -y
           curl -L \
           -X POST \
           -H "Accept: application/vnd.github+json" \
