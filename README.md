@@ -125,7 +125,6 @@
     |rjust_character|str|否|`rjust_space_width`填充的字符，空格即可|
     |table_separator|str|否|用来区分归档列表每一项的分隔符，由于归档文档是markdown列表格式，所以`\|`即可|
     |archive_template|str|否|归档内容的标准模版，定义了流水线归档内容的格式，可用的预定义变量有`{table_id}` `{issue_type}` `{issue_title}` `{rjust_space}` `{issue_repository}` `{issue_id}` `{introduced_version}` `{archive_version}`|
-    |archive_document_path|str|否|归档文档的路径，流水线会读取归档文档并将内容写入该路径|
     |issue_title_processing_rules|dict[str,dict[str,str\|list]]|否|Issue标题预处理规则，用来对特定类型的Issue标题进行文本的添加或者修改，第一层key为Issue类型，第二层key是固定的，必须要填写`add_prefix` `add_suffix` `remove_keyword`，`add_prefix`是在Issue标题前添加的字符串，`add_suffix`是在Issue标题后添加的字符串，`remove_keyword`是Issue标题中若存在匹配的关键字则删除这些关键字|
 
 

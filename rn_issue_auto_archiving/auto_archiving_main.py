@@ -66,7 +66,7 @@ def main():
         ))
 
         archive_document = ArchiveDocument(
-            config.archive_document_path
+            os.environ[Env.ARCHIVED_DOCUMENT_PATH]
         )
         # 因为暂时用不到，禁用 failed_record 本机记录功能
         # for issue_id in failed_record.get_all_issue_id():

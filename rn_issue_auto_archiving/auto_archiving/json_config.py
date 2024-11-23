@@ -19,7 +19,6 @@ class ConfigJson(TypedDict):
     rjust_character: str
     table_separator: str
     archive_template: str
-    archive_document_path: str
     action_name_map: dict[str, str]
     issue_title_processing_rules: dict[IssueType,
                                        ProcessingAction]
@@ -34,7 +33,6 @@ class Config():
         self.rjust_character: str
         self.archive_template: str
         self.archive_template: str
-        self.archive_document_path: str
         self.table_separator: str
         self.action_name_map: dict[str, str]
         self.reopen_workflow_prefix_map: dict[str, str]
