@@ -69,6 +69,7 @@ def get_remote_file_sha256(
     print(Log.get_remote_file_sha256
           .format(file_path=file_path))
 
+    
     response: httpx.Response = http_request(
         method="HEAD",
         url=f'https://{gitlab_host}/api/v4/projects/{project_id}/repository/files/{file_path}?ref={branch_name}',
