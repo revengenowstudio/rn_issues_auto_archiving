@@ -14,6 +14,8 @@ Remove-Item -Recurse -Force -Path "./output/rn_issue_auto_archiving/auto_archivi
 Remove-Item -Recurse -Force -Path "./output/rn_issue_auto_archiving/issue_processor/__pycache__"
 Remove-Item -Recurse -Force -Path "./output/rn_issue_auto_archiving/shared/__pycache__"
 Remove-Item -Recurse -Force -Path "./output/rn_issue_auto_archiving/utils/__pycache__"
+Remove-Item -Recurse -Force -Path "./output/.gitlab/workflows/DeployAutoArchiving.yml"
+Remove-Item -Recurse -Force -Path "./output/.github/workflows/DeployAutoArchiving.yml"
 
 # 输出完成信息
 Write-Output "output done"
