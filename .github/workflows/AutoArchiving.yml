@@ -46,7 +46,7 @@ on:
 
 env:
   ARCHIVED_DOCUMENT_PATH: "./修改归档"
-  TARGET_BRANCH: "main"
+  TARGET_BRANCH: main
   ISSUE_OUTPUT_PATH: "./output.json"
   ISSUE_REPOSITORY: "外部Issue"
   COMMIT_TITLE: "Closed 外部Issue#"
