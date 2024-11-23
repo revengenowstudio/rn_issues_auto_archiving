@@ -1,5 +1,4 @@
 from http import HTTPStatus
-import json
 
 import httpx
 
@@ -31,12 +30,15 @@ def http_request(
             response.raise_for_status()
             return response
         except httpx.HTTPStatusError:
-            print(Log.http_status_error
-                      .format(
-                          reason=json_dumps(
-                              response.json(),
-                          ),
-                      ))
+            try:
+                print(Log.http_status_error
+                        .format(
+                            reason=json_dumps(
+                                response.json(),
+                            ),
+                        ))
+            except Exception:
+                pass
             raise
         except Exception as e:
             error = e
