@@ -71,7 +71,7 @@
 
     |变量名|变量类型|描述|
     |---|---|---|
-    |TOKEN|secret|此token用于获取Issue信息，需要个人账号的PAT（个人访问令牌）的`API读写权限`和`仓库读写权限`|
+    |TOKEN|secret|此token用于获取Issue信息，需要个人账号的PAT（个人访问令牌）的`API读写权限`和`仓库读写权限`，且需要PAT所属用户是目标仓库的`maintainer`或`owner`级别成员|
     
 - 现有生产环境下，使用的是`RN-Bot`账号的PAT，如果PAT失效或者异常，请联系拥有`RN-Bot`账号管理权限的管理员
 
