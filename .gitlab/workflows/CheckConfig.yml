@@ -14,4 +14,4 @@ check_config:
       when: always
   image: m.daocloud.io/docker.io/library/python:3.10.13-slim-bullseye
   script: |
-    python ./rn_issue_auto_archiving/utils/check_config.py --config-dir "./config/"
+    python ./rn_issues_auto_archiving/utils/check_config.py --config-dir "./config/"

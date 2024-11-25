@@ -49,16 +49,16 @@ auto_archiving:
   image: m.daocloud.io/docker.io/library/python:3.10.13-slim-bullseye
   resource_group: auto_archiving_group
   script: |
-    pip install -r ./rn_issue_auto_archiving/issue_processor/requirements.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
-    pip install -r ./rn_issue_auto_archiving/auto_archiving/requirements.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+    pip install -r ./rn_issues_auto_archiving/issue_processor/requirements.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+    pip install -r ./rn_issues_auto_archiving/auto_archiving/requirements.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
     if [ -e "$TRIGGER_PAYLOAD" ]; then
       cp $TRIGGER_PAYLOAD $WEBHOOK_OUTPUT_PATH
     fi
     export WEBHOOK_PAYLOAD=$(cat $TRIGGER_PAYLOAD)
-    python ./rn_issue_auto_archiving/issue_processor_main.py  -c "./config/issue_processor.json"
-    python ./rn_issue_auto_archiving/auto_archiving_main.py -c "./config/auto_archiving.json" -fr "./归档失败记录.json"
+    python ./rn_issues_auto_archiving/issue_processor_main.py  -c "./config/issue_processor.json"
+    python ./rn_issues_auto_archiving/auto_archiving_main.py -c "./config/auto_archiving.json" -fr "./归档失败记录.json"
     export author_email=RN-Bot-CI@$CI_SERVER_HOST
     export author_name=RN-Bot-CI
     export commit_message="Close $ISSUE_REPOSITORY#{issue_id}"
-    python ./rn_issue_auto_archiving/push_document.py
+    python ./rn_issues_auto_archiving/push_document.py
 

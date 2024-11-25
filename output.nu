@@ -25,15 +25,15 @@ def main [
     cp -r ./.github ./output/
     cp -r ./.gitlab ./output/
     cp ./.gitlab-ci.yml ./output/
-    cp -r ./rn_issue_auto_archiving ./output/
+    cp -r ./rn_issues_auto_archiving ./output/
 
     # 删除特定目录
     print "delete unnessesary output files"
-    rm -rfv ./output/rn_issue_auto_archiving/__pycache__
-    rm -rfv ./output/rn_issue_auto_archiving/auto_archiving/__pycache__
-    rm -rfv ./output/rn_issue_auto_archiving/issue_processor/__pycache__
-    rm -rfv ./output/rn_issue_auto_archiving/shared/__pycache__
-    rm -rfv ./output/rn_issue_auto_archiving/utils/__pycache__
+    rm -rfv ./output/rn_issues_auto_archiving/__pycache__
+    rm -rfv ./output/rn_issues_auto_archiving/auto_archiving/__pycache__
+    rm -rfv ./output/rn_issues_auto_archiving/issue_processor/__pycache__
+    rm -rfv ./output/rn_issues_auto_archiving/shared/__pycache__
+    rm -rfv ./output/rn_issues_auto_archiving/utils/__pycache__
     rm -rfv ./output/.gitlab/workflows/DeployAutoArchiving.yml
     rm -rfv ./output/.github/workflows/DeployAutoArchiving.yml
     # 调用函数处理第一个文件
@@ -50,7 +50,7 @@ def main [
     print $"copy output files to ($RN_ALL_ISSUES_REPO_PATH)"
     cp -r ./output/config $"($RN_ALL_ISSUES_REPO_PATH)"
     cp -r ./output/.github $"($RN_ALL_ISSUES_REPO_PATH)/"
-    cp -r ./output/rn_issue_auto_archiving $"($RN_ALL_ISSUES_REPO_PATH)/"
+    cp -r ./output/rn_issues_auto_archiving $"($RN_ALL_ISSUES_REPO_PATH)/"
     
     if ($RN_INTERNAL_ISSUES_REPO_PATH | is-empty) {
         print "RN_INTERNAL_ISSUES_REPO_PATH is empty , exit"
@@ -61,7 +61,7 @@ def main [
     cp -r ./output/config $"($RN_INTERNAL_ISSUES_REPO_PATH)"
     cp -r ./output/.gitlab $"($RN_INTERNAL_ISSUES_REPO_PATH)/"
     cp ./output/.gitlab-ci.yml $"($RN_INTERNAL_ISSUES_REPO_PATH)/.gitlab-ci.yml"
-    cp -r ./output/rn_issue_auto_archiving $"($RN_INTERNAL_ISSUES_REPO_PATH)/"
+    cp -r ./output/rn_issues_auto_archiving $"($RN_INTERNAL_ISSUES_REPO_PATH)/"
 
     # 输出完成信息
     print "job done"

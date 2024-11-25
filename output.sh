@@ -49,14 +49,14 @@ function pickFiles {
     cp -rf "./.github" "$outputPath/"
     cp -rf "./.gitlab" "$outputPath/"
     cp "./.gitlab-ci.yml" "$outputPath/"
-    cp -rf "./rn_issue_auto_archiving" "$outputPath/"
+    cp -rf "./rn_issues_auto_archiving" "$outputPath/"
 
     # 删除特定目录
-    rm -rf "$outputPath/rn_issue_auto_archiving/__pycache__"
-    rm -rf "$outputPath/rn_issue_auto_archiving/auto_archiving/__pycache__"
-    rm -rf "$outputPath/rn_issue_auto_archiving/issue_processor/__pycache__"
-    rm -rf "$outputPath/rn_issue_auto_archiving/shared/__pycache__"
-    rm -rf "$outputPath/rn_issue_auto_archiving/utils/__pycache__"
+    rm -rf "$outputPath/rn_issues_auto_archiving/__pycache__"
+    rm -rf "$outputPath/rn_issues_auto_archiving/auto_archiving/__pycache__"
+    rm -rf "$outputPath/rn_issues_auto_archiving/issue_processor/__pycache__"
+    rm -rf "$outputPath/rn_issues_auto_archiving/shared/__pycache__"
+    rm -rf "$outputPath/rn_issues_auto_archiving/utils/__pycache__"
     rm -rf "$outputPath/.gitlab/workflows/DeployAutoArchiving.yml"
     rm -rf "$outputPath/.github/workflows/DeployAutoArchiving.yml"
 }
@@ -74,14 +74,14 @@ function copyOutputFilesToAllIssueRepo {
     # 复制文件和目录到目标路径
     cp -rf "$outputPath/config" "$RN_ALL_ISSUES_REPO_PATH"
     cp -rf "$outputPath/.github" "$RN_ALL_ISSUES_REPO_PATH/"
-    cp -rf "$outputPath/rn_issue_auto_archiving" "$RN_ALL_ISSUES_REPO_PATH/"
+    cp -rf "$outputPath/rn_issues_auto_archiving" "$RN_ALL_ISSUES_REPO_PATH/"
 }
 
 function copyOutputFilesToInternalIssueRepo {
     cp -rf "$outputPath/config" "$RN_INTERNAL_ISSUES_REPO_PATH"
     cp -rf "$outputPath/.gitlab" "$RN_INTERNAL_ISSUES_REPO_PATH/"
     cp -rf "$outputPath/.gitlab-ci.yml" "$RN_INTERNAL_ISSUES_REPO_PATH/.gitlab-ci.yml"
-    cp -rf "$outputPath/rn_issue_auto_archiving" "$RN_INTERNAL_ISSUES_REPO_PATH/"
+    cp -rf "$outputPath/rn_issues_auto_archiving" "$RN_INTERNAL_ISSUES_REPO_PATH/"
 }
 
 parseCmds "$@"
