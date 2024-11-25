@@ -45,11 +45,11 @@ function pickFiles {
     mkdir -p "$outputPath"
 
     # 复制文件和目录
-    cp -r "./config" "$outputPath/"
-    cp -r "./.github" "$outputPath/"
-    cp -r "./.gitlab" "$outputPath/"
+    cp -rf "./config" "$outputPath/"
+    cp -rf "./.github" "$outputPath/"
+    cp -rf "./.gitlab" "$outputPath/"
     cp "./.gitlab-ci.yml" "$outputPath/"
-    cp -r "./rn_issue_auto_archiving" "$outputPath/"
+    cp -rf "./rn_issue_auto_archiving" "$outputPath/"
 
     # 删除特定目录
     rm -rf "$outputPath/rn_issue_auto_archiving/__pycache__"
@@ -72,16 +72,16 @@ function updateBranchInFile() {
 
 function copyOutputFilesToAllIssueRepo {
     # 复制文件和目录到目标路径
-    cp -r "$outputPath/config" "$RN_ALL_ISSUES_REPO_PATH"
-    cp -r "$outputPath/.github" "$RN_ALL_ISSUES_REPO_PATH/"
-    cp -r "$outputPath/rn_issue_auto_archiving" "$RN_ALL_ISSUES_REPO_PATH/"
+    cp -rf "$outputPath/config" "$RN_ALL_ISSUES_REPO_PATH"
+    cp -rf "$outputPath/.github" "$RN_ALL_ISSUES_REPO_PATH/"
+    cp -rf "$outputPath/rn_issue_auto_archiving" "$RN_ALL_ISSUES_REPO_PATH/"
 }
 
 function copyOutputFilesToInternalIssueRepo {
-    cp -r "$outputPath/config" "$RN_INTERNAL_ISSUES_REPO_PATH"
-    cp -r "$outputPath/.gitlab" "$RN_INTERNAL_ISSUES_REPO_PATH/"
-    cp -r "$outputPath/.gitlab-ci.yml" "$RN_INTERNAL_ISSUES_REPO_PATH/.gitlab-ci.yml"
-    cp -r "$outputPath/rn_issue_auto_archiving" "$RN_INTERNAL_ISSUES_REPO_PATH/"
+    cp -rf "$outputPath/config" "$RN_INTERNAL_ISSUES_REPO_PATH"
+    cp -rf "$outputPath/.gitlab" "$RN_INTERNAL_ISSUES_REPO_PATH/"
+    cp -rf "$outputPath/.gitlab-ci.yml" "$RN_INTERNAL_ISSUES_REPO_PATH/.gitlab-ci.yml"
+    cp -rf "$outputPath/rn_issue_auto_archiving" "$RN_INTERNAL_ISSUES_REPO_PATH/"
 }
 
 parseCmds "$@"
