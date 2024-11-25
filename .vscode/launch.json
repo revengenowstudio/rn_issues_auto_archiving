@@ -8,7 +8,7 @@
             "name": "github issue_processor",
             "type": "debugpy",
             "request": "launch",
-            "program": "src/issue_processor_main.py",
+            "program": "rn_issues_auto_archiving/issue_processor_main.py",
             "args": [
                 "--config",
                 "./config/issue_processor.json",
@@ -22,7 +22,7 @@
             "name": "gitlab issue_processor",
             "type": "debugpy",
             "request": "launch",
-            "program": "src/issue_processor_main.py",
+            "program": "rn_issues_auto_archiving/issue_processor_main.py",
             "args": [
                 "--config",
                 "./config/issue_processor.json",
@@ -36,7 +36,7 @@
             "name": "auto_archiving",
             "type": "debugpy",
             "request": "launch",
-            "program": "src/auto_archiving_main.py",
+            "program": "rn_issues_auto_archiving/auto_archiving_main.py",
             "args": [
                 "--config",
                 "./config/auto_archiving.json",
@@ -50,7 +50,15 @@
             "name": "push_document gitlab",
             "type": "debugpy",
             "request": "launch",
-            "program": "src/push_document.py",
+            "program": "rn_issues_auto_archiving/push_document.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "archiving_success",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "rn_issues_auto_archiving/archiving_success.py",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}"
         },
@@ -58,7 +66,7 @@
             "name": "check_config",
             "type": "debugpy",
             "request": "launch",
-            "program": "src/utils/check_config.py",
+            "program": "rn_issues_auto_archiving/utils/check_config.py",
             "args": [
                 "--config-dir",
                 "./config"

@@ -61,4 +61,5 @@ auto_archiving:
     export author_name=RN-Bot-CI
     export commit_message="Close $ISSUE_REPOSITORY#{issue_id}"
     python ./rn_issues_auto_archiving/push_document.py
+    python ./rn_issues_auto_archiving/archiving_success.py
 

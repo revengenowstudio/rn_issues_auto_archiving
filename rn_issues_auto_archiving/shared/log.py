@@ -109,3 +109,7 @@ class Log():
     need_to_push_document = '''本地文件 {file_path} 的sha256值与远程仓库文件 {file_path} 的sha256值不一致，执行推送流程'''
     get_local_file_sha256 = '''正在获取本地文件 {file_path} 的sha256值'''
     get_local_file_sha256_success = '''成功获取本地文件 {file_path} 的sha256值：{sha256}'''
+
+    # archiving_success
+    unknown_platform_type = '''未识别的平台类型 "{platform_type}"'''
+    send_comment_failed = '''发送评论失败，原因：{exc}'''

@@ -20,11 +20,6 @@ from shared.exception import *
 # 所以并没有实现黑名单的功能
 
 
-def Exit():
-    print(Log.job_done)
-    exit(0)
-
-
 def main() -> None:
     if os.environ[Env.CI_EVENT_TYPE] in CiEventType.manual:
         print(Log.running_ci_by_manual)
@@ -57,13 +52,13 @@ def main() -> None:
     else:
         print(Log.get_test_platform_type
               .format(test_platform_type=test_platform_type))
-        if test_platform_type == "github":
+        if test_platform_type == Github.name:
             platform = Github()
-        elif test_platform_type == "gitlab":
+        elif test_platform_type == Gitlab.name:
             try:
                 platform = Gitlab()
             except WebhookPayloadError:
-                Exit()
+                return
         else:
             print(Log.unexpected_platform_type
                   .format(
@@ -77,11 +72,11 @@ def main() -> None:
         if (not platform.should_ci_running_in_manual
                 and platform.should_issue_state_open):
             print(Log.issue_state_is_open)
-            Exit()
-        
+            return
+
         if platform.should_issue_state_update:
             print(Log.issue_state_is_update)
-            Exit()
+            return
 
         platform.init_issue_info_from_platform()
 
@@ -142,7 +137,7 @@ def main() -> None:
                 config.white_list.labels
             ):
                 print(Log.not_archive_issue)
-                Exit()
+                return
             archive_version = platform.parse_archive_version(
                 archive_version_list
             )
@@ -160,7 +155,7 @@ def main() -> None:
         if (platform.should_ci_running_in_manual
                 and platform.should_issue_state_open):
             platform.close_issue()
-
+        print(Log.job_done)
     except (
         ArchiveBaseError
     ) as exc:
