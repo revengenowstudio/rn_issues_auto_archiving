@@ -8,6 +8,10 @@ def update_branch_in_file [file_name:string] {
     open -r $file_name | str replace 'TARGET_BRANCH: main' 'TARGET_BRANCH: master' | save -f $file_name
     print $"File updated : ($file_name) , change 'TARGET_BRANCH' value 'main' to 'master'"
 }
+def update_gitlab_ci [file_name:string] {
+    open -r $file_name | str replace -r "(include:)" "$1\n  - local: \"/.gitlab/workflows/DeployAutoArchiving.yml\"" | save -f $file_name
+    print $"File updated : ($file_name) , add '/.gitlab/workflows/DeployAutoArchiving.yml' after 'include:' "
+}
 
 def main [
     --RN_ALL_ISSUES_REPO_PATH : string  # 选填，外部issue仓库的绝对或者相对路径
@@ -41,6 +45,8 @@ def main [
 
     # 调用函数处理第二个文件
     update_branch_in_file "./output/.gitlab/workflows/AutoArchiving.yml"
+
+    update_gitlab_ci "./output/.gitlab-ci.yml"
 
     if ($RN_ALL_ISSUES_REPO_PATH | is-empty) {
         print "RN_ALL_ISSUES_REPO_PATH is empty , exit"

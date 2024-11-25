@@ -18,6 +18,24 @@ function Update-BranchInFile {
     Write-Host "File updated: $fileName"
 }
 
+function Add-IncludeInGitlabCi {
+    param (
+        [string]$fileName
+    )
+
+    # 使用 UTF-8 编码读取输入文件内容
+    $content = [System.IO.File]::ReadAllText($fileName, [System.Text.Encoding]::UTF8)
+
+    # 使用正则表达式匹配并替换 "TARGET_BRANCH: main" 为 "TARGET_BRANCH: master"
+    $updatedContent = $content -replace "(include:)", "`$1`n  - local: `"/.gitlab/workflows/DeployAutoArchiving.yml`""
+
+    # 将更新后的内容写回原文件，使用 UTF-8 编码
+    [System.IO.File]::WriteAllText($fileName, $updatedContent, [System.Text.Encoding]::UTF8)
+
+    # 输出完成信息
+    Write-Host "File updated: $fileName"
+}
+
 # 定义一个函数来检查并返回指定参数的值
 function Get-CommandLineParameter {
     param (
@@ -76,6 +94,8 @@ Update-BranchInFile -fileName "./output/.github/workflows/AutoArchiving.yml"
 
 # 调用函数处理第二个文件
 Update-BranchInFile -fileName "./output/.gitlab/workflows/AutoArchiving.yml"
+
+Add-IncludeInGitlabCi -fileName "./output/.gitlab-ci.yml"
 
 # 主程序入口
 $RN_ALL_ISSUES_REPO_PATH = Get-CommandLineParameter -parameterName "--RN_ALL_ISSUES_REPO_PATH" -cmdArgs $args

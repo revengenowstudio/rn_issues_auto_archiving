@@ -62,12 +62,16 @@ function pickFiles {
 }
 
 # 定义一个函数来处理文件
-function updateBranchInFile() {
+function updateBranchInFile {
     local file_name="$1"
-    local content=$(<"$file_name")
-    local updated_content=$(echo "$content" | sed 's/TARGET_BRANCH:[[:space:]]*main/TARGET_BRANCH: master/g')
-    echo "$updated_content" >"$file_name"
+    sed -i 's/TARGET_BRANCH:[[:space:]]*main/TARGET_BRANCH: master/g' "$file_name"
     echo "File updated : '$file_name' , TARGET_BRANCH value update to 'master'"
+}
+
+function updateBranchInGitlabCiFile {
+    local file_name="$1"
+    sed -i '/^include:/a \  - local: "/.gitlab/workflows/DeployAutoArchiving.yml"' "$file_name"
+    echo "Added include: local: \"./.gitlab/workflows/DeployAutoArchiving.yml\" to \"$file_name\""
 }
 
 function copyOutputFilesToAllIssueRepo {
@@ -88,6 +92,7 @@ parseCmds "$@"
 pickFiles
 updateBranchInFile "$outputPath/.github/workflows/AutoArchiving.yml"
 updateBranchInFile "$outputPath/.gitlab/workflows/AutoArchiving.yml"
+updateBranchInGitlabCiFile "$outputPath/.gitlab-ci.yml"
 
 if [[ -n "$RN_ALL_ISSUES_REPO_PATH" ]]; then
     echo "get RN_ALL_ISSUES_REPO_PATH '$RN_ALL_ISSUES_REPO_PATH' , copy output files to '$RN_ALL_ISSUES_REPO_PATH'"
