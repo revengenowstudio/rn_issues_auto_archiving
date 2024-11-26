@@ -36,6 +36,9 @@ def main() -> None:
         from dotenv import load_dotenv
         load_dotenv()
 
+    if not Gitlab.should_issue_type_webhook():
+        return
+
     test_platform_type = get_value_from_args(
         short_arg="-pt",
         long_arg="--platform-type",

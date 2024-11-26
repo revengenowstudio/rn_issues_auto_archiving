@@ -677,6 +677,28 @@ class Gitlab(Platform):
     name = "gitlab"
 
     @staticmethod
+    def should_issue_type_webhook() -> bool:
+        '''Gitlab流水线通过webhook触发流水线，
+        且无法在流水线测区分webhook事件，
+        可能会遇到非Issue事件触发的webhook触发了自动归档流水线
+        （例如push事件webhook触发的自动部署流水线）
+        gitlab webhook事件类型详见：
+        https://docs.gitlab.com/ee/user/project/integrations/webhook_events.html#push-events
+        '''
+        try:
+            webhook_payload = json.loads(
+                os.environ[Env.WEBHOOK_PAYLOAD])
+            if webhook_payload["event_name"] == "issue":
+                print(Log.issue_type_webhook_detected)
+                return True
+            else:
+                print(Log.other_type_webhook_detected)
+                return False
+        except KeyError:
+            # 如果读取不到环境变量，说明是github流水线环境
+            return True
+
+    @staticmethod
     def create_http_header(token: str) -> dict[str, str]:
         ''' 所需http header结构详见：
         https://docs.gitlab.com/ee/api/rest/index.html#request-payload'''
