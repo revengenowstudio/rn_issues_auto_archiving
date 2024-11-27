@@ -105,7 +105,7 @@ def main():
                 issue_info.ci_event_type in CiEventType.manual
             )
         )
-        # 由于后续还有push步骤，发送归档成功的评论不能在这里完成了
+        # 由于后续还有push步骤，就不在这里发送归档成功的评论了
         enable_send_comment = False
     except Exception as exc:
         exceptions.append(exc)

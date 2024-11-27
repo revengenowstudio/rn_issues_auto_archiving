@@ -75,6 +75,13 @@
             "cwd": "${workspaceFolder}"
         },
         {
+            "name": "Run UnitTest",
+            "type": "PowerShell",
+            "request": "launch",
+            "script": "./run_test.ps1",
+            "cwd": "${cwd}"
+        },
+        {
             "name": "output PowerShell",
             "type": "PowerShell",
             "request": "launch",

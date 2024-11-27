@@ -71,10 +71,6 @@ class Config():
             self.type_keyword: dict[str, str] = {}
             self.need_introduced_version_issue_type: list[str] = []
             self.label_map : dict[str,str] = {}
-
-    @staticmethod
-    def register_condition_handler(func: Callable[[list[str]], bool]) -> None:
-            Config.LabelConditions.handlers.append(func)
     @staticmethod
     def get_condition_handlers():
         return Config.LabelConditions.handlers
