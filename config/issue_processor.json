@@ -39,17 +39,12 @@
             "task 任务": "设定引入"
         }
     },
-    "white_list": {
-        "labels": [
-            "resolved 已解决"
-        ],
-        "comments": [
-            "{version_regex}测试通过",
-            "已验证[,，]版本号[:：]{version_regex}"
-        ]
-    },
-    "black_list": {
-        "labels": [],
-        "comments": []
-    }
+    "archive_necessary_labels": [
+        "resolved 已解决"
+    ],
+    "archived_version_reges_for_comments": [
+        "{version_regex}测试通过",
+        "已验证[,，]版本号[:：]{version_regex}"
+    ]
+    
 }
