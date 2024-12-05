@@ -114,7 +114,10 @@ def main() -> None:
     if not GitlabClient.should_issue_type_webhook():
         return
 
-    platform = init_git_service_client(test_platform_type)
+    platform = init_git_service_client(
+        test_platform_type,
+        config
+        )
 
     try:
         # gitlab的issue webhook是会相应issue reopen事件的
