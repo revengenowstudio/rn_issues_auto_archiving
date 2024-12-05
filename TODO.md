@@ -23,4 +23,8 @@
 - [ ] 完成“从两个issue仓库归档文件提取某个版本号范围的归档记录”归档记录收集汇总流水线（这是另一个仓库的任务）
 
 - [ ] 编写单元测试（重要）
+    - 将`_read_platform_environments`等读取环境变量的函数，统一抽象为data_source的子类，判断data_source只管从命令行参数或者环境变量中读取内容，data_source抽象类抽象出函数接口以供子类实现。数据类分为两种，一个是配置数据类，一个是IssueData，data_source类将有一个方法将读取内容输出成数据类以供后续使用。GithubService和GitlabService类创建时需要获取到这个数据类，而数据类本身还需要提供一个json输出接口，用于最后保存成json或者打印信息
 
+- [ ] 要不吧获取信息和归档内容写入脚本两个合一起吧，不是更好维护一点吗？
+
+# TODO  IssusDataSource的子类已经写完了，就差用上去到main和给gitlab和github类上了
