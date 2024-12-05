@@ -26,7 +26,6 @@ class ConfigJson(TypedDict):
 
 
 class Config():
-
     def __init__(self, config_path: str):
         print(Log.loading_something.format(something=config_path))
         self.rjust_space_width: int

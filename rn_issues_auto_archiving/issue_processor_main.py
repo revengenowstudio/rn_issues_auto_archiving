@@ -1,11 +1,22 @@
 import os
 
-from issue_processor.issue_platform import (Platform,
-                                            Github,
-                                            Gitlab,
-                                            )
+from issue_processor.git_service_client import (GitServiceClient,
+                                                GithubClient,
+                                                GitlabClient,
+                                                )
+from issue_processor.issue_data_source import (
+    GithubIssueDataSource,
+    GitlabIssueDataSource,
+)
+from shared.issue_info import IssueInfo
 from shared.ci_event_type import CiEventType
-from issue_processor.json_config import Config
+from shared.json_config import (
+    Config
+)
+from shared.config_data_source import (
+    EnvConfigDataSource,
+    JsonConfigDataSource
+)
 from shared.env import Env
 from shared.log import Log
 from shared.env import (should_run_in_github_action,
@@ -13,11 +24,51 @@ from shared.env import (should_run_in_github_action,
                         should_run_in_local)
 from shared.get_args import get_value_from_args
 from shared.exception import *
+from shared.config_manager import ConfigManager
 
 
-# TODO
-# 虽然配置文件里有black list的配置项，但是由于暂时用不到
-# 所以并没有实现黑名单的功能
+def init_git_service_client(
+    test_platform_type: str | None,
+    config: Config
+) -> GithubClient | GitlabClient:
+    service_client: GithubClient | GitlabClient | None = None
+    if test_platform_type is not None:
+        print(Log.get_test_platform_type
+              .format(test_platform_type=test_platform_type))
+
+    issue_info = IssueInfo()
+    if (test_platform_type == GithubClient.name
+            or should_run_in_github_action()):
+        GithubIssueDataSource().load(issue_info)
+        service_client = GithubClient(
+            issue_info=issue_info,
+            token=config.token,
+            output_path=config.output_path,
+            ci_event_type=issue_info.ci_event_type
+        )
+    elif (test_platform_type == GitlabClient.name
+          or should_run_in_gitlab_ci()):
+        GitlabIssueDataSource().load(issue_info)
+        try:
+            service_client = GitlabClient(
+                issue_info=issue_info,
+                token=config.token,
+                output_path=config.output_path,
+                ci_event_type=issue_info.ci_event_type
+            )
+        except WebhookPayloadError:
+            return
+        # 这里特意没写else，如果本地手动执行脚本的时候
+        # 没有添加--platform-type或-pt参数
+        # 就会跑到这里的else语句了
+        # 且不需要else已经足够判断生产环境了
+    else:
+        raise UnexpectedPlatform(
+            Log.unexpected_platform_type
+            .format(
+                platform_type=test_platform_type
+            ))
+    return service_client
 
 
 def main() -> None:
@@ -25,48 +76,45 @@ def main() -> None:
         print(Log.running_ci_by_manual)
     else:
         print(Log.running_ci_by_automated)
-    config = Config(get_value_from_args(
-        short_arg="-c",
-        long_arg="--config",
-    ))
-    platform: Platform
 
     if should_run_in_local():
         print(Log.non_platform_action_env)
         from dotenv import load_dotenv
         load_dotenv()
 
-    if not Gitlab.should_issue_type_webhook():
-        return
-
     test_platform_type = get_value_from_args(
         short_arg="-pt",
         long_arg="--platform-type",
     )
-    if test_platform_type is None:
-        if should_run_in_github_action():
-            platform = Github()
-        elif should_run_in_gitlab_ci():
-            platform = Gitlab()
-        # 这里特意没写else，如果本地手动执行脚本的时候
-        # 没有添加--platform-type或-pt参数
-        # 就会跑到这里的else语句了
-        # 且不需要else已经足够判断生产环境了
-    else:
-        print(Log.get_test_platform_type
-              .format(test_platform_type=test_platform_type))
-        if test_platform_type == Github.name:
-            platform = Github()
-        elif test_platform_type == Gitlab.name:
-            try:
-                platform = Gitlab()
-            except WebhookPayloadError:
-                return
-        else:
-            print(Log.unexpected_platform_type
-                  .format(
-                      platform_type=test_platform_type
-                  ))
+    config_path = get_value_from_args(
+        short_arg="-c",
+        long_arg="--config",
+    )
+    if config_path is None:
+        print(Log.config_path_not_found)
+        return
+
+    config_manager = ConfigManager([
+        EnvConfigDataSource(),
+        JsonConfigDataSource(config_path)
+    ])
+    config = Config()
+
+    try:
+        config_manager.load_all(config)
+    except Exception as exc:
+        print(Log.parse_config_failed
+              .format(exc=exc))
+        raise
+
+    if config.output_path is None:
+        print(Log.config_path_not_found)
+        return
+
+    if not GitlabClient.should_issue_type_webhook():
+        return
+
+    platform = init_git_service_client(test_platform_type)
 
     try:
         # gitlab的issue webhook是会相应issue reopen事件的
@@ -109,14 +157,14 @@ def main() -> None:
         if platform.should_ci_running_in_manual:
             if not platform.should_archived_version_input:
                 archive_version_list = platform.get_archive_version(
-                    config.white_list.comments
+                    config.archived_version_reges_for_comments
                 )
                 if not platform.should_archive_issue(
                     issue_type,
                     config.issue_type.label_map,
                     archive_version_list,
                     platform.get_labels(),
-                    config.white_list.labels
+                    config.archive_necessary_labels
                 ):
                     raise MissingArchiveVersionAndArchiveLabel(
                         ErrorMessage.missing_labels_and_archive_version
@@ -130,14 +178,14 @@ def main() -> None:
         # 例如格式错误的issue被创建者手动关闭了
         else:
             archive_version_list = platform.get_archive_version(
-                config.white_list.comments
+                config.archived_version_reges_for_comments
             )
             if not platform.should_archive_issue(
                 issue_type,
                 config.issue_type.label_map,
                 archive_version_list,
                 platform.get_labels(),
-                config.white_list.labels
+                config.archive_necessary_labels
             ):
                 print(Log.not_archive_issue)
                 return

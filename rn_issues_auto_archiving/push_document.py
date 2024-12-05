@@ -13,7 +13,7 @@ from shared.exception import ErrorMessage
 from auto_archiving.send_comment import send_comment
 from auto_archiving.reopen_issue import reopen_issue
 from auto_archiving.http_request import http_request
-from issue_processor.issue_platform import Gitlab
+from rn_issues_auto_archiving.issue_processor.git_service_client import GitlabClient
 from shared.issue_info import IssueInfoJson
 
 
@@ -74,7 +74,7 @@ def get_remote_file_sha256(
         url=f'https://{gitlab_host}/api/v4/projects/{project_id}/repository/files/{file_path}?ref={branch_name}',
         headers=http_header
     )
-    result = response.headers.get("X-Gitlab-Content-Sha256")
+    result = response.headers.get("X-GitlabClient-Content-Sha256")
     print(Log.get_remote_file_sha256_success
           .format(file_path=file_path,
                   sha256=result))
@@ -121,7 +121,7 @@ def main():
     gitlab_host = os.environ[Env.GITLAB_HOST]
     project_id = int(os.environ[Env.PROJECT_ID])
     token = os.environ[Env.TOKEN]
-    http_header = Gitlab.create_http_header(token)
+    http_header = GitlabClient.create_http_header(token)
 
     try:
 

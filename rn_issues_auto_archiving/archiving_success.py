@@ -11,7 +11,7 @@ from shared.env import (Env,
                         should_run_in_local
                         )
 from auto_archiving.send_comment import send_comment
-from issue_processor.issue_platform import Gitlab, Github
+from rn_issues_auto_archiving.issue_processor.git_service_client import GitlabClient, GithubClient
 
 
 def main():
@@ -36,8 +36,8 @@ def main():
                   IssueInfoJson.remove_sensitive_info(issue_info_json)
               )))
         issue_info = IssueInfo(
-            reopen_info=IssueInfo.ReopenInfo(
-                **issue_info_json.pop("reopen_info")
+            links=IssueInfo.Links(
+                **issue_info_json.pop("links")
             ),
             **issue_info_json
         )
@@ -46,12 +46,12 @@ def main():
         return
 
     http_header: dict[str, str]
-    if issue_info.platform_type == Github.name:
-        http_header = Github.create_http_header(
+    if issue_info.platform_type == GithubClient.name:
+        http_header = GithubClient.create_http_header(
             token=token
         )
-    elif issue_info.platform_type == Gitlab.name:
-        http_header = Gitlab.create_http_header(
+    elif issue_info.platform_type == GitlabClient.name:
+        http_header = GitlabClient.create_http_header(
             token=token
         )
     else:
@@ -62,7 +62,7 @@ def main():
             ))
     try:
         send_comment(
-            comment_url=issue_info.reopen_info.comment_url,
+            comment_url=issue_info.links.comment_url,
             http_header=http_header,
             message=Log.issue_archived_success.format(
                 issue_id=issue_info.issue_id,

@@ -37,7 +37,7 @@ class ErrorMessage():
 
     reopen_issue_failed = '''Reopen Issue失败，错误信息：{exc}。
     '''
-    
+
     send_comment_failed = '''发送告警评论失败，错误信息：{exc}。
     '''
 
@@ -75,17 +75,26 @@ class InBlackList(ArchiveBaseError):
     '''匹配到无法继续执行归档任务的黑名单内容'''
     pass
 
+
 class MissingArchiveVersionAndArchiveLabel(ArchiveBaseError):
     '''Issue Archive Version和关键的归档标签都缺失'''
     pass
+
 
 class WebhookPayloadError(Exception):
     '''webhook payload为空'''
     pass
 
+
 class IssueInfoMissing(Exception):
     '''找不到IssueInfo文件'''
-    
+
+
 class MissingIssueNumber(Exception):
     '''Issue Number为空'''
+    pass
+
+
+class UnexpectedPlatform(Exception):
+    '''未识别的流水线环境'''
     pass

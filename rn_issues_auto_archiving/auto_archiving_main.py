@@ -54,8 +54,8 @@ def main():
         return
     try:
         issue_info = IssueInfo(
-            reopen_info=IssueInfo.ReopenInfo(
-                **issue_info_json.pop("reopen_info")
+            links=IssueInfo.Links(
+                **issue_info_json.pop("links")
             ),
             **issue_info_json
         )
@@ -134,10 +134,10 @@ def main():
         # )
         try:
             reopen_issue(
-                http_header=issue_info.reopen_info.http_header,
-                reopen_url=issue_info.reopen_info.reopen_url,
-                reopen_http_method=issue_info.reopen_info.reopen_http_method,
-                reopen_body=issue_info.reopen_info.reopen_body
+                http_header=issue_info.http_header,
+                reopen_url=issue_info.links.issue_url,
+                reopen_http_method=issue_info.reopen_http_method,
+                reopen_body=issue_info.reopen_body
             )
         except Exception as exc_:
             exceptions.append(exc_)
@@ -153,8 +153,8 @@ def main():
         if enable_send_comment:
             try:
                 send_comment(
-                    http_header=issue_info.reopen_info.http_header,
-                    comment_url=issue_info.reopen_info.comment_url,
+                    http_header=issue_info.http_header,
+                    comment_url=issue_info.links.comment_url,
                     message=comment_message
                 )
             except Exception as exc_:
