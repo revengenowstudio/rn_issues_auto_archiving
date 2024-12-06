@@ -174,7 +174,6 @@ def main() -> None:
         not_input_archive_version = not platform.should_archived_version_input(
             issue_info.archive_version
         )
-
         if ((running_in_manual and not_input_archive_version)
                 or not running_in_manual):
             # 不是所有issue的状态都需要检查issue是否符合归档条件的

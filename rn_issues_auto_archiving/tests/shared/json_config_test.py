@@ -1,7 +1,6 @@
 import pytest
 
-import issue_processor.json_config
-import auto_archiving.json_config
+import shared.json_config
 
 
 def test_issue_processor_json_config():
