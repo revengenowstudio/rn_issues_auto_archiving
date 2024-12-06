@@ -1,6 +1,6 @@
 from io import TextIOWrapper
 
-from .json_config import IssueType, ConfigJson
+from shared.json_config import IssueType, ConfigJson, ProcessingActionJson
 from shared.log import Log
 
 
@@ -18,13 +18,13 @@ class ArchiveDocument():
         print(Log.getting_something_from_success
               .format(another=path,
                       something=Log.archive_document_content))
-        self.__file: TextIOWrapper | None = None
+        self.__file: TextIOWrapper
 
     def __add_line(self, line: str) -> None:
         print(Log.add_new_line)
         self.__new_lines.append(line)
 
-    def __replace_line(self, index: str, line: str) -> None:
+    def __replace_line(self, index: int, line: str) -> None:
         print(Log.replaced_line_index
               .format(line_index=index,
                       ))
@@ -74,8 +74,10 @@ class ArchiveDocument():
     def parse_issue_title(
         issue_title: str,
         issue_type: str,
-        issue_title_processing_rules: dict[IssueType,
-                                           ConfigJson.ProcessingAction]
+        issue_title_processing_rules: dict[
+            IssueType,
+            ProcessingActionJson
+        ]
     ) -> str:
         action_map = issue_title_processing_rules.get(
             issue_type)
@@ -146,8 +148,10 @@ class ArchiveDocument():
                       rjust_character: str,
                       table_separator: str,
                       archive_template: str,
-                      issue_title_processing_rules: dict[IssueType,
-                                                         ConfigJson.ProcessingAction],
+                      issue_title_processing_rules: dict[
+                          IssueType,
+                          ProcessingActionJson
+                      ],
                       issue_id: int,
                       issue_type: str,
                       issue_title: str,
@@ -197,7 +201,7 @@ class ArchiveDocument():
             archive_version=archive_version
         )
         print(Log.format_issue_content_success)
-        
+
         if "\n" not in new_content:
             new_content += "\n"
 
@@ -208,7 +212,6 @@ class ArchiveDocument():
             )
         else:
             self.__add_line(new_content)
-
 
     def save(self) -> None:
         print(Log.write_content_to_document)

@@ -5,7 +5,7 @@ from pathlib import Path
 from shared.log import Log
 from shared.issue_info import IssueInfo
 from shared.get_args import get_value_from_args
-from shared.issue_info import IssueInfoJson
+from shared.issue_info import IssueInfoJson, IssueInfo
 from shared.json_dumps import json_dumps
 from shared.env import (Env,
                         should_run_in_local
@@ -23,24 +23,16 @@ def main():
     output_path = os.environ[Env.ISSUE_OUTPUT_PATH]
     issue_repository = os.environ[Env.ISSUE_REPOSITORY]
     token = os.environ[Env.TOKEN]
-    
-    issue_info_json: IssueInfoJson
+
     issue_info: IssueInfo
     try:
-        issue_info_json = json.loads(
-            Path(output_path
-                 ).read_text(encoding="utf-8")
-        )
+        issue_info = IssueInfo()
+        issue_info.json_load(output_path)
         print(Log.print_issue_info
               .format(issue_info=json_dumps(
-                  IssueInfoJson.remove_sensitive_info(issue_info_json)
+                  issue_info.to_print_string()
               )))
-        issue_info = IssueInfo(
-            links=IssueInfo.Links(
-                **issue_info_json.pop("links")
-            ),
-            **issue_info_json
-        )
+
     except FileNotFoundError:
         print(Log.issue_output_not_found)
         return

@@ -7,14 +7,20 @@ from http import HTTPStatus
 
 import httpx
 
+import github_response_json
+import gitlab_response_json
 from shared.log import Log
 from shared.env import Env
 from shared.exception import *
-from shared.issue_info import IssueInfoJson, AUTO_ISSUE_TYPE, IssueInfo
+from shared.issue_info import AUTO_ISSUE_TYPE, IssueInfo
 from shared.issue_state import IssueState, parse_issue_state
 from shared.ci_event_type import CiEventType
 from shared.json_dumps import json_dumps
 from shared.api_path import ApiPath
+
+
+def get_issue_id_from_url(url: str) -> int:
+    return int(url.split("/")[-1])
 
 
 @dataclass()
@@ -61,9 +67,25 @@ class GitServiceClient(ABC):
                 .format(issues_number_var=issue_number))
         return int(issue_number.strip())
 
-    @abstractmethod
-    def _get_labels_from_platform(self) -> list[str]:
-        pass
+    @staticmethod
+    def should_issue_state_open(issue_state: str) -> bool:
+        return issue_state == IssueState.open
+
+    @staticmethod
+    def should_issue_state_update(issue_state: str) -> bool:
+        return issue_state == IssueState.update
+
+    @staticmethod
+    def should_archived_version_input(archive_version: str) -> bool:
+        return archive_version != ""
+
+    @staticmethod
+    def should_introduced_version_input(introduced_version: str) -> bool:
+        return introduced_version != ""
+
+    @staticmethod
+    def should_issue_type_auto_detect(issue_type: str) -> bool:
+        return issue_type == AUTO_ISSUE_TYPE
 
     @abstractmethod
     def _get_comments_from_platform(
@@ -73,11 +95,11 @@ class GitServiceClient(ABC):
         pass
 
     @abstractmethod
-    def reopen_issue(self) -> None:
+    def reopen_issue(self, issue_url: str) -> None:
         pass
 
     @abstractmethod
-    def close_issue(self) -> None:
+    def close_issue(self, issue_url: str) -> None:
         pass
 
     @abstractmethod
@@ -89,7 +111,7 @@ class GitServiceClient(ABC):
         pass
 
     @abstractmethod
-    def get_issue_info_from_platform(self) -> Issue:
+    def get_issue_info_from_platform(self, issue_url: str) -> Issue:
         pass
 
     @property
@@ -113,22 +135,6 @@ class GitServiceClient(ABC):
         pass
 
     @property
-    def introduced_version(self) -> str:
-        return self._issue_info.introduced_version
-
-    @property
-    def archive_version(self) -> str:
-        return self._issue_info.archive_version
-
-    @property
-    def should_issue_state_open(self) -> bool:
-        return self._issue_info.issue_state == IssueState.open
-
-    @property
-    def should_issue_state_update(self) -> bool:
-        return self._issue_info.issue_state == IssueState.update
-
-    @property
     def should_ci_running_in_manual(self) -> bool:
         return self._ci_event_type in CiEventType.manual
 
@@ -136,32 +142,7 @@ class GitServiceClient(ABC):
     def should_ci_running_in_issue_event(self) -> bool:
         return self._ci_event_type in CiEventType.issue_event
 
-    @property
-    def should_archived_version_input(self) -> bool:
-        return self._issue_info.archive_version != ""
-
-    @property
-    def should_introduced_version_input(self) -> bool:
-        return self._issue_info.introduced_version != ""
-
-    @property
-    def should_issue_type_auto_detect(self) -> bool:
-        return self._issue_info.issue_type == AUTO_ISSUE_TYPE
-
-    @property
-    def archived_version(self) -> str:
-        return self._issue_info.archive_version
-
-    @property
-    def introduced_version(self) -> str:
-        return self._issue_info.introduced_version
-
-    @property
-    def issue_type(self) -> str:
-        return self._issue_info.issue_type
-
     def __init__(self,
-                 issue_info: IssueInfo,
                  token: str,
                  output_path: str,
                  ci_event_type: str,
@@ -169,7 +150,6 @@ class GitServiceClient(ABC):
         self._token: str = token
         self._output_path: str = output_path
         self._ci_event_type: str = ci_event_type
-        self._issue_info: IssueInfo = issue_info
         self._platform_type: str
         self._http_header: dict[str, str]
         self._http_client: httpx.Client
@@ -179,11 +159,11 @@ class GitServiceClient(ABC):
         self,
         url: str,
         method: str = "GET",
-        params: dict[str, str] = None,
-        json_content: dict[str, str] = None,
+        params: dict[str, str] | None = None,
+        json_content: dict[str, str] | None = None,
         retry_times: int = 3,
     ) -> httpx.Response:
-        error = None
+        error: Exception = Exception()
         for _ in range(retry_times):
             try:
                 response = self._http_client.request(
@@ -209,35 +189,29 @@ class GitServiceClient(ABC):
                 error = e
         raise error
 
-    def init_issue_info_from_platform(
-        self
+    def fetch_missing_issue_info(
+        self,
+        issue_info: IssueInfo
     ) -> None:
 
         self._comments = self._get_comments_from_platform(
-            self._http_client,
-            self._issue_info.links.comment_url
+            issue_info.links.comment_url
         )
-
+        new_issue_info = self.get_issue_info_from_platform(
+            issue_info.links.issue_url
+        )
+        issue_info.issue_labels = new_issue_info.labels
         if self.should_ci_running_in_manual:
-            # 手动触发流水线的情况
-            # 以防可选项为空，需要打一个请请求获取issue信息
-            issue_info = self.get_issue_info_from_platform()
-            self._issue_info.issue_labels = issue_info.labels
-            self._issue_info.issue_state = issue_info.state
-            if self._issue_info.issue_title == "":
-                self._issue_info.issue_title = issue_info.title
-            if self._issue_info.issue_body == "":
-                self._issue_info.issue_body = issue_info.body
-
-        else:
-            # issue事件触发流水线的情况
-            # 至于为什么要留着_get_labels_from_platform
-            # 因为gitlab的webhook载荷里有标签了，没必要在打一次请求
-            self._issue_info.issue_labels = self._get_labels_from_platform()
+            issue_info.issue_state = new_issue_info.state
+            if issue_info.issue_title == "":
+                issue_info.issue_title = new_issue_info.title
+            if issue_info.issue_body == "":
+                issue_info.issue_body = new_issue_info.body
 
     def get_introduced_version_from_description(
         self,
         issue_type: str,
+        issue_body: str,
         introduced_version_reges: list[str],
         need_introduced_version_issue_type: list[str]
     ) -> str:
@@ -248,7 +222,7 @@ class GitServiceClient(ABC):
             introduced_versions.extend(
                 re.findall(
                     regex,
-                    self._issue_info.issue_body
+                    issue_body
                 )
             )
         introduced_versions = [item.strip() for item in introduced_versions]
@@ -273,9 +247,6 @@ class GitServiceClient(ABC):
               .format(another=Log.issue_description, something=Log.introduced_version))
         return introduced_versions[0]
 
-    def get_labels(self) -> list[str]:
-        return self._issue_info.issue_labels
-
     def get_archive_version(
         self,
         comment_reges: list[str]
@@ -291,7 +262,10 @@ class GitServiceClient(ABC):
 
         return result
 
-    def send_comment(self, comment_body: str) -> None:
+    def send_comment(
+            self,
+            comment_url: str,
+            comment_body: str) -> None:
         ''' api结构详见：\n
         Github ： https://docs.github.com/zh/rest/issues/comments?apiVersion=2022-11-28#create-an-issue-comment \n
         Gitlab ： https://docs.gitlab.com/ee/api/notes.html#create-new-issue-note \n
@@ -301,7 +275,7 @@ class GitServiceClient(ABC):
             something=Log.announcement_comment))
         self.http_request(
             method="POST",
-            url=self._issue_info.links.comment_url,
+            url=comment_url,
             json_content={
                 "body": comment_body
             }
@@ -319,6 +293,13 @@ class GitServiceClient(ABC):
         check_labels: bool = True,
         check_archive_version: bool = True
     ) -> bool:
+        '''should_archive_issue会检查当前issue是否是应该被归档的对象，\n
+        以及判断当前issue如果是归档的对象，是否符合归档条件 \n
+        函数区分了上述三种情况且会产生不同的行为：\n
+        - 若issue不是归档对象，则直接返回False\n
+        - 若issue是归档对象，但是不满足归档条件（缺少归档关键信息），则抛出相应错误\n
+        - 若issue是归档对象，并且满足归档条件，则返回True\n
+        '''
 
         if (should_not_match_archive_version := (
                 len(archive_version) == 0)
@@ -365,33 +346,15 @@ class GitServiceClient(ABC):
 
         return True
 
-    def get_issue_type_from_title(
-        self,
-        type_keyword: dict[str, str]
-    ) -> str:
-        print(Log.getting_something_from
-              .format(another=Log.issue_title, something=Log.issue_type))
-        for keyword, type in type_keyword.items():
-            if keyword in self._issue_info.issue_title:
-                print(Log.getting_something_from_success
-                      .format(another=Log.issue_title,
-                              something=Log.issue_type))
-                return type
-
-        print(Log.issue_type_not_found)
-        raise IssueTypeError(
-            ErrorMessage.missing_issue_type_from_title
-            .format(issue_type=list(type_keyword.keys()))
-        )
-
     def get_issue_type_from_labels(
             self,
+            issue_labels: list[str],
             label_map: dict[str, str]
     ) -> str:
         print(Log.getting_something_from
               .format(another=Log.issue_label, something=Log.issue_type))
         for label_name, type in label_map.items():
-            if label_name in self._issue_info.issue_labels:
+            if label_name in issue_labels:
                 print(Log.getting_something_from_success
                       .format(another=Log.issue_label,
                               something=Log.issue_type))
@@ -402,18 +365,20 @@ class GitServiceClient(ABC):
 
     def remove_type_in_issue_title(
             self,
+            issue_title: str,
             type_keyword: dict[str, str]
-    ) -> None:
-        title = self._issue_info.issue_title
+    ) -> str:
+        title = issue_title
         # 这里不打算考虑issue标题中
         # 匹配多个issue类型关键字的情况
         # 因为这种情况下脚本完全无法判断
         # issue的真实类型是什么
         for key in type_keyword.keys():
             if key in title:
-                self._issue_info.issue_title = title.replace(
+                title = title.replace(
                     key, '').strip()
                 break
+        return title
 
     def parse_archive_version(
         self,
@@ -428,53 +393,6 @@ class GitServiceClient(ABC):
         print(Log.getting_something_from_success
               .format(another=Log.issue_comment, something=Log.archive_version))
         return archive_version[0]
-
-    def issue_content_to_json(
-        self,
-        archive_version: str,
-        introduced_version: str,
-        issue_type: str
-    ) -> None:
-        json_path = self._output_path
-        issue_json = IssueInfoJson(
-            issue_id=self._issue_info.issue_id,
-            issue_type=issue_type,
-            issue_title=self._issue_info.issue_title,
-            issue_state=self._issue_info.issue_state,
-            introduced_version=introduced_version,
-            archive_version=archive_version,
-            ci_event_type=self._ci_event_type,
-            platform_type=self._platform_type,
-            links=IssueInfoJson.Links(
-                http_header=self._http_header,
-                issue_url=self._issue_info.links.issue_url,
-                reopen_http_method=self.reopen_issue_method,
-                reopen_body=self.reopen_issue_body,
-                comment_url=self._issue_info.links.comment_url,
-            )
-        )
-
-        print(Log.print_issue_json
-              .format(
-                  issue_json=json_dumps(
-                      IssueInfoJson.remove_sensitive_info(
-                          issue_json)
-                  ),
-              ))
-        print(Log.save_issue_content_to_file
-              .format(output_path=json_path))
-
-        with open(json_path,
-                  "w",
-                  encoding="utf-8") as file:
-            json.dump(
-                issue_json,
-                file,
-                ensure_ascii=False,
-                indent=4
-            )
-        print(Log.save_issue_content_to_file_success
-              .format(output_path=json_path))
 
 
 class GithubClient(GitServiceClient):
@@ -509,28 +427,14 @@ class GithubClient(GitServiceClient):
             "state": "closed"
         }
 
-    def _get_labels_from_platform(self) -> list[str]:
-        ''' 所需http header结构详见：
-        https://docs.github.com/zh/rest/issues/issues?apiVersion=2022-11-28#get-an-issue'''
-        print(Log.getting_something.
-              format(something=Log.issue_label))
-        response = self.http_request(
-            url=self._issue_info.links.issue_url,
-            method="GET"
-        )
-        print(Log.getting_something_success.
-              format(something=Log.issue_label))
-        return [label["name"]
-                for label in response.json()["labels"]]
-
     def _init_http_client(self) -> None:
         self._http_header = self.create_http_header(self._token)
         self._http_client = httpx.Client(
             headers=self._http_header
         )
 
-    def __init__(self, issue_info, token, output_path, ci_event_type):
-        super().__init__(issue_info, token, output_path, ci_event_type)
+    def __init__(self,  token, output_path, ci_event_type):
+        super().__init__(token, output_path, ci_event_type)
         self._platform_type = GithubClient.name
         self._init_http_client()
 
@@ -539,16 +443,17 @@ class GithubClient(GitServiceClient):
         url: str,
     ) -> list[Comment]:
         ''' api结构详见：
-        https://docs.github.com/zh/rest/issues/comments?apiVersion=2022-11-28#create-an-issue-comment'''
+        https://docs.github.com/en/rest/issues/comments?apiVersion=2022-11-28#list-issue-comments-for-a-repository'''
         print(Log.getting_something.format(something=Log.issue_comment))
         comments: list[Comment] = []
         page = 1
         while True:
             response: httpx.Response = self.http_request(
                 url=url,
-                params={"page": page}
+                params={"page": str(page)}
             )
-            raw_json: list[dict[str, str]] = response.json()
+            raw_json: list[github_response_json.Comment
+                           ] = response.json()
             if len(raw_json) == 0:
                 break
             comments.extend(
@@ -561,12 +466,12 @@ class GithubClient(GitServiceClient):
               format(something=Log.issue_comment))
         return comments
 
-    def get_issue_info_from_platform(self) -> Issue:
+    def get_issue_info_from_platform(self, issue_url: str) -> Issue:
         ''' 所需http header结构详见：
         https://docs.github.com/zh/rest/issues/issues?apiVersion=2022-11-28#get-an-issue'''
         print(Log.getting_issue_info)
         response = self.http_request(
-            url=self._issue_info.links.issue_url,
+            url=issue_url,
             method="GET"
         )
         print(Log.getting_issue_info_success)
@@ -580,34 +485,38 @@ class GithubClient(GitServiceClient):
                     for label in raw_json["labels"]],
         )
 
-    def reopen_issue(self) -> None:
+    def reopen_issue(self, issue_url: str) -> None:
         ''' api结构详见：
         https://docs.github.com/zh/rest/issues/issues?apiVersion=2022-11-28#update-an-issue'''
-        url = self._issue_info.links.issue_url
+        url = issue_url
         print(Log.reopen_issue
-              .format(issue_number=self._issue_info.issue_id))
+              .format(issue_number=get_issue_id_from_url(
+                  issue_url)))
         self.http_request(
             method=self.reopen_issue_method,
             url=url,
             json_content=self.reopen_issue_body
         )
         print(Log.reopen_issue_success
-              .format(issue_number=self._issue_info.issue_id)
+              .format(issue_number=get_issue_id_from_url(
+                  issue_url))
               )
 
-    def close_issue(self) -> None:
+    def close_issue(self, issue_url: str) -> None:
         ''' api结构详见：
         https://docs.github.com/zh/rest/issues/issues?apiVersion=2022-11-28#update-an-issue'''
-        url = self._issue_info.links.issue_url
+        url = issue_url
         print(Log.close_issue
-              .format(issue_number=self._issue_info.issue_id))
+              .format(issue_number=get_issue_id_from_url(
+                  issue_url)))
         self.http_request(
             method=self.close_issue_method,
             url=url,
             json_content=self.close_issue_body
         )
         print(Log.close_issue_success
-              .format(issue_number=self._issue_info.issue_id)
+              .format(issue_number=get_issue_id_from_url(
+                  issue_url))
               )
 
     def close(self):
@@ -694,24 +603,14 @@ class GitlabClient(GitServiceClient):
 
         return '/'.join(url_split)
 
-    def _get_labels_from_platform(self) -> list[str]:
-        # ''' 所需http header结构详见：
-        # https://docs.gitlab.com/ee/api/issues.html#single-issue'''
-        # gitlab webhook的payload携带了label了
-        print(Log.getting_something.
-              format(something=Log.issue_label))
-        print(Log.getting_something_success.
-              format(something=Log.issue_label))
-        return self._issue_info.issue_labels
-
     def _init_http_client(self) -> None:
         self._http_header = self.create_http_header(self._token)
         self._http_client = httpx.Client(
             headers=self._http_header
         )
 
-    def __init__(self, issue_info, token, output_path, ci_event_type):
-        super().__init__(issue_info, token, output_path, ci_event_type)
+    def __init__(self,  token, output_path, ci_event_type):
+        super().__init__(token, output_path, ci_event_type)
         self._platform_type = GitlabClient.name
         self._init_http_client()
 
@@ -730,9 +629,10 @@ class GitlabClient(GitServiceClient):
         while True:
             response: httpx.Response = self.http_request(
                 url=url,
-                params={"page": page}
+                params={"page": str(page)}
             )
-            raw_json: list[dict[str, str]] = response.json()
+            raw_json: list[gitlab_response_json.Comment
+                           ] = response.json()
             if len(raw_json) == 0:
                 break
             comments.extend(
@@ -744,13 +644,13 @@ class GitlabClient(GitServiceClient):
               format(something=Log.issue_comment))
         return comments
 
-    def get_issue_info_from_platform(self) -> Issue:
+    def get_issue_info_from_platform(self, issue_url: str) -> Issue:
         ''' 所需http header结构详见：
         https://docs.gitlab.com/ee/api/issues.html#single-issue'''
         print(Log.getting_issue_info)
         response = self.http_request(
             method="GET",
-            url=self._issue_info.links.issue_url
+            url=issue_url
         )
         print(Log.getting_issue_info_success)
         raw_json = response.json()
@@ -764,34 +664,38 @@ class GitlabClient(GitServiceClient):
             archive_version=""
         )
 
-    def reopen_issue(self) -> None:
+    def reopen_issue(self, issue_url: str) -> None:
         ''' api结构详见：
         https://docs.gitlab.com/ee/api/issues.html#edit-an-issue'''
-        url = self._issue_info.links.issue_url
+        url = issue_url
         print(Log.reopen_issue
-              .format(issue_number=self._issue_info.issue_id))
+              .format(issue_number=get_issue_id_from_url(
+                  issue_url)))
         self.http_request(
             method=self.reopen_issue_method,
             url=url,
             json_content=self.reopen_issue_body
         )
         print(Log.reopen_issue_success
-              .format(issue_number=self._issue_info.issue_id)
+              .format(issue_number=get_issue_id_from_url(
+                  issue_url))
               )
 
-    def close_issue(self) -> None:
+    def close_issue(self, issue_url: str) -> None:
         ''' api结构详见：
         https://docs.gitlab.com/ee/api/issues.html#edit-an-issue'''
-        url = self._issue_info.links.issue_url
+        url = issue_url
         print(Log.close_issue
-              .format(issue_number=self._issue_info.issue_id))
+              .format(issue_number=get_issue_id_from_url(
+                  issue_url)))
         self.http_request(
             method=self.close_issue_method,
             url=url,
             json_content=self.close_issue_body
         )
         print(Log.close_issue_success
-              .format(issue_number=self._issue_info.issue_id)
+              .format(issue_number=get_issue_id_from_url(
+                  issue_url))
               )
 
     def close(self):

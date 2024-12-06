@@ -27,3 +27,4 @@
 
 - [ ] 要不吧获取信息和归档内容写入脚本两个合一起吧，不是更好维护一点吗？
 - config的定义和json配置已经合并到一起了，就差吧两个main合并成一个，并且还要重构gitlab和github类的东西。记得吧`issue_content_to_json`干掉，因为已经不需要了，issue_info数据类自己有to_json方法
+- `rn_issues_auto_archiving\archiving_success.py`的内容也合并到 `rn_issues_auto_archiving\main.py`中

@@ -6,7 +6,7 @@ from auto_archiving.http_request import http_request
 
 def send_comment(
         comment_url: str,
-        http_header: str,
+        http_header: dict[str,str],
         message: str
 ) -> None:
     ''' api结构详见：\n

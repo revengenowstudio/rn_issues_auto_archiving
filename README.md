@@ -59,7 +59,7 @@
 - Python脚本全部位于`./src/`目录下
 - Github流水线脚本全部位于`./.github/workflows/`目录下，配置文件则在`./.github/configs/`
 - Gitlab流水线脚本全部位于`./gitlab-ci.yml`，配置文件则在`./.gitlab/configs/`
-- 脚本配置文件`issue_processor.json`负责存储脚本处理Issue的行为，例如匹配所需的关键字，匹配Issue标签的类型等等。部分配置支持正则表达式，具体详情参见下文[Config配置](#Config配置)
+- 脚本配置文件`auto_archiving.json`负责存储脚本处理Issue的行为，例如匹配所需的关键字，匹配Issue标签的类型等等。部分配置支持正则表达式，具体详情参见下文[Config配置](#Config配置)
 
 ## github侧
 
@@ -105,7 +105,7 @@
         - `已激活`： 必须勾选这个复选框，创建之后调度器自动按照间隔时间触发流水线
 
 # Config配置
-- `issue_processor.json`负责定义Issue信息收集相关内容
+- `auto_archiving.json`负责定义Issue信息收集相关内容
     |变量名|变量类型|正则表达式支持|描述|
     |---|---|---|---|
     |version_regex|str|是|匹配版本号的正则表达式，最外层必须有一对小括号`()`，因为这个值会被其他值引用|

@@ -43,8 +43,9 @@ class EnvConfigDataSource(DataSource):
             self,
             config: Config
     ) -> None:
-        config.token = os.environ[Env.TOKEN],
+        config.token = os.environ[Env.TOKEN]
         config.output_path = os.environ[Env.ISSUE_OUTPUT_PATH]
+        config.ci_event_type = os.environ[Env.CI_EVENT_TYPE]
 
 
 class JsonConfigDataSource(DataSource):
@@ -61,7 +62,7 @@ class JsonConfigDataSource(DataSource):
         print(Log.loading_something
               .format(something=config_path))
 
-        raw_json: ConfigJson = (
+        raw_json: dict = (
             json.loads(
                 Path(config_path
                      ).read_text(encoding="utf-8")
@@ -71,13 +72,16 @@ class JsonConfigDataSource(DataSource):
               .format(something=config_path))
 
         apply_place_holder(
-            obj=raw_json,
-            place_holder=raw_json
+            obj=dict(raw_json),
+            place_holder=dict(raw_json)
         )
-        raw_json["issue_type"] = Config.IssueType(
+
+        issue_type = Config.IssueType(
             **raw_json.pop("issue_type"))
-        raw_json["archived_document"] = Config.ArchivedDocument(
+        archived_document = Config.ArchivedDocument(
             **raw_json.pop("archived_document"))
         config = replace(config,
-                         **asdict(),
+                         **asdict(config),
                          issue_type=raw_json.pop("issue_type"))
+        config.issue_type = issue_type
+        config.archived_document = archived_document

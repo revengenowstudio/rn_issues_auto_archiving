@@ -8,10 +8,10 @@
             "name": "github issue_processor",
             "type": "debugpy",
             "request": "launch",
-            "program": "rn_issues_auto_archiving/issue_processor_main.py",
+            "program": "rn_issues_auto_archiving/main.py",
             "args": [
                 "--config",
-                "./config/issue_processor.json",
+                "./config/auto_archiving.json",
                 "--platform-type",
                 "github"
             ],
@@ -22,10 +22,10 @@
             "name": "gitlab issue_processor",
             "type": "debugpy",
             "request": "launch",
-            "program": "rn_issues_auto_archiving/issue_processor_main.py",
+            "program": "rn_issues_auto_archiving/main.py",
             "args": [
                 "--config",
-                "./config/issue_processor.json",
+                "./config/auto_archiving.json",
                 "--platform-type",
                 "gitlab"
             ],

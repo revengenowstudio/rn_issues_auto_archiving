@@ -10,3 +10,4 @@ webhook.json
 !output.nu
 output
 .VSCodeCounter
+.pytest_cache
