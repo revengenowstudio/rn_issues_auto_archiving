@@ -1,9 +1,9 @@
 from typing import TypedDict, Any
-from dataclasses import dataclass, asdict, replace
+from dataclasses import dataclass, asdict, replace, field
 from pathlib import Path
 import json
 
-from json_dumps import json_dumps
+from shared.json_dumps import json_dumps
 
 
 AUTO_ISSUE_TYPE = "自动判断"
@@ -11,8 +11,6 @@ AUTO_ISSUE_TYPE = "自动判断"
 
 class LinksJson(TypedDict):
     issue_url: str
-    reopen_http_method: str
-    reopen_body: dict[str, str]
     comment_url: str
 
 
@@ -29,6 +27,8 @@ class IssueInfoJson(TypedDict):
     ci_event_type: str
     platform_type: str
     http_header: dict[str, str]
+    reopen_http_method: str
+    reopen_body: dict[str, str]
     links: LinksJson
 
 
@@ -45,15 +45,17 @@ class IssueInfo():
     issue_state: str = str()
     '''值只可能为 open 或 closed'''
     issue_body: str = str()
-    issue_labels: list[str] = []
+    issue_labels: list[str] = field(default_factory=list[str])
     introduced_version: str = str()
     archive_version: str = str()
     ci_event_type: str = str()
     platform_type: str = str()
     issue_repository: str = str()
-    http_header: dict[str, str] = {}
+    http_header: dict[str, str] = field(
+        default_factory=dict[str, str])
     reopen_http_method: str = str()
-    reopen_body: dict[str, str] = {}
+    reopen_body: dict[str, str] = field(
+        default_factory=dict[str, str])
     links: Links = Links()
 
     @staticmethod
@@ -70,12 +72,6 @@ class IssueInfo():
                 asdict(self)
             )
         )
-
-    def print(self) -> None:
-        print(
-            self.to_print_string()
-        )
-
     def to_dict(self) -> IssueInfoJson:
         return IssueInfoJson(**asdict(self))
 
@@ -91,7 +87,9 @@ class IssueInfo():
         json_data: IssueInfoJson = json.loads(
             Path(json_path).read_text(encoding="utf-8")
         )
-        links = json_data.get("links")
-        replace(self, **json_data)
-        replace(self.links, **links)
-
+        self.from_dict(json_data)
+    
+    def from_dict(self, issue_info: IssueInfoJson) -> None:
+        links = issue_info.get("links")
+        self.__dict__.update(issue_info)
+        self.links= self.Links(**links)
