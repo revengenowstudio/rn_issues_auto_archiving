@@ -4,13 +4,12 @@ from pathlib import Path
 
 from shared.log import Log
 from shared.issue_info import IssueInfo
-from shared.get_args import get_value_from_args
-from shared.issue_info import IssueInfoJson, IssueInfo
+from shared.issue_info import IssueInfo
 from shared.json_dumps import json_dumps
 from shared.env import (Env,
                         should_run_in_local
                         )
-from auto_archiving.send_comment import send_comment
+from shared.send_comment import send_comment
 from rn_issues_auto_archiving.issue_processor.git_service_client import GitlabClient, GithubClient
 
 

@@ -10,9 +10,9 @@ import httpx
 from shared.env import Env
 from shared.log import Log
 from shared.exception import ErrorMessage
-from auto_archiving.send_comment import send_comment
-from auto_archiving.reopen_issue import reopen_issue
-from auto_archiving.http_request import http_request
+from shared.send_comment import send_comment
+from shared.reopen_issue import reopen_issue
+from shared.http_request import http_request
 from rn_issues_auto_archiving.issue_processor.git_service_client import GitlabClient
 from shared.issue_info import IssueInfoJson
 
