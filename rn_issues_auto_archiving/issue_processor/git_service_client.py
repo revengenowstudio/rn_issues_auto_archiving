@@ -1,7 +1,7 @@
 import os
 import re
 import json
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from abc import abstractmethod, ABC
 from http import HTTPStatus
 
@@ -13,7 +13,7 @@ from shared.log import Log
 from shared.env import Env
 from shared.exception import *
 from shared.issue_info import AUTO_ISSUE_TYPE, IssueInfo
-from shared.issue_state import IssueState, parse_issue_state
+from shared.issue_state import parse_issue_state
 from shared.ci_event_type import CiEventType
 from shared.json_dumps import json_dumps
 from shared.api_path import ApiPath
@@ -66,26 +66,6 @@ class GitServiceClient(ABC):
                 Log.invalid_issue_number
                 .format(issues_number_var=issue_number))
         return int(issue_number.strip())
-
-    @staticmethod
-    def should_issue_state_open(issue_state: str) -> bool:
-        return issue_state == IssueState.open
-
-    @staticmethod
-    def should_issue_state_update(issue_state: str) -> bool:
-        return issue_state == IssueState.update
-
-    @staticmethod
-    def should_archived_version_input(archive_version: str) -> bool:
-        return archive_version != ""
-
-    @staticmethod
-    def should_introduced_version_input(introduced_version: str) -> bool:
-        return introduced_version != ""
-
-    @staticmethod
-    def should_issue_type_auto_detect(issue_type: str) -> bool:
-        return issue_type == AUTO_ISSUE_TYPE
 
     @abstractmethod
     def _get_comments_from_platform(
@@ -363,7 +343,7 @@ class GitServiceClient(ABC):
         print(Log.issue_type_not_found)
         return ""
 
-    def remove_type_in_issue_title(
+    def remove_issue_type_in_issue_title(
             self,
             issue_title: str,
             type_keyword: dict[str, str]

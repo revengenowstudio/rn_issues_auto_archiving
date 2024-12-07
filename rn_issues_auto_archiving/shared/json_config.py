@@ -3,6 +3,9 @@
 from dataclasses import dataclass
 from typing import TypedDict, TypeAlias
 
+from shared.config_manager import ConfigManager
+from shared.log import Log
+
 IssueType: TypeAlias = str
 
 
@@ -31,7 +34,6 @@ class IssueTypeJson(TypedDict):
 
 
 class ConfigJson(TypedDict):
-
     version_regex: str
     introduced_version_reges: list[str]
     issue_type: IssueType
@@ -64,6 +66,7 @@ class Config():
     token: str = str()
     output_path: str = str()
     ci_event_type: str = str()
+    archived_document_path:str = str()
 
     # 从命令行参数读取
     config_path: str = str()
@@ -76,3 +79,14 @@ class Config():
     issue_type: IssueType = IssueType()
     introduced_version_reges: list[str] = []
     archived_document: ArchivedDocument = ArchivedDocument()
+
+
+def init_config(config_manager: ConfigManager) -> Config:
+    config = Config()
+    try:
+        config_manager.load_all(config)
+    except Exception as exc:
+        print(Log.parse_config_failed
+              .format(exc=exc))
+        raise
+    return config

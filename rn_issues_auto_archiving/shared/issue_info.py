@@ -3,7 +3,12 @@ from dataclasses import dataclass, asdict, replace, field
 from pathlib import Path
 import json
 
+from issue_processor.issue_data_source import GithubIssueDataSource, GitlabIssueDataSource
+from issue_processor.git_service_client import GithubClient, GitlabClient
+from shared.exception import UnexpectedPlatform
+from shared.log import Log
 from shared.json_dumps import json_dumps
+
 
 
 AUTO_ISSUE_TYPE = "自动判断"
@@ -72,6 +77,7 @@ class IssueInfo():
                 asdict(self)
             )
         )
+
     def to_dict(self) -> IssueInfoJson:
         return IssueInfoJson(**asdict(self))
 
@@ -88,8 +94,29 @@ class IssueInfo():
             Path(json_path).read_text(encoding="utf-8")
         )
         self.from_dict(json_data)
-    
+
     def from_dict(self, issue_info: IssueInfoJson) -> None:
         links = issue_info.get("links")
         self.__dict__.update(issue_info)
-        self.links= self.Links(**links)
+        self.links = self.Links(**links)
+        
+    def update(self, **kwargs) -> None:
+        self.__dict__.update(kwargs)
+        
+
+
+def init_issue_info(
+    platform: GithubClient | GitlabClient,
+) -> IssueInfo:
+    issue_info = IssueInfo()
+    if isinstance(platform, GithubClient):
+        GithubIssueDataSource().load(issue_info)
+    elif isinstance(platform, GitlabClient):
+        GitlabIssueDataSource().load(issue_info)
+    else:
+        raise UnexpectedPlatform(
+            Log.unexpected_platform_type
+            .format(
+                platform_type=type(platform)
+            ))
+    return issue_info

@@ -86,7 +86,7 @@ class ArchiveDocument():
         else:
             result = issue_title
             for keyword in action_map["remove_keyword"]:
-                result.replace(keyword, '')
+                result = result.replace(keyword, '')
             result = ''.join(
                 [action_map["add_prefix"],
                  result,
