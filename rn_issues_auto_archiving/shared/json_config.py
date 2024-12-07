@@ -1,6 +1,6 @@
 
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TypedDict, TypeAlias
 
 from shared.config_manager import ConfigManager
@@ -46,9 +46,12 @@ class ConfigJson(TypedDict):
 class Config():
     @dataclass
     class IssueType():
-        type_keyword: dict[str, str] = {}
-        need_introduced_version_issue_type: list[str] = []
-        label_map: dict[str, str] = {}
+        type_keyword: dict[str, str] = field(
+            default_factory=dict)
+        need_introduced_version_issue_type: list[str] = field(
+            default_factory=list)
+        label_map: dict[str, str] = field(
+            default_factory=dict)
 
     @dataclass
     class ArchivedDocument():
@@ -57,36 +60,31 @@ class Config():
         rjust_character: str = str()
         table_separator: str = str()
         archive_template: str = str()
-        action_name_map: dict[str, str] = {}
+        action_name_map: dict[str, str] = field(
+            default_factory=dict)
         issue_title_processing_rules: dict[IssueType,
-                                           ProcessingActionJson] = {}
-        reopen_workflow_prefix_map: dict[str, str] = {}
+                                           ProcessingActionJson] = field(
+            default_factory=dict)
+        reopen_workflow_prefix_map: dict[str, str] = field(
+            default_factory=dict)
 
     # 从env读取
     token: str = str()
     output_path: str = str()
     ci_event_type: str = str()
-    archived_document_path:str = str()
+    archived_document_path: str = str()
 
     # 从命令行参数读取
     config_path: str = str()
     test_platform_type: str | None = None
 
     # 从配置文件json读取
-    archive_necessary_labels: list[str] = []
-    archived_version_reges_for_comments: list[str] = []
+    archive_necessary_labels: list[str] = field(
+        default_factory=list)
+    archived_version_reges_for_comments: list[str] = field(
+        default_factory=list)
     version_regex: str = str()
     issue_type: IssueType = IssueType()
-    introduced_version_reges: list[str] = []
+    introduced_version_reges: list[str] = field(
+        default_factory=list)
     archived_document: ArchivedDocument = ArchivedDocument()
-
-
-def init_config(config_manager: ConfigManager) -> Config:
-    config = Config()
-    try:
-        config_manager.load_all(config)
-    except Exception as exc:
-        print(Log.parse_config_failed
-              .format(exc=exc))
-        raise
-    return config

@@ -1,6 +1,6 @@
 from typing import TypedDict
 
-class User(TypedDict):
+class GithubUserJson(TypedDict):
     avatar_url: str
     events_url: str
     followers_url: str
@@ -20,7 +20,7 @@ class User(TypedDict):
     type: str
     url: str
 
-class Comment(TypedDict):
+class GithubCommentJson(TypedDict):
     author_association: str
     body: str
     created_at: str
@@ -30,4 +30,4 @@ class Comment(TypedDict):
     node_id: str
     updated_at: str
     url: str
-    user: User
+    user: GithubUserJson

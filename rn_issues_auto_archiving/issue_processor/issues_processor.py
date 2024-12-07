@@ -1,11 +1,16 @@
 
 
-from git_service_client import GitServiceClient
+from issue_processor.git_service_client import GitServiceClient
+from issue_processor.issue_data_source import GithubIssueDataSource, GitlabIssueDataSource
+from issue_processor.git_service_client import GithubClient, GitlabClient
+from shared.config_manager import ConfigManager
+from shared.env import should_run_in_github_action, should_run_in_gitlab_ci
 from shared.issue_state import IssueState
 from shared.exception import ErrorMessage, MissingArchiveVersionAndArchiveLabel
 from shared.issue_info import AUTO_ISSUE_TYPE, IssueInfo
 from shared.json_config import Config
 from shared.log import Log
+from shared.exception import UnexpectedPlatform
 
 
 class IssueProcessor():
@@ -18,15 +23,74 @@ class IssueProcessor():
         self._issue_info = issue_info
         self._config = config
         self._platform = platform
+        
+    @staticmethod
+    def init_config(config_manager: ConfigManager) -> Config:
+        config = Config()
+        try:
+            config_manager.load_all(config)
+        except Exception as exc:
+            print(Log.parse_config_failed
+                .format(exc=exc))
+            raise
+        return config
+
+    @staticmethod
+    def init_git_service_client(
+        test_platform_type: str | None,
+        config: Config
+    ) -> GithubClient | GitlabClient:
+        service_client: GithubClient | GitlabClient
+        if test_platform_type is not None:
+            print(Log.get_test_platform_type
+                  .format(test_platform_type=test_platform_type))
+        if (test_platform_type == GithubClient.name
+                or should_run_in_github_action()):
+            service_client = GithubClient(
+                token=config.token,
+                output_path=config.output_path,
+                ci_event_type=config.ci_event_type
+            )
+        elif (test_platform_type == GitlabClient.name
+              or should_run_in_gitlab_ci()):
+            service_client = GitlabClient(
+                token=config.token,
+                output_path=config.output_path,
+                ci_event_type=config.ci_event_type
+            )
+        else:
+            raise UnexpectedPlatform(
+                Log.unexpected_platform_type
+                .format(
+                    platform_type=test_platform_type
+                ))
+        return service_client
+
+    @staticmethod
+    def init_issue_info(
+        platform: GithubClient | GitlabClient,
+    ) -> IssueInfo:
+        issue_info = IssueInfo()
+        if isinstance(platform, GithubClient):
+            GithubIssueDataSource().load(issue_info)
+        elif isinstance(platform, GitlabClient):
+            GitlabIssueDataSource().load(issue_info)
+        else:
+            raise UnexpectedPlatform(
+                Log.unexpected_platform_type
+                .format(
+                    platform_type=type(platform)
+                ))
+        return issue_info
 
     def not_archived_object(self) -> bool:
         # gitlab的issue webhook是会响应issue reopen事件的
         # gitlab的reopen issue事件应该被跳过
         # 而手动触发的流水线有可能目标Issue是还没被closed的
         if (not self._platform.should_ci_running_in_manual
-                and (self._issue_info.issue_state
-                     == IssueState.open)
-            ):
+                    and (self._issue_info.issue_state
+                         == IssueState.open)
+                ):
             print(Log.issue_state_is_open)
             return True
 
@@ -101,9 +165,9 @@ class IssueProcessor():
 
     def close_issue(self) -> None:
         if (self._platform.should_ci_running_in_manual
-                and (self._issue_info.issue_state
-                     == IssueState.open)
-            ):
+                    and (self._issue_info.issue_state
+                         == IssueState.open)
+                ):
             self._platform.close_issue(
                 self._issue_info.links.issue_url
             )

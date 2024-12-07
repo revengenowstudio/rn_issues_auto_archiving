@@ -1,10 +1,8 @@
 import os
 from abc import ABC, abstractmethod
-from dataclasses import asdict
 import json
 
-from git_service_client import GitServiceClient
-from shared.issue_info import IssueInfo, IssueInfoJson, AUTO_ISSUE_TYPE
+from shared.issue_info import IssueInfo, AUTO_ISSUE_TYPE
 from shared.ci_event_type import CiEventType
 from shared.env import Env
 from shared.log import Log
@@ -13,6 +11,13 @@ from shared.json_dumps import json_dumps
 from shared.exception import MissingIssueNumber, WebhookPayloadError
 from shared.api_path import ApiPath
 
+@staticmethod
+def issue_number_to_int(issue_number: str):
+    if not issue_number.isdigit():
+        raise ValueError(
+            Log.invalid_issue_number
+            .format(issues_number_var=issue_number))
+    return int(issue_number.strip())
 
 class IssusDataSource(ABC):
 
@@ -29,7 +34,7 @@ class GithubIssueDataSource(IssusDataSource):
         issue_info.issue_repository = os.environ[Env.ISSUE_REPOSITORY]
         if ci_event_type in CiEventType.manual:
             issue_info.issue_id = (
-                GitServiceClient.issue_number_to_int(
+                issue_number_to_int(
                     os.environ[Env.MANUAL_ISSUE_NUMBER]))
             issue_info.issue_title = (
                 os.environ[Env.MANUAL_ISSUE_TITLE].strip())
@@ -82,7 +87,7 @@ class GitlabIssueDataSource(IssusDataSource):
                 raise MissingIssueNumber(
                     Log.missing_issue_number
                     .format(issues_number_var=Env.ISSUE_NUMBER))
-            issue_info.issue_id = issue_id = GitServiceClient.issue_number_to_int(
+            issue_info.issue_id = issue_id = issue_number_to_int(
                 issue_id_str)
             issue_info.issue_title = os.environ.get(
                 Env.ISSUE_TITLE, "").strip()

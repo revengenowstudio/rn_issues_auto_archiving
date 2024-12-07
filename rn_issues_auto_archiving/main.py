@@ -9,48 +9,12 @@ from issue_processor.issues_processor import IssueProcessor
 from auto_archiving.archive_document import ArchiveDocument
 from shared.config_manager import ConfigManager
 from shared.config_data_source import EnvConfigDataSource, JsonConfigDataSource
-from shared.issue_info import init_issue_info
 from shared.ci_event_type import CiEventType
-from shared.json_config import (Config,
-                                init_config)
 from shared.env import Env
 from shared.log import Log
-from shared.env import (should_run_in_github_action,
-                        should_run_in_gitlab_ci,
-                        should_run_in_local)
+from shared.env import should_run_in_local
 from shared.get_args import get_value_from_args
 from shared.exception import *
-
-
-def init_git_service_client(
-    test_platform_type: str | None,
-    config: Config
-) -> GithubClient | GitlabClient :
-    service_client: GithubClient | GitlabClient
-    if test_platform_type is not None:
-        print(Log.get_test_platform_type
-              .format(test_platform_type=test_platform_type))
-    if (test_platform_type == GithubClient.name
-            or should_run_in_github_action()):
-        service_client = GithubClient(
-            token=config.token,
-            output_path=config.output_path,
-            ci_event_type=config.ci_event_type
-        )
-    elif (test_platform_type == GitlabClient.name
-          or should_run_in_gitlab_ci()):
-        service_client = GitlabClient(
-            token=config.token,
-            output_path=config.output_path,
-            ci_event_type=config.ci_event_type
-        )
-    else:
-        raise UnexpectedPlatform(
-            Log.unexpected_platform_type
-            .format(
-                platform_type=test_platform_type
-            ))
-    return service_client
 
 
 def main() -> None:
@@ -82,20 +46,20 @@ def main() -> None:
     if not GitlabClient.should_issue_type_webhook():
         return
 
-    config = init_config(
+    config = IssueProcessor.init_config(
         ConfigManager([
             EnvConfigDataSource(),
             JsonConfigDataSource(config_path)
         ])
     )
 
-    platform = init_git_service_client(
+    platform = IssueProcessor.init_git_service_client(
         test_platform_type,
         config
     )
 
     try:
-        issue_info = init_issue_info(platform)
+        issue_info = IssueProcessor.init_issue_info(platform)
     except WebhookPayloadError:
         return
 
@@ -117,11 +81,11 @@ def main() -> None:
             config.archived_document_path
         )
         if (issue_info.ci_event_type in CiEventType.issue_event
-                    and archive_document.should_issue_archived(
+            and archive_document.should_issue_archived(
                         issue_info.issue_id,
                         issue_info.issue_repository
                     )
-                ):
+            ):
             print(Log.issue_already_archived
                   .format(issue_id=issue_info.issue_id,
                           issue_repository=issue_info.issue_repository))

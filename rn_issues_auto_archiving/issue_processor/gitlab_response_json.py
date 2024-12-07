@@ -1,6 +1,6 @@
 from typing import TypedDict,Any
 
-class Author(TypedDict):
+class GitlabAuthorJson(TypedDict):
     avatar_url: str
     id: int
     locked: bool
@@ -9,9 +9,9 @@ class Author(TypedDict):
     username: str
     web_url: str
 
-class Comment(TypedDict):
+class GitlabCommentJson(TypedDict):
     attachment: None
-    author: Author
+    author: GitlabAuthorJson
     body: str
     commands_changes: dict[str, Any]
     confidential: bool

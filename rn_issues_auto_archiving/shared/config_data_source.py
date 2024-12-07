@@ -3,10 +3,10 @@ import json
 from dataclasses import asdict, replace
 from pathlib import Path
 
-from log import Log
-from data_source import DataSource
-from env import Env
-from json_config import Config, ConfigJson
+from shared.log import Log
+from shared.data_source import DataSource
+from shared.env import Env
+from shared.json_config import Config, ConfigJson
 
 FORMAT_MAP_BLACK_LIST = [
     "version_regex",

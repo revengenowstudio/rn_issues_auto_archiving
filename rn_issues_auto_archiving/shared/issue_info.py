@@ -3,10 +3,6 @@ from dataclasses import dataclass, asdict, replace, field
 from pathlib import Path
 import json
 
-from issue_processor.issue_data_source import GithubIssueDataSource, GitlabIssueDataSource
-from issue_processor.git_service_client import GithubClient, GitlabClient
-from shared.exception import UnexpectedPlatform
-from shared.log import Log
 from shared.json_dumps import json_dumps
 
 
@@ -50,17 +46,17 @@ class IssueInfo():
     issue_state: str = str()
     '''值只可能为 open 或 closed'''
     issue_body: str = str()
-    issue_labels: list[str] = field(default_factory=list[str])
+    issue_labels: list[str] = field(default_factory=list)
     introduced_version: str = str()
     archive_version: str = str()
     ci_event_type: str = str()
     platform_type: str = str()
     issue_repository: str = str()
     http_header: dict[str, str] = field(
-        default_factory=dict[str, str])
+        default_factory=dict)
     reopen_http_method: str = str()
     reopen_body: dict[str, str] = field(
-        default_factory=dict[str, str])
+        default_factory=dict)
     links: Links = Links()
 
     @staticmethod
@@ -103,20 +99,3 @@ class IssueInfo():
     def update(self, **kwargs) -> None:
         self.__dict__.update(kwargs)
         
-
-
-def init_issue_info(
-    platform: GithubClient | GitlabClient,
-) -> IssueInfo:
-    issue_info = IssueInfo()
-    if isinstance(platform, GithubClient):
-        GithubIssueDataSource().load(issue_info)
-    elif isinstance(platform, GitlabClient):
-        GitlabIssueDataSource().load(issue_info)
-    else:
-        raise UnexpectedPlatform(
-            Log.unexpected_platform_type
-            .format(
-                platform_type=type(platform)
-            ))
-    return issue_info

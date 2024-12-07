@@ -7,8 +7,8 @@ from http import HTTPStatus
 
 import httpx
 
-import github_response_json
-import gitlab_response_json
+from .github_response_json import GithubCommentJson
+from .gitlab_response_json import GitlabCommentJson
 from shared.log import Log
 from shared.env import Env
 from shared.exception import *
@@ -59,13 +59,6 @@ class PlatformEnvironments():
 
 
 class GitServiceClient(ABC):
-    @staticmethod
-    def issue_number_to_int(issue_number: str):
-        if not issue_number.isdigit():
-            raise ValueError(
-                Log.invalid_issue_number
-                .format(issues_number_var=issue_number))
-        return int(issue_number.strip())
 
     @abstractmethod
     def _get_comments_from_platform(
@@ -432,7 +425,7 @@ class GithubClient(GitServiceClient):
                 url=url,
                 params={"page": str(page)}
             )
-            raw_json: list[github_response_json.Comment
+            raw_json: list[GithubCommentJson
                            ] = response.json()
             if len(raw_json) == 0:
                 break
@@ -611,7 +604,7 @@ class GitlabClient(GitServiceClient):
                 url=url,
                 params={"page": str(page)}
             )
-            raw_json: list[gitlab_response_json.Comment
+            raw_json: list[GitlabCommentJson
                            ] = response.json()
             if len(raw_json) == 0:
                 break
