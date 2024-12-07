@@ -1,54 +1,101 @@
-from typing import TypedDict
-from dataclasses import dataclass
+from typing import TypedDict, Any
+from dataclasses import dataclass, asdict, replace, field
+from pathlib import Path
+import json
+
+from shared.json_dumps import json_dumps
+
+
+
+AUTO_ISSUE_TYPE = "自动判断"
+
+
+class LinksJson(TypedDict):
+    issue_url: str
+    comment_url: str
 
 
 class IssueInfoJson(TypedDict):
-    
-    class ReopenInfo(TypedDict):
-        http_header: dict[str, str]
-        reopen_url: str
-        reopen_http_method: str
-        reopen_body: dict[str, str]
-        comment_url: str
-
     issue_id: int
     issue_type: str
     issue_title: str
     issue_state: str
     '''值只可能为 open 或 closed'''
+    issue_body: str
+    issue_labels: list[str]
     introduced_version: str
     archive_version: str
     ci_event_type: str
     platform_type: str
-    reopen_info: ReopenInfo
-    
-    
-    @staticmethod
-    def remove_sensitive_info(issue_info:dict) -> dict:
-        '''移除issue_info的敏感信息，函数不会修改传入的字典'''
-        result = issue_info.copy()
-        result.pop("reopen_info")
-        return result
-        
+    http_header: dict[str, str]
+    reopen_http_method: str
+    reopen_body: dict[str, str]
+    links: LinksJson
+
 
 @dataclass()
 class IssueInfo():
     @dataclass()
-    class ReopenInfo():
-        http_header: dict[str, str]
-        reopen_url: str
-        reopen_http_method: str
-        reopen_body: dict[str, str]
-        comment_url: str
+    class Links():
+        issue_url: str = str()
+        comment_url: str = str()
 
-    issue_id: int
-    issue_type: str
-    issue_title: str
-    issue_state: str
+    issue_id: int = -1
+    issue_type: str = AUTO_ISSUE_TYPE
+    issue_title: str = str()
+    issue_state: str = str()
     '''值只可能为 open 或 closed'''
-    introduced_version: str
-    archive_version: str
-    ci_event_type:str         
-    platform_type: str
-    reopen_info: ReopenInfo
-    
+    issue_body: str = str()
+    issue_labels: list[str] = field(default_factory=list)
+    introduced_version: str = str()
+    archive_version: str = str()
+    ci_event_type: str = str()
+    platform_type: str = str()
+    issue_repository: str = str()
+    http_header: dict[str, str] = field(
+        default_factory=dict)
+    reopen_http_method: str = str()
+    reopen_body: dict[str, str] = field(
+        default_factory=dict)
+    links: Links = Links()
+
+    @staticmethod
+    def remove_sensitive_info(issue_info: dict[str, Any]
+                              ) -> dict[str, Any]:
+        '''移除issue_info的敏感信息，函数不会修改传入的字典'''
+        result = issue_info.copy()
+        result.pop("http_header")
+        return result
+
+    def to_print_string(self) -> str:
+        return json_dumps(
+            IssueInfo.remove_sensitive_info(
+                asdict(self)
+            )
+        )
+
+    def to_dict(self) -> IssueInfoJson:
+        return IssueInfoJson(**asdict(self))
+
+    def json_dump(self, json_path: str) -> None:
+        json.dump(
+            self.to_dict(),
+            Path(json_path).open("w", encoding="utf-8"),
+            indent=4,
+            ensure_ascii=False
+        )
+
+    def json_load(self, json_path: str) -> None:
+        json_data: IssueInfoJson = json.loads(
+            Path(json_path).read_text(encoding="utf-8")
+        )
+        self.from_dict(json_data)
+
+    def from_dict(self, issue_info: IssueInfoJson) -> None:
+        links = issue_info.get("links")
+        self.__dict__.update(issue_info)
+        self.links = self.Links(**links)
+        
+    def update(self, **kwargs) -> None:
+        self.__dict__.update(kwargs)
+        
