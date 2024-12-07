@@ -64,7 +64,7 @@ def main() -> None:
         return
 
     try:
-        platform.fetch_missing_issue_info(issue_info)
+        platform.enrich_missing_issue_info(issue_info)
 
         issue_processor = IssueProcessor(issue_info, config, platform)
         if issue_processor.not_archived_object():

@@ -162,7 +162,7 @@ class GitServiceClient(ABC):
                 error = e
         raise error
 
-    def fetch_missing_issue_info(
+    def enrich_missing_issue_info(
         self,
         issue_info: IssueInfo
     ) -> None:
