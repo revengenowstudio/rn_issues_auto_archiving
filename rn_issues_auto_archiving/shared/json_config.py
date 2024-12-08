@@ -1,10 +1,6 @@
-
-
+import os
 from dataclasses import dataclass, field
 from typing import TypedDict, TypeAlias
-
-from shared.config_manager import ConfigManager
-from shared.log import Log
 
 IssueType: TypeAlias = str
 
@@ -37,7 +33,7 @@ class ConfigJson(TypedDict):
     version_regex: str
     introduced_version_reges: list[str]
     issue_type: IssueType
-    archived_version_reges_for_comments: list[str]
+    archive_version_reges_for_comments: list[str]
     archive_necessary_labels: list[str]
     archived_document: ArchivedDocumentJson
 
@@ -81,7 +77,7 @@ class Config():
     # 从配置文件json读取
     archive_necessary_labels: list[str] = field(
         default_factory=list)
-    archived_version_reges_for_comments: list[str] = field(
+    archive_version_reges_for_comments: list[str] = field(
         default_factory=list)
     version_regex: str = str()
     issue_type: IssueType = IssueType()

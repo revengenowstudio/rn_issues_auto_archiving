@@ -66,26 +66,37 @@ def main() -> None:
     try:
         platform.enrich_missing_issue_info(issue_info)
 
-        issue_processor = IssueProcessor(issue_info, config, platform)
-        if issue_processor.not_archived_object():
+        if IssueProcessor.verify_not_archived_object(
+            issue_info, config
+        ):
             return
 
-        issue_processor.match_issue_type()
-        issue_processor.match_introduced_version()
-        issue_processor.match_archive_version()
-        issue_processor.parse_issue_title()
-        issue_processor.close_issue()
+        IssueProcessor.update_issue_info_with_gather_info(
+            issue_info,
+            IssueProcessor.gather_info_from_issue(
+                issue_info,
+                config
+            )
+        )
+        IssueProcessor.parse_issue_info_for_archived(
+            issue_info,
+            config
+        )
+        IssueProcessor.close_issue_if_not_closed(
+            issue_info,
+            platform
+        )
 
         # 将issue内容写入归档文件
         archive_document = ArchiveDocument(
             config.archived_document_path
         )
-        if (issue_info.ci_event_type in CiEventType.issue_event
-            and archive_document.should_issue_archived(
-                        issue_info.issue_id,
-                        issue_info.issue_repository
-                    )
-            ):
+        if (CiEventType.should_ci_running_in_issue_event()
+                and archive_document.should_issue_archived(
+                    issue_info.issue_id,
+                    issue_info.issue_repository
+        )
+        ):
             print(Log.issue_already_archived
                   .format(issue_id=issue_info.issue_id,
                           issue_repository=issue_info.issue_repository))
