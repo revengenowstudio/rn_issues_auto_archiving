@@ -59,7 +59,7 @@
 - Python脚本全部位于`./src/`目录下
 - Github流水线脚本全部位于`./.github/workflows/`目录下，配置文件则在`./.github/configs/`
 - Gitlab流水线脚本全部位于`./gitlab-ci.yml`，配置文件则在`./.gitlab/configs/`
-- 脚本配置文件`issue_processor.json`负责存储脚本处理Issue的行为，例如匹配所需的关键字，匹配Issue标签的类型等等。部分配置支持正则表达式，具体详情参见下文[Config配置](#Config配置)
+- 脚本配置文件`auto_archiving.json`负责存储脚本处理Issue的行为，例如匹配所需的关键字，匹配Issue标签的类型等等。部分配置支持正则表达式，具体详情参见下文[Config配置](#Config配置)
 
 ## github侧
 
@@ -105,7 +105,7 @@
         - `已激活`： 必须勾选这个复选框，创建之后调度器自动按照间隔时间触发流水线
 
 # Config配置
-- `issue_processor.json`负责定义Issue信息收集相关内容
+- `auto_archiving.json`负责定义Issue信息收集相关内容
     |变量名|变量类型|正则表达式支持|描述|
     |---|---|---|---|
     |version_regex|str|是|匹配版本号的正则表达式，最外层必须有一对小括号`()`，因为这个值会被其他值引用|
@@ -113,8 +113,8 @@
     |issue_type.type_keyword|dict[str,str]|否|匹配Issue标题中Issue类型关键字的字典，用来转换成归档内容中的Issue类型文本，由于不再通过Issue标题判断Issue类型，此项可以无视|
     |issue_type.need_introduced_version_issue_type|list[str]|否|归档时需要`引入版本号`的Issue类型，填写的内容为归档文档中定义的Issue类型，可填多个，匹配到任意一个即要求Issue描述中带有`引入版本号`，若Issue属于列表中的Issue类型但Issue描述中没有找到`引入版本号`，则归档流水线会报错并reopen此Issue|
     |issue_type.label_map|dict[str,str]|否|Issue标签（labels）映射为归档文档中定义的Issue类型，流水线通过这个字典来判断Issue是什么类型的，key为Issue标签名称，value为归档文档中定义的Issue类型名称|
-    |white_list.labels|list[str]|否|归档所必须的Issue标签，流水线会检查issue是否包含这些标签，若不包含则报错并reopen此Issue。若填写多个Issue标签，则Issue必须同时具有这些标签才可以被流水线归档|
-    |white_list.comments|list[str]|是|从Issue评论中匹配`归档版本号`的正则表达式，可组合引用`{version_regex}`。若流水线用任意一个列表内的正则均无法在Issue评论中匹配成功，则报错并reopen此Issue|
+    |archive_necessary_labels|list[str]|否|归档所必须的Issue标签，流水线会检查issue是否包含这些标签，若不包含则报错并reopen此Issue。若填写多个Issue标签，则Issue必须同时具有这些标签才可以被流水线归档|
+    |archive_version_reges_for_comments|list[str]|是|从Issue评论中匹配`归档版本号`的正则表达式，可组合引用`{version_regex}`。若流水线用任意一个列表内的正则均无法在Issue评论中匹配成功，则报错并reopen此Issue|
     |black_list.labels|list[str]|否|保留字段，暂未实现功能|
     |black_list.comments|list[str]|是|保留字段，暂未实现功能|
 
