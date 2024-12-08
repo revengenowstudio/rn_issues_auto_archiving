@@ -56,7 +56,6 @@ auto_archiving:
     fi
     export WEBHOOK_PAYLOAD=$(cat $TRIGGER_PAYLOAD)
     python ./rn_issues_auto_archiving/main.py  -c "./config/auto_archiving.json"
-    python ./rn_issues_auto_archiving/auto_archiving_main.py -c "./config/auto_archiving.json" -fr "./归档失败记录.json"
     export author_email=RN-Bot-CI@$CI_SERVER_HOST
     export author_name=RN-Bot-CI
     export commit_message="Close $ISSUE_REPOSITORY#{issue_id}"
