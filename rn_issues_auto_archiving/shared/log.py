@@ -32,6 +32,7 @@ class Log():
     target_labels_not_found = '''未在 Issue 中找到 归档所需标签'''
     too_many_introduced_version = '''匹配到多个引入版本号'''
     too_many_archive_version = '''匹配到多个 归档关键字/归档版本号'''
+    too_many_issue_type = '''匹配到多个Issue类型标签：{labels}'''
     issue_type_not_found = '''未在 Issue标题 中找到 Issue类型关键字'''
     not_archive_issue = '''未满足归档Issue条件，不对此Issue进行归档处理'''
     print_input_variables = '''打印输入信息 ： {input_variables}'''

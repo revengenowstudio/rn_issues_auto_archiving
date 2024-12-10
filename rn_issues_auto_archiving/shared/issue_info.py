@@ -17,6 +17,11 @@ class LinksJson(TypedDict):
     comment_url: str
 
 
+class CommentJson(TypedDict):
+    author: str
+    body: str
+
+
 class IssueInfoJson(TypedDict):
     issue_id: int
     issue_type: str
@@ -25,6 +30,7 @@ class IssueInfoJson(TypedDict):
     '''值只可能为 open 或 closed'''
     issue_body: str
     issue_labels: list[str]
+    issue_comments: list[CommentJson]
     introduced_version: str
     archive_version: str
     ci_event_type: str
@@ -114,18 +120,29 @@ class IssueInfo():
         need_introduced_version_issue_type: list[str]
     ) -> str:
         print(Log.getting_something_from
-              .format(another=Log.issue_description, something=Log.introduced_version))
+              .format(another=Log.issue_description,
+                      something=Log.introduced_version))
+
+        issue_body = self.issue_body
+        issue_type = self.issue_type
         introduced_versions: list[str] = []
         for regex in introduced_version_reges:
             introduced_versions.extend(
                 re.findall(
                     regex,
-                    self.issue_body
+                    issue_body
                 )
             )
         introduced_versions = [item.strip() for item in introduced_versions]
+        if len(introduced_versions) >= 2:
+            print(Log.too_many_introduced_version)
+            raise IntroducedVersionError(
+                ErrorMessage.too_many_introduced_version
+                .format(versions=[i for i in introduced_versions])
+            )
+
         if len(introduced_versions) == 0:
-            if any([self.issue_type == target_issue_type
+            if any([issue_type == target_issue_type
                     for target_issue_type in need_introduced_version_issue_type]):
                 print(Log.introduced_version_not_found)
                 raise IntroducedVersionError(
@@ -134,15 +151,9 @@ class IssueInfo():
             else:
                 print(Log.introduced_version_not_found)
                 return ""
-
-        elif len(introduced_versions) >= 2:
-            print(Log.too_many_introduced_version)
-            raise IntroducedVersionError(
-                ErrorMessage.too_many_introduced_version
-                .format(versions=[i for i in introduced_versions])
-            )
         print(Log.getting_something_from_success
-              .format(another=Log.issue_description, something=Log.introduced_version))
+              .format(another=Log.issue_description,
+                      something=Log.introduced_version))
         return introduced_versions[0]
 
     def get_archive_version_from_comments(
@@ -152,8 +163,10 @@ class IssueInfo():
         '''匹配不到归档版本号会返回一个空字符串'''
         print(Log.getting_something_from
               .format(another=Log.issue_comment, something=Log.archive_version))
+
+        issue_comments = self.issue_comments
         archive_version_list: list[str] = []
-        for comment in self.issue_comments:
+        for comment in issue_comments:
             for comment_regex in comment_reges:
                 if len(match_result := re.findall(
                         comment_regex, comment.body)) > 0:
@@ -164,11 +177,11 @@ class IssueInfo():
                 ErrorMessage.too_many_archive_version
                 .format(versions=[i for i in archive_version_list])
             )
+        elif len(archive_version_list) == 0:
+            return ""
         elif len(archive_version_list) == 1:
             print(Log.getting_something_from_success
                   .format(another=Log.issue_comment, something=Log.archive_version))
-        elif len(archive_version_list) == 0:
-            return ""
         return archive_version_list[0]
 
     def get_issue_type_from_labels(
@@ -177,31 +190,46 @@ class IssueInfo():
     ) -> str:
         print(Log.getting_something_from
               .format(another=Log.issue_label, something=Log.issue_type))
-        for label_name, type in label_map.items():
-            if label_name in self.issue_labels:
-                print(Log.getting_something_from_success
-                      .format(another=Log.issue_label,
-                              something=Log.issue_type))
-                return type
 
-        print(Log.issue_type_not_found)
-        return ""
+        issue_labels = self.issue_labels
+        result = []
+        for label_name, type in label_map.items():
+            if label_name in issue_labels:
+                result.append(type)
+
+        if len(result) == 0:
+            print(Log.issue_type_not_found)
+            raise IssueTypeError(
+                ErrorMessage.missing_issue_type_from_label
+                .format(issue_type=list(label_map.keys()))
+            )
+        if len(result) > 1:
+            print(Log.too_many_issue_type)
+            raise IssueTypeError(
+                ErrorMessage.too_many_issue_type
+                .format(issue_type=result)
+            )
+        if len(result) == 1:
+            print(Log.getting_something_from_success
+                  .format(another=Log.issue_label,
+                          something=Log.issue_type))
+        return result[0]
 
     def should_archive_issue(
         self,
         archive_version_reges_for_comments: list[str],
-        target_labels: list[str],
-        label_map: dict[str, str],
+        archive_necessary_labels: list[str],
         check_labels: bool = True,
         check_archive_version: bool = True
     ) -> bool:
         '''should_archive_issue会检查当前issue是否是应该被归档的对象，\n
         以及判断当前issue如果是归档的对象，是否符合归档条件 \n
         函数区分了上述三种情况且会产生不同的行为：\n
-        - 若issue不是归档对象，则直接返回False\n
-        - 若issue是归档对象，但是不满足归档条件（缺少归档关键信息），则抛出相应错误\n
-        - 若issue是归档对象，并且满足归档条件，则返回True\n
+        - 若issue不是归档对象，则直接返回False \n
+        - 若issue是归档对象，但是不满足归档条件（缺少归档关键信息），则抛出相应错误 \n
+        - 若issue是归档对象，并且满足归档条件，则返回True \n
         '''
+        issue_labels = self.issue_labels
         archive_version = self.get_archive_version_from_comments(
             archive_version_reges_for_comments
         )
@@ -212,10 +240,10 @@ class IssueInfo():
         else:
             print(Log.archive_version_found)
 
-        # issue所挂标签必须匹配所有白名单标签
+        # issue必须包含某些归档所需标签，否则不进行归档流程
         if (should_label_not_in_target := (
-                set(self.issue_labels) & set(target_labels)
-                != set(target_labels))
+                set(issue_labels) & set(archive_necessary_labels)
+                != set(archive_necessary_labels))
                 and check_labels):
             print(Log.target_labels_not_found)
         else:
@@ -233,19 +261,13 @@ class IssueInfo():
                 and check_labels):
             raise ArchiveLabelError(
                 ErrorMessage.missing_archive_labels
-                .format(labels=target_labels)
+                .format(labels=archive_necessary_labels)
             )
 
         if (should_not_match_archive_version
                 and check_archive_version):
             raise ArchiveVersionError(
                 ErrorMessage.missing_archive_version
-            )
-
-        if self.issue_type == "":
-            raise IssueTypeError(
-                ErrorMessage.missing_issue_type_from_label
-                .format(issue_type=list(label_map.keys()))
             )
 
         return True

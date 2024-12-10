@@ -2,7 +2,6 @@ import os
 import time
 
 from issue_processor.git_service_client import (
-    GithubClient,
     GitlabClient,
 )
 from issue_processor.issues_processor import IssueProcessor
