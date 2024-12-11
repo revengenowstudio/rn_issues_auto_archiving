@@ -1,20 +1,29 @@
 import os
+from unittest.mock import patch
 
 from shared.env import (
     should_run_in_github_action,
     should_run_in_gitlab_ci,
-    should_run_in_local
+    should_run_in_local,
+    Env
 )
 
 def test_should_run_in_github_action():
-    os.environ["GITHUB_ACTIONS"] = "true"
-    assert should_run_in_github_action() is True
-    del os.environ["GITHUB_ACTIONS"]
+    with patch.dict(os.environ, {Env.GITHUB_ACTIONS: "true"}):
+        assert should_run_in_github_action() is True
+    assert should_run_in_github_action() is False
+
 
 def test_should_run_in_gitlab_ci():
-    os.environ["GITLAB_CI"] = "true"
-    assert should_run_in_gitlab_ci() is True
-    del os.environ["GITLAB_CI"]
+    with patch.dict(os.environ, {Env.GITLAB_CI: "true"}):
+        assert should_run_in_gitlab_ci() is True
+    assert should_run_in_github_action() is False
+
 
 def test_should_run_in_local():
+    with patch.dict(os.environ, {Env.GITHUB_ACTIONS: "true"}):
+        assert should_run_in_local() is False
+    with patch.dict(os.environ, {Env.GITLAB_CI: "true"}):
+        assert should_run_in_local() is False
     assert should_run_in_local() is True
+    
