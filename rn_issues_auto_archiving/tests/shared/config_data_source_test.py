@@ -1,190 +1,114 @@
-# import os
-# from unittest.mock import patch
+import os
+import json
+from unittest.mock import patch
+from typing import TypeAlias, Any
+from pathlib import Path
 
-# import pytest
-# from rn_issues_auto_archiving.issue_processor.git_service_client import GithubClient, GitlabClient, GitServiceClient, AUTO_ISSUE_TYPE
-# from shared.env import Env
-# from shared.issue_state import parse_issue_state
-# # from conftest import github_auto_archiving_env_dict,github_manual_archiving_env_dict
+import pytest
 
+from shared.json_config import Config, ConfigJson
+from shared.config_data_source import (
+    EnvConfigDataSource,
+    JsonConfigDataSource,
+    apply_place_holder
+)
+from shared.env import Env
 
-# class TestPlatform():
-#     @staticmethod
-#     def test_issue_number_to_int():
-#         assert GitServiceClient.issue_number_to_int(
-#             "123") == 123
-#         with pytest.raises(ValueError):
-#             GitServiceClient.issue_number_to_int("abc")
-
-
-# github_auto_archiving_env_dict = {
-#     "TOKEN": "fake_token",
-#     "ISSUE_OUTPUT_PATH": "fake_output_path",
-#     "CI_EVENT_TYPE": "fake_event_type",
-#     "ISSUE_NUMBER": "123",
-#     "ISSUE_TITLE": "fake_issue_title",
-#     "ISSUE_STATE": "fake_issue_state",
-#     "ISSUE_BODY": "fake_issue_body",
-#     "ISSUE_URL": "fake_issue_url",
-#     "COMMENTS_URL": "fake_comments_url"
-# }
+TestConfigDict: TypeAlias = dict[str, str | dict[str, str]]
 
 
-# github_manual_archiving_env_dict = {
-#     "TOKEN": "fake_token",
-#     "ISSUE_OUTPUT_PATH": "fake_output_path",
-#     "CI_EVENT_TYPE": "fake_event_type",
-#     "MANUAL_ISSUE_NUMBER": "321",
-#     "MANUAL_ISSUE_TITLE": "fake_manual_issue_title",
-#     "MANUAL_ISSUE_STATE": "fake_manual_issue_state",
-#     "INTRODUCED_VERSION": "fake_introduced_version",
-#     "ARCHIVE_VERSION": "fake_archive_version",
-#     "ISSUE_TYPE": "fake_issue_type",
-#     "MANUAL_ISSUE_URL": "fake_manual_issue_url",
-#     "MANUAL_COMMENTS_URL": "fake_manual_comments_url"
-# }
-
-# gitlab_auto_archiving_env_dict = {
-#     "TOKEN": "fake_token",
-#     "CI_EVENT_TYPE": "fake_ci_event_type",
-#     "ISSUE_OUTPUT_PATH": "fake_issue_output_path",
-#     "API_BASE_URL": "fake_api_base_url",
-#     "WEBHOOK_PAYLOAD": "fake_webhook_payload",
-# }
-# gitlab_manual_archiving_env_dict = {
-#     "TOKEN": "fake_token",
-#     "CI_EVENT_TYPE": "fake_ci_event_type",
-#     "ISSUE_OUTPUT_PATH": "fake_issue_output_path",
-#     "API_BASE_URL": "fake_api_base_url",
-#     "ISSUE_NUMBER": "fake_issue_number",
-#     "ISSUE_TITLE": "fake_issue_title",
-#     "ISSUE_STATE": "fake_issue_state",
-#     "INTRODUCED_VERSION": "fake_introduced_version",
-#     "ARCHIVE_VERSION": "fake_archive_version",
-#     "ISSUE_TYPE": "fake_issue_type",
-
-# }
+@pytest.mark.parametrize(
+    "config_dict,expected_dict",
+    [
+        (
+            {"version_regex": "(\\d\\.\\d{2}\\.\\d{3}[a-zA-Z]?\\d{0,2})",
+             "archive_version_reges_for_comments": [
+                 "{version_regex}测试通过",
+                 "已验证[,，]版本号[:：]{version_regex}"
+             ]},
+            {"version_regex": "(\\d\\.\\d{2}\\.\\d{3}[a-zA-Z]?\\d{0,2})",
+                "archive_version_reges_for_comments": [
+                    "(\\d\\.\\d{2}\\.\\d{3}[a-zA-Z]?\\d{0,2})测试通过",
+                    "已验证[,，]版本号[:：](\\d\\.\\d{2}\\.\\d{3}[a-zA-Z]?\\d{0,2})"
+                ]}
+        ),
+    ]
+)
+def test_apply_place_holder(
+    config_dict: TestConfigDict,
+    expected_dict: TestConfigDict
+):
+    assert (apply_place_holder(config_dict, config_dict)
+            == expected_dict)
 
 
-# @pytest.fixture(scope="class")
-# def setup_github_auto_archiving_environment():
-#     with patch.dict(os.environ, github_auto_archiving_env_dict):
-#         yield
-#     # os.environ[Env.TOKEN] = ""
-#     # os.environ[Env.ISSUE_OUTPUT_PATH] = ""
-#     # os.environ[Env.CI_EVENT_TYPE] = ""
-#     # os.environ[Env.ISSUE_NUMBER] = ""
-#     # os.environ[Env.ISSUE_TITLE] = ""
-#     # os.environ[Env.ISSUE_STATE] = ""
-#     # os.environ[Env.ISSUE_BODY] = ""
-#     # os.environ[Env.ISSUE_URL] = ""
-#     # os.environ[Env.COMMENTS_URL] = ""
+class TestEnvConfigDataSource():
+    @pytest.mark.parametrize(
+        "env_dict", [
+            {
+                Env.TOKEN: "token",
+                Env.ISSUE_OUTPUT_PATH: "issue_output_path",
+                Env.CI_EVENT_TYPE: "ci_event_type",
+                Env.ARCHIVED_DOCUMENT_PATH: "archived_document_path",
+            },
+        ]
+    )
+    def test_load(self, env_dict: dict[str, str]):
+        with patch.dict(os.environ, env_dict):
+            config = Config()
+            env_config_data_source = EnvConfigDataSource()
+            env_config_data_source.load(config)
+            assert config.token == env_dict[Env.TOKEN]
+            assert config.issue_output_path == env_dict[Env.ISSUE_OUTPUT_PATH]
+            assert config.ci_event_type == env_dict[Env.CI_EVENT_TYPE]
+            assert config.archived_document_path == env_dict[Env.ARCHIVED_DOCUMENT_PATH]
 
 
-# @pytest.fixture(scope="class")
-# def setup_github_manual_archiving_environment():
-#     with patch.dict(os.environ, github_manual_archiving_env_dict):
-#         yield
-#     # os.environ[Env.TOKEN] = ""
-#     # os.environ[Env.ISSUE_OUTPUT_PATH] = ""
-#     # os.environ[Env.CI_EVENT_TYPE] = ""
-#     # os.environ[Env.MANUAL_ISSUE_NUMBER] = ""
-#     # os.environ[Env.MANUAL_ISSUE_TITLE] = ""
-#     # os.environ[Env.MANUAL_ISSUE_STATE] = ""
-#     # os.environ[Env.INTRODUCED_VERSION] = ""
-#     # os.environ[Env.ARCHIVE_VERSION] = ""
-#     # os.environ[Env.ISSUE_TYPE] = ""
-#     # os.environ[Env.MANUAL_ISSUE_URL] = ""
-#     # os.environ[Env.MANUAL_COMMENTS_URL] = ""
+class TestJsonConfigDataSource():
+    @pytest.mark.parametrize(
+        "json_data", [
+            {
+                "archive_necessary_labels": [
+                    "resolved 已解决"
+                ],
+                "issue_type": {
+                    "type_keyword": {
+                        "#Bug#": "Bug修复"
+                    }
+                },
+                "archived_document": {
+                    "issue_title_processing_rules": {
+                        "Bug修复": {
+                            "add_prefix": "修复了",
+                            "add_suffix": "的Bug",
+                            "remove_keyword": []
+                        }
+                    }
+                }
+            },
+        ]
+    )
+    def test_load(self,
+                  tmp_path: Path,
+                  json_data: dict[
+                      str,
+                      Any]
+                  ):
+        sub_dir = tmp_path / "sub"
+        sub_dir.mkdir()
+        json_path = sub_dir / "test.json"
+        json_path.write_text(json.dumps(
+            json_data,
+            indent=4,
+            ensure_ascii=False
+        ), encoding="utf-8")
+        config = Config()
+        json_config_data_source = JsonConfigDataSource(str(json_path))
+        json_config_data_source.load(config)
 
-
-# def test_github_init_issue_info(
-#         github: GithubClient,
-#         env_dict: dict[str, str],
-#         manual: bool = False
-# ):
-#     assert github._token == env_dict["TOKEN"]
-#     assert github._output_path == env_dict["ISSUE_OUTPUT_PATH"]
-#     assert github._ci_event_type == env_dict["CI_EVENT_TYPE"]
-#     assert github._issue.id == int(
-#         env_dict["ISSUE_NUMBER"])
-#     assert github._issue.title == env_dict["ISSUE_TITLE"]
-#     assert github._issue.state == parse_issue_state(env_dict["ISSUE_STATE"])
-#     assert github._issue.labels == []
-#     if manual:
-#         assert github._issue.issue_type == env_dict["ISSUE_TYPE"]
-#         assert github._issue.introduced_version == env_dict["INTRODUCED_VERSION"]
-#         assert github._issue.archive_version == env_dict["ARCHIVE_VERSION"]
-#         assert github._urls.issue_url == env_dict["MANUAL_ISSUE_URL"]
-#         assert github._urls.comments_url == env_dict["MANUAL_COMMENTS_URL"]
-#     else:
-#         assert github._issue.issue_type == AUTO_ISSUE_TYPE
-#         assert github._issue.body == env_dict["ISSUE_BODY"]
-#         assert github._urls.issue_url == env_dict["ISSUE_URL"]
-#         assert github._urls.comments_url == env_dict["COMMENTS_URL"]
-# def test_gitlab_init_issue_info(
-#         gitlab: GitlabClient,
-#         env_dict: dict[str, str],
-#         manual: bool = False
-# ):
-#     assert gitlab._token == env_dict["TOKEN"]
-#     assert gitlab._output_path == env_dict["ISSUE_OUTPUT_PATH"]
-#     assert github._ci_event_type == env_dict["CI_EVENT_TYPE"]
-#     assert gitlab._issue.id == int(
-#         env_dict["ISSUE_NUMBER"])
-#     assert gitlab._issue.title == env_dict["ISSUE_TITLE"]
-#     assert gitlab._issue.state == parse_issue_state(env_dict["ISSUE_STATE"])
-#     assert gitlab._issue.labels == []
-#     if manual:
-#         assert gitlab._issue.issue_type == env_dict["ISSUE_TYPE"]
-#         assert gitlab._issue.introduced_version == env_dict["INTRODUCED_VERSION"]
-#         assert gitlab._issue.archive_version == env_dict["ARCHIVE_VERSION"]
-#         assert gitlab._urls.issue_url == env_dict["MANUAL_ISSUE_URL"]
-#         assert gitlab._urls.comments_url == env_dict["MANUAL_COMMENTS_URL"]
-#     else:
-#         assert gitlab._issue.issue_type == AUTO_ISSUE_TYPE
-#         assert gitlab._issue.body == env_dict["ISSUE_BODY"]
-#         assert gitlab._urls.issue_url == env_dict["ISSUE_URL"]
-#         assert gitlab._urls.comments_url == env_dict["COMMENTS_URL"]
-
-
-# @pytest.mark.parametrize(
-#     "env_dict",
-#     [
-#         github_auto_archiving_env_dict,
-#         github_manual_archiving_env_dict
-#     ]
-# )
-# def test_github_read_platform_environments(
-#     self,
-#     env_dict: dict[str, str]
-# ):
-#     with patch.dict(os.environ, env_dict):
-#         if env_dict.get("ISSUE_NUMBER") is None:
-#             pytest.raises(ValueError)
-#             return
-#         test_platform_issue_info(GithubClient())
-
-
-# @pytest.mark.usefixtures("setup_github_auto_archiving_environment")
-# @pytest.fixture(scope="class")
-# def github(self) -> GithubClient:
-#     # self.github1 = GithubClient()
-#     return GithubClient()
-
-# # def setup_gitlab_environment():
-# #     os.environ[Env.TOKEN]
-# #     os.environ[Env.CI_EVENT_TYPE]
-# #     os.environ[Env.ISSUE_OUTPUT_PATH]
-# #     os.environ.get(Env.ISSUE_NUMBER, "")
-# #     os.environ.get(Env.ISSUE_TITLE, "").strip(),
-# #     os.environ[Env.ISSUE_STATE]),
-# #         os.environ.get(
-# #     os.environ.get(Env.ISSUE_TYPE,
-# #                    os.environ[Env.API_BASE_URL]
-# #                    os.environ[Env.WEBHOOK_PAYLOAD]
-# #                    os.environ[Env.API_BASE_URL]}
-
-
-# # @pytest.mark.usefixtures("setup_gitlab_environment")
-# # class TestGitlab():
+        assert config.archive_necessary_labels == json_data[
+            "archive_necessary_labels"]
+        assert config.issue_type.type_keyword == json_data[
+            "issue_type"]["type_keyword"]
+        assert config.archived_document.issue_title_processing_rules == json_data[
+            "archived_document"]["issue_title_processing_rules"]
