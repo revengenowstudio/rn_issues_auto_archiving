@@ -1,5 +1,5 @@
 import os
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field,asdict
 from typing import TypedDict, TypeAlias
 
 IssueType: TypeAlias = str
@@ -66,7 +66,7 @@ class Config():
 
     # 从env读取
     token: str = str()
-    output_path: str = str()
+    issue_output_path: str = str()
     ci_event_type: str = str()
     archived_document_path: str = str()
 
@@ -84,3 +84,6 @@ class Config():
     introduced_version_reges: list[str] = field(
         default_factory=list)
     archived_document: ArchivedDocument = ArchivedDocument()
+    
+    # def to_dict(self) -> ConfigJson:
+    #     return ConfigJson(**asdict(self))

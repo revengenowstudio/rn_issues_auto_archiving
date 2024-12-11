@@ -19,14 +19,14 @@ def main():
         from dotenv import load_dotenv
         load_dotenv()
 
-    output_path = os.environ[Env.ISSUE_OUTPUT_PATH]
+    issue_output_path = os.environ[Env.ISSUE_OUTPUT_PATH]
     issue_repository = os.environ[Env.ISSUE_REPOSITORY]
     token = os.environ[Env.TOKEN]
 
     issue_info: IssueInfo
     try:
         issue_info = IssueInfo()
-        issue_info.json_load(output_path)
+        issue_info.json_load(issue_output_path)
         print(Log.print_issue_info
               .format(issue_info=json_dumps(
                   issue_info.to_print_string()

@@ -6,7 +6,7 @@ from pathlib import Path
 from shared.log import Log
 from shared.data_source import DataSource
 from shared.env import Env
-from shared.json_config import Config, ConfigJson
+from shared.json_config import Config
 
 FORMAT_MAP_BLACK_LIST = [
     "version_regex",
@@ -41,7 +41,7 @@ def apply_place_holder(obj: dict,
 class EnvConfigDataSource(DataSource):
     def load(self, config: Config) -> None:
         config.token = os.environ[Env.TOKEN]
-        config.output_path = os.environ[Env.ISSUE_OUTPUT_PATH]
+        config.issue_output_path = os.environ[Env.ISSUE_OUTPUT_PATH]
         config.ci_event_type = os.environ[Env.CI_EVENT_TYPE]
         config.archived_document_path = os.environ[Env.ARCHIVED_DOCUMENT_PATH]
 
@@ -78,8 +78,6 @@ class JsonConfigDataSource(DataSource):
             **raw_json.pop("issue_type"))
         archived_document = Config.ArchivedDocument(
             **raw_json.pop("archived_document"))
-        config = replace(config,
-                         **asdict(config),
-                         issue_type=raw_json.pop("issue_type"))
+        config.__dict__.update(**raw_json)
         config.issue_type = issue_type
         config.archived_document = archived_document

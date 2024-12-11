@@ -121,7 +121,7 @@ def main() -> None:
         # 为了后续推送文档和发送归档成功评论的脚本
         # 而将issue信息输出一个json文件
         issue_info.json_dump(
-            config.output_path
+            config.issue_output_path
         )
 
     except (
