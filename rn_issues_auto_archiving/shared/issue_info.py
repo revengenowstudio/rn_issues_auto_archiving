@@ -207,7 +207,7 @@ class IssueInfo():
             print(Log.too_many_issue_type)
             raise IssueTypeError(
                 ErrorMessage.too_many_issue_type
-                .format(issue_type=result)
+                .format(labels=result)
             )
         if len(result) == 1:
             print(Log.getting_something_from_success

@@ -1,70 +1,74 @@
 import pytest
 import json
-import re
 from pathlib import Path
 
 from shared.issue_info import CommentJson, IssueInfoJson, IssueInfo
 from shared.exception import *
 
-
-full_issue_info_dict = {
-    "issue_id": 1,
-    "issue_type": "设定调整",
-    "issue_title": "test_issue，这是issue标题",
-    "issue_state": "closed",
-    "issue_body": "这是一个测试issue描述",
-    "issue_labels": ["hello"],
-    "issue_comments": [{
-        "author": "test_user",
-        "body": "test_body",
-    }],
-    "introduced_version": "原版YR",
-    "archive_version": "0.99.922",
-    "ci_event_type": "trigger",
-    "platform_type": "gitlab",
-    "issue_repository": "外部Issue",
-    "http_header": {
-        "Authorization": "Bearer 12321312saddaed",
-        "Content-Type": "application/json"
-    },
-    "reopen_http_method": "PUT",
-    "reopen_body": {
-        "state_event": "reopen"
-    },
-    "links": {
-        "issue_url": "https://example.com/api/v4/projects/xx/issues/1",
-        "comment_url": "https://example.com/api/v4/projects/xx/issues/1/notes"
+class TestData():
+    full_issue_info_dict = {
+        "issue_id": 1,
+        "issue_type": "设定调整",
+        "issue_title": "test_issue，这是issue标题",
+        "issue_state": "closed",
+        "issue_body": "这是一个测试issue描述",
+        "issue_labels": ["hello"],
+        "issue_comments": [{
+            "author": "test_user",
+            "body": "test_body",
+        }],
+        "introduced_version": "原版YR",
+        "archive_version": "0.99.922",
+        "ci_event_type": "trigger",
+        "platform_type": "gitlab",
+        "issue_repository": "外部Issue",
+        "http_header": {
+            "Authorization": "Bearer 12321312saddaed",
+            "Content-Type": "application/json"
+        },
+        "reopen_http_method": "PUT",
+        "reopen_body": {
+            "state_event": "reopen"
+        },
+        "links": {
+            "issue_url": "https://example.com/api/v4/projects/xx/issues/1",
+            "comment_url": "https://example.com/api/v4/projects/xx/issues/1/notes"
+        }
     }
-}
 
-default_issue_info_dict = {
-    "issue_id": -1,
-    "issue_type": "自动判断",
-    "issue_title": "",
-    "issue_state": "",
-    "issue_body": "",
-    "issue_labels": [],
-    "issue_comments": [],
-    "introduced_version": "",
-    "archive_version": "",
-    "ci_event_type": "",
-    "platform_type": "",
-    "issue_repository": "",
-    "http_header": {},
-    "reopen_http_method": "",
-    "reopen_body": {},
-    "links": {
-        "issue_url": "",
-        "comment_url": ""
+    default_issue_info_dict = {
+        "issue_id": -1,
+        "issue_type": "自动判断",
+        "issue_title": "",
+        "issue_state": "",
+        "issue_body": "",
+        "issue_labels": [],
+        "issue_comments": [],
+        "introduced_version": "",
+        "archive_version": "",
+        "ci_event_type": "",
+        "platform_type": "",
+        "issue_repository": "",
+        "http_header": {},
+        "reopen_http_method": "",
+        "reopen_body": {},
+        "links": {
+            "issue_url": "",
+            "comment_url": ""
+        }
     }
-}
+    issue_body_with_introduced_version = "【发现版本号】：0.99.918\n"
+    empty_issue_body = ""
+
+
+
 
 
 @pytest.mark.parametrize("issue_info_dict,expected_result", [
-    (full_issue_info_dict,
-     full_issue_info_dict.copy()),
-    (default_issue_info_dict,
-     default_issue_info_dict.copy())
+    (TestData.full_issue_info_dict,
+        TestData.full_issue_info_dict.copy()),
+    (TestData.default_issue_info_dict,
+        TestData.default_issue_info_dict.copy())
 ])
 def test_remove_sensitive_info(
         issue_info_dict: IssueInfoJson,
@@ -75,12 +79,11 @@ def test_remove_sensitive_info(
         dict(issue_info_dict))
         == expected_result)
 
-
 @pytest.mark.parametrize("issue_info_dict,expected_result", [
-    (default_issue_info_dict,
-     default_issue_info_dict),
-    (full_issue_info_dict,
-     full_issue_info_dict)
+    (TestData.default_issue_info_dict,
+        TestData.default_issue_info_dict),
+    (TestData.full_issue_info_dict,
+        TestData.full_issue_info_dict)
 ])
 def test_to_print_string(
     issue_info_dict: IssueInfoJson,
@@ -94,12 +97,11 @@ def test_to_print_string(
         indent=4,
         ensure_ascii=False))
 
-
 @pytest.mark.parametrize("issue_info_dict,expected_result", [
-    (default_issue_info_dict,
-     default_issue_info_dict),
-    (full_issue_info_dict,
-     full_issue_info_dict)
+    (TestData.default_issue_info_dict,
+        TestData.default_issue_info_dict),
+    (TestData.full_issue_info_dict,
+        TestData.full_issue_info_dict)
 ])
 def test_to_dict(
     issue_info_dict: IssueInfoJson,
@@ -109,12 +111,11 @@ def test_to_dict(
     issue_info.from_dict(issue_info_dict)
     assert issue_info.to_dict() == expected_result
 
-
 @pytest.mark.parametrize("issue_info_dict,expected_result", [
-    (default_issue_info_dict,
-     default_issue_info_dict),
-    (full_issue_info_dict,
-     full_issue_info_dict)
+    (TestData.default_issue_info_dict,
+        TestData.default_issue_info_dict),
+    (TestData.full_issue_info_dict,
+        TestData.full_issue_info_dict)
 ])
 def test_json_dump(
     issue_info_dict: IssueInfoJson,
@@ -132,12 +133,11 @@ def test_json_dump(
     finally:
         Path(dump_json_name).unlink()
 
-
 @pytest.mark.parametrize("issue_info_dict,expected_result", [
-    (default_issue_info_dict,
-     default_issue_info_dict),
-    (full_issue_info_dict,
-     full_issue_info_dict)
+    (TestData.default_issue_info_dict,
+        TestData.default_issue_info_dict),
+    (TestData.full_issue_info_dict,
+        TestData.full_issue_info_dict)
 ])
 def test_json_load(
     issue_info_dict: IssueInfoJson,
@@ -157,12 +157,11 @@ def test_json_load(
     finally:
         Path(dump_json_name).unlink()
 
-
 @pytest.mark.parametrize("issue_info_dict,expected_result", [
-    (default_issue_info_dict,
-     default_issue_info_dict),
-    (full_issue_info_dict,
-     full_issue_info_dict)
+    (TestData.default_issue_info_dict,
+        TestData.default_issue_info_dict),
+    (TestData.full_issue_info_dict,
+        TestData.full_issue_info_dict)
 ])
 def test_from_dict(
     issue_info_dict: IssueInfoJson,
@@ -173,12 +172,11 @@ def test_from_dict(
     issue_info.from_dict(issue_info_dict)
     assert issue_info.to_dict() == expected_result
 
-
 @pytest.mark.parametrize("issue_info_dict,expected_result", [
-    (default_issue_info_dict,
-     default_issue_info_dict),
-    (full_issue_info_dict,
-     full_issue_info_dict)
+    (TestData.default_issue_info_dict,
+        TestData.default_issue_info_dict),
+    (TestData.full_issue_info_dict,
+        TestData.full_issue_info_dict)
 ])
 def test_update(
     issue_info_dict: IssueInfoJson,
@@ -200,20 +198,15 @@ def test_update(
         "comment_url": "https://example.com/2"
     }
     assert issue_info.to_dict() == expected_result
-
-
-issue_body_with_introduced_version = "【发现版本号】：0.99.918\n"
-empty_issue_body = ""
-
-
 @pytest.mark.parametrize("issue_body,with_introduced_version,issue_type,expected_version", [
 
-    (issue_body_with_introduced_version, True, "Bug修复", "0.99.918"),  # 描述里有归档版本号
-    (issue_body_with_introduced_version, True, "设定调整", "0.99.918"),  # 描述里有归档版本号
-    (issue_body_with_introduced_version, True, "设定引入", "0.99.918"),  # 描述里有归档版本号
-    (empty_issue_body, False, "Bug修复", ""),  # 描述里没有归档版本号
-    (empty_issue_body, False, "设定调整", ""),  # 描述里没有归档版本号
-    (empty_issue_body, False, "设定引入", ""),  # 描述里没有归档版本号
+    (TestData.issue_body_with_introduced_version,
+        True, "Bug修复", "0.99.918"),  # 描述里有归档版本号
+    (TestData.issue_body_with_introduced_version, True, "设定调整", "0.99.918"),  # 描述里有归档版本号
+    (TestData.issue_body_with_introduced_version, True, "设定引入", "0.99.918"),  # 描述里有归档版本号
+    (TestData.empty_issue_body, False, "Bug修复", ""),  # 描述里没有归档版本号
+    (TestData.empty_issue_body, False, "设定调整", ""),  # 描述里没有归档版本号
+    (TestData.empty_issue_body, False, "设定引入", ""),  # 描述里没有归档版本号
 ])
 def test_get_introduced_version_from_description(
     issue_body: str,
@@ -272,7 +265,6 @@ def test_get_introduced_version_from_description(
             need_introduced_version_issue_type
         )
         assert introduced_version == expected_version
-
 
 @pytest.mark.parametrize("comments,include_archive_version_number,expected_version,", [
     ([
@@ -333,8 +325,7 @@ def test_get_archive_version_from_comments(
             archive_version_reges_for_comments
         )
 
-
-@pytest.mark.parametrize("comments,issue_type_label_number,expected_type", [
+@pytest.mark.parametrize("labels,issue_type_label_number,expected_type", [
     ([""], 0,  ""),
     (["bug"], 1,  "Bug修复"),
     (["bug", "enhancement 优化或建议"], 2, "")
@@ -367,7 +358,6 @@ def test_get_issue_type_from_labels(
             label_map
         )
 
-
 comments_without_archived_version = [
     {
         "body": ""
@@ -384,15 +374,14 @@ comments_with_single_archived_version = [
         "body": ""
     }
 ]
-# comments_with_double_archived_version = [
-#     {
-#         "body": "0.99.918测试通过"
-#     },
-#     {
-#         "body": "已验证，版本号：0.99.918"
-#     }
-# ]
-
+comments_with_double_archived_version = [
+    {
+        "body": "0.99.918测试通过"
+    },
+    {
+        "body": "已验证，版本号：0.99.918"
+    }
+]
 
 @pytest.mark.parametrize(
     "labels,comments,archive_version_number,expected_result",
@@ -435,9 +424,9 @@ def test_should_archive_issue(
     # 是归档对象，不满足归档条件：缺少归档评论，有归档所需标签
     # 是归档对象，满足归档条件：有归档评论，有归档所需标签
     [i for i in [body if "0.99.918" in body else ""
-     for body in [comment_dict["body"]
-                  for comment_dict in comments]] if i.strip()
-     ]
+                    for body in [comment_dict["body"]
+                                for comment_dict in comments]] if i.strip()
+        ]
 
     if ("resolved 已解决" not in labels
             and archive_version_number == 1):
@@ -450,7 +439,7 @@ def test_should_archive_issue(
             )
 
     elif ("resolved 已解决" in labels
-          and archive_version_number == 0):
+            and archive_version_number == 0):
         with pytest.raises(
             ArchiveVersionError
         ):
@@ -470,14 +459,13 @@ def test_should_archive_issue(
             archive_necessary_labels
         )
 
-
 @pytest.mark.parametrize(
     "issue_title,expected_result",
     [
         ("#建议反馈#建议能坦克碾压一些小型地图物件和路灯",
-         "建议能坦克碾压一些小型地图物件和路灯"),
+            "建议能坦克碾压一些小型地图物件和路灯"),
         ("建议能坦克碾压一些小型地图物件和路灯",
-         "建议能坦克碾压一些小型地图物件和路灯"),
+            "建议能坦克碾压一些小型地图物件和路灯"),
     ])
 def test_remove_issue_type_in_issue_title(
     issue_title: str,
