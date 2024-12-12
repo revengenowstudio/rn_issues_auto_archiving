@@ -1,5 +1,3 @@
-import httpx
-
 from shared.log import Log
 from shared.http_request import http_request
 
