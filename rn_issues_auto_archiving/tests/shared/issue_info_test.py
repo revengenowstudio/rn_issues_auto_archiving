@@ -5,6 +5,7 @@ from pathlib import Path
 from shared.issue_info import CommentJson, IssueInfoJson, IssueInfo
 from shared.exception import *
 
+
 class TestData():
     full_issue_info_dict = {
         "issue_id": 1,
@@ -61,9 +62,6 @@ class TestData():
     empty_issue_body = ""
 
 
-
-
-
 @pytest.mark.parametrize("issue_info_dict,expected_result", [
     (TestData.full_issue_info_dict,
         TestData.full_issue_info_dict.copy()),
@@ -78,6 +76,7 @@ def test_remove_sensitive_info(
     assert (IssueInfo.remove_sensitive_info(
         dict(issue_info_dict))
         == expected_result)
+
 
 @pytest.mark.parametrize("issue_info_dict,expected_result", [
     (TestData.default_issue_info_dict,
@@ -97,6 +96,7 @@ def test_to_print_string(
         indent=4,
         ensure_ascii=False))
 
+
 @pytest.mark.parametrize("issue_info_dict,expected_result", [
     (TestData.default_issue_info_dict,
         TestData.default_issue_info_dict),
@@ -110,6 +110,7 @@ def test_to_dict(
     issue_info = IssueInfo()
     issue_info.from_dict(issue_info_dict)
     assert issue_info.to_dict() == expected_result
+
 
 @pytest.mark.parametrize("issue_info_dict,expected_result", [
     (TestData.default_issue_info_dict,
@@ -132,6 +133,7 @@ def test_json_dump(
         assert actual_result == expected_result
     finally:
         Path(dump_json_name).unlink()
+
 
 @pytest.mark.parametrize("issue_info_dict,expected_result", [
     (TestData.default_issue_info_dict,
@@ -157,6 +159,7 @@ def test_json_load(
     finally:
         Path(dump_json_name).unlink()
 
+
 @pytest.mark.parametrize("issue_info_dict,expected_result", [
     (TestData.default_issue_info_dict,
         TestData.default_issue_info_dict),
@@ -171,6 +174,7 @@ def test_from_dict(
     issue_info = IssueInfo()
     issue_info.from_dict(issue_info_dict)
     assert issue_info.to_dict() == expected_result
+
 
 @pytest.mark.parametrize("issue_info_dict,expected_result", [
     (TestData.default_issue_info_dict,
@@ -198,12 +202,16 @@ def test_update(
         "comment_url": "https://example.com/2"
     }
     assert issue_info.to_dict() == expected_result
+
+
 @pytest.mark.parametrize("issue_body,with_introduced_version,issue_type,expected_version", [
 
     (TestData.issue_body_with_introduced_version,
         True, "Bug修复", "0.99.918"),  # 描述里有归档版本号
-    (TestData.issue_body_with_introduced_version, True, "设定调整", "0.99.918"),  # 描述里有归档版本号
-    (TestData.issue_body_with_introduced_version, True, "设定引入", "0.99.918"),  # 描述里有归档版本号
+    (TestData.issue_body_with_introduced_version,
+     True, "设定调整", "0.99.918"),  # 描述里有归档版本号
+    (TestData.issue_body_with_introduced_version,
+     True, "设定引入", "0.99.918"),  # 描述里有归档版本号
     (TestData.empty_issue_body, False, "Bug修复", ""),  # 描述里没有归档版本号
     (TestData.empty_issue_body, False, "设定调整", ""),  # 描述里没有归档版本号
     (TestData.empty_issue_body, False, "设定引入", ""),  # 描述里没有归档版本号
@@ -266,6 +274,7 @@ def test_get_introduced_version_from_description(
         )
         assert introduced_version == expected_version
 
+
 @pytest.mark.parametrize("comments,include_archive_version_number,expected_version,", [
     ([
         {
@@ -325,6 +334,7 @@ def test_get_archive_version_from_comments(
             archive_version_reges_for_comments
         )
 
+
 @pytest.mark.parametrize("labels,issue_type_label_number,expected_type", [
     ([""], 0,  ""),
     (["bug"], 1,  "Bug修复"),
@@ -358,6 +368,7 @@ def test_get_issue_type_from_labels(
             label_map
         )
 
+
 comments_without_archived_version = [
     {
         "body": ""
@@ -382,6 +393,7 @@ comments_with_double_archived_version = [
         "body": "已验证，版本号：0.99.918"
     }
 ]
+
 
 @pytest.mark.parametrize(
     "labels,comments,archive_version_number,expected_result",
@@ -424,9 +436,9 @@ def test_should_archive_issue(
     # 是归档对象，不满足归档条件：缺少归档评论，有归档所需标签
     # 是归档对象，满足归档条件：有归档评论，有归档所需标签
     [i for i in [body if "0.99.918" in body else ""
-                    for body in [comment_dict["body"]
-                                for comment_dict in comments]] if i.strip()
-        ]
+                 for body in [comment_dict["body"]
+                              for comment_dict in comments]] if i.strip()
+     ]
 
     if ("resolved 已解决" not in labels
             and archive_version_number == 1):
@@ -458,6 +470,7 @@ def test_should_archive_issue(
             archive_version_reges_for_comments,
             archive_necessary_labels
         )
+
 
 @pytest.mark.parametrize(
     "issue_title,expected_result",
