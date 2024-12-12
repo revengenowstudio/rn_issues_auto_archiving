@@ -1,7 +1,8 @@
 import pytest
-import sys
+from unittest.mock import patch
 
 from shared.get_args import get_value_from_args
+
 
 @pytest.mark.parametrize(
     "short_arg,long_arg,value", [
@@ -14,14 +15,8 @@ def test_get_value_from_args(
     long_arg: str,
     value: str
 ):
-    sys.argv.extend([short_arg,value])    
-    assert get_value_from_args(short_arg, long_arg) == value
-    sys.argv.remove(short_arg)
-    sys.argv.remove(value)
-
-    sys.argv.extend([long_arg,value])    
-    assert get_value_from_args(short_arg, long_arg) == value
-    sys.argv.remove(long_arg)
-    sys.argv.remove(value)
-    
+    with patch("sys.argv", [short_arg, value]):
+        assert get_value_from_args(short_arg, long_arg) == value
+    with patch("sys.argv", [long_arg, value]):
+        assert get_value_from_args(short_arg, long_arg) == value
     assert get_value_from_args(short_arg, long_arg) == None
