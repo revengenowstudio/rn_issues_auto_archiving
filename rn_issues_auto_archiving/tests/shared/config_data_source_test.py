@@ -6,15 +6,13 @@ from pathlib import Path
 
 import pytest
 
-from shared.json_config import Config, ConfigJson
+from shared.json_config import Config
 from shared.config_data_source import (
     EnvConfigDataSource,
     JsonConfigDataSource,
     apply_place_holder
 )
 from shared.env import Env
-
-TestConfigDict: TypeAlias = dict[str, str | dict[str, str]]
 
 
 @pytest.mark.parametrize(
@@ -35,10 +33,11 @@ TestConfigDict: TypeAlias = dict[str, str | dict[str, str]]
     ]
 )
 def test_apply_place_holder(
-    config_dict: TestConfigDict,
-    expected_dict: TestConfigDict
+    config_dict: dict[str, str | dict[str, str]],
+    expected_dict: dict[str, str | dict[str, str]]
 ):
-    assert (apply_place_holder(config_dict, config_dict)
+    apply_place_holder(config_dict, config_dict)
+    assert (config_dict
             == expected_dict)
 
 
