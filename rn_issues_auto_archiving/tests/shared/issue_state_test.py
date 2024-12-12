@@ -13,8 +13,8 @@ from shared.issue_state import parse_issue_state
     ("update", "update"),
     ("", ""),
     ("xxx", "xxx"),
-    ("openxxx", "openxxx"),
-    ("closexxx", "closexxx"),
+    ("open_x", "open_x"),
+    ("close_x", "close_x"),
 ])
 def test_parse_issue_state(input: str, output: str):
     assert parse_issue_state(input) == output
