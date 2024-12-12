@@ -11,13 +11,14 @@ from shared.json_dumps import json_dumps
 from shared.exception import MissingIssueNumber, WebhookPayloadError
 from shared.api_path import ApiPath
 
-@staticmethod
+
 def issue_number_to_int(issue_number: str):
     if not issue_number.isdigit():
         raise ValueError(
             Log.invalid_issue_number
             .format(issues_number_var=issue_number))
     return int(issue_number.strip())
+
 
 class IssusDataSource(ABC):
 
@@ -32,6 +33,8 @@ class GithubIssueDataSource(IssusDataSource):
 
         issue_info.ci_event_type = ci_event_type = os.environ[Env.CI_EVENT_TYPE]
         issue_info.issue_repository = os.environ[Env.ISSUE_REPOSITORY]
+
+        # 手动触发流水线时应该读取的环境变量
         if ci_event_type in CiEventType.manual:
             issue_info.issue_id = (
                 issue_number_to_int(
@@ -52,11 +55,13 @@ class GithubIssueDataSource(IssusDataSource):
                   .format(
                       input_variables=issue_info.to_print_string()
                   ))
+
             issue_info.links.issue_url = (
                 os.environ[Env.MANUAL_ISSUE_URL])
             issue_info.links.comment_url = (
                 os.environ[Env.MANUAL_COMMENTS_URL])
 
+        # 自动触发流水线时应该读取的环境变量
         else:
             issue_info.issue_id = int(os.environ[Env.ISSUE_NUMBER])
             issue_info.issue_title = os.environ[Env.ISSUE_TITLE]
@@ -75,15 +80,21 @@ class GithubIssueDataSource(IssusDataSource):
 
 
 class GitlabIssueDataSource(IssusDataSource):
+    @staticmethod
+    def build_issue_url(issue_id: int, api_base_url: str) -> str:
+        return f'{api_base_url}{ApiPath.issues}/{issue_id}'
+
     def load(self, issue_info: IssueInfo) -> None:
         print(Log.loading_something.format(something=Log.env))
 
         issue_info.ci_event_type = ci_event_type = os.environ[Env.CI_EVENT_TYPE]
         issue_info.issue_repository = os.environ[Env.ISSUE_REPOSITORY]
+
+        # 手动触发流水线时应该读取的环境变量
         issue_id: int
         if ci_event_type in CiEventType.manual:
             issue_id_str = os.environ.get(Env.ISSUE_NUMBER, None)
-            if issue_id_str is None:
+            if issue_id_str is None or issue_id_str == "":
                 raise MissingIssueNumber(
                     Log.missing_issue_number
                     .format(issues_number_var=Env.ISSUE_NUMBER))
@@ -112,11 +123,8 @@ class GitlabIssueDataSource(IssusDataSource):
                           "issue_type": issue_info.issue_type
                       }
                   )))
-            issue_url = f'{os.environ[Env.API_BASE_URL]}{ApiPath.issues}/{issue_id}'
 
-            issue_info.links.issue_url = issue_url
-            issue_info.links.comment_url = issue_url + '/' + ApiPath.notes
-
+        # 自动触发流水线时应该读取的环境变量
         else:
             try:
                 webhook_payload = json.loads(
@@ -125,9 +133,8 @@ class GitlabIssueDataSource(IssusDataSource):
                 print(Log.webhook_payload_not_found)
                 raise WebhookPayloadError(Log.webhook_payload_not_found)
 
-            issue_id = webhook_payload["object_attributes"]["iid"]
             # webhook里是json，iid一定是int
-            issue_info.issue_id = issue_id
+            issue_info.issue_id = issue_id = webhook_payload["object_attributes"]["iid"]
             issue_info.issue_title = webhook_payload["object_attributes"]["title"]
             issue_info.issue_state = parse_issue_state(
                 webhook_payload["object_attributes"]["action"])
@@ -140,9 +147,10 @@ class GitlabIssueDataSource(IssusDataSource):
             issue_info.archive_version = ""
             issue_info.issue_type = AUTO_ISSUE_TYPE
 
-            issue_url = f'{os.environ[Env.API_BASE_URL]}{ApiPath.issues}/{issue_id}'
-            issue_info.links.issue_url = issue_url
-            issue_info.links.comment_url = issue_url + '/' + ApiPath.notes
+        issue_url = self.build_issue_url(
+            issue_id, os.environ[Env.API_BASE_URL])
+        issue_info.links.issue_url = issue_url
+        issue_info.links.comment_url = issue_url + '/' + ApiPath.notes
 
         print(Log.loading_something_success
               .format(something=Log.env))
