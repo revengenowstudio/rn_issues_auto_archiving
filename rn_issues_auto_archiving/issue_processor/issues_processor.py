@@ -62,7 +62,7 @@ class IssueProcessor():
 
     @staticmethod
     def init_issue_info(
-        platform: GithubClient | GitlabClient,
+        platform: GitServiceClient,
     ) -> IssueInfo:
         issue_info = IssueInfo()
         if isinstance(platform, GithubClient):
@@ -86,9 +86,9 @@ class IssueProcessor():
         # gitlab的reopen issue事件应该被跳过
         # 而手动触发的流水线有可能目标Issue是还没被closed的
         if (CiEventType.should_ci_running_in_issue_event()
-                    and (issue_info.issue_state
+            and (issue_info.issue_state
                          == IssueState.open)
-                ):
+            ):
             print(Log.issue_state_is_open)
             return True
 
@@ -123,7 +123,10 @@ class IssueProcessor():
         issue_info: IssueInfo,
         config: Config
     ) -> GatherInfo:
-        gather_info = IssueProcessor.GatherInfo()
+        gather_info = IssueProcessor.GatherInfo(
+            issue_type=issue_info.issue_type,
+            introduced_version=issue_info.introduced_version
+        )
         if issue_info.issue_type == AUTO_ISSUE_TYPE:
             gather_info.issue_type = issue_info.get_issue_type_from_labels(
                 config.issue_type.label_map
@@ -173,9 +176,9 @@ class IssueProcessor():
         platform: GitServiceClient,
     ) -> None:
         if (CiEventType.should_ci_running_in_manual()
-                    and (issue_info.issue_state
+            and (issue_info.issue_state
                          == IssueState.open)
-                ):
+            ):
             platform.close_issue(
                 issue_info.links.issue_url
             )
