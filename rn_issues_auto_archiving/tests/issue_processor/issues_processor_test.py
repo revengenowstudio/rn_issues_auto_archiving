@@ -5,9 +5,8 @@ from unittest.mock import patch, MagicMock
 from issue_processor.issues_processor import IssueProcessor
 from issue_processor.git_service_client import (
     GitServiceClient, GithubClient, GitlabClient)
-from shared.ci_event_type import CiEventType
 from shared.issue_state import IssueState
-from shared.exception import ErrorMessage, MissingArchiveVersionAndArchiveLabel, UnexpectedPlatform
+from shared.exception import MissingArchiveVersionAndArchiveLabel, UnexpectedPlatform
 from shared.issue_info import AUTO_ISSUE_TYPE, IssueInfo
 from shared.json_config import Config
 
@@ -111,6 +110,8 @@ class TestIssueProcessor():
         issue_state,\
         archive_version,\
         expect_result", [
+            # 以下测试数据分别为：
+            # 是否自动运行流水线,是否手动运行流水线,是否为归档对象,issue_state,归档版本号,预期结果
             (False, True, False, IssueState.closed, "",
              MissingArchiveVersionAndArchiveLabel),
             (False, True, False, IssueState.open, "",
@@ -220,7 +221,7 @@ class TestIssueProcessor():
         assert issue_info.issue_type == gather_info.issue_type
         assert issue_info.introduced_version == gather_info.introduced_version
         assert issue_info.archive_version == gather_info.archive_version
-        
+
     def test_parse_issue_info_for_archived(
         self
     ):
@@ -228,19 +229,19 @@ class TestIssueProcessor():
         issue_info.remove_issue_type_in_issue_title.return_value = "test_title"
         issue_info.update.return_value = None
         config = MagicMock()
-        
+
         IssueProcessor.parse_issue_info_for_archived(
             issue_info,
             config
         )
-        assert issue_info.remove_issue_type_in_issue_title.called 
-        assert issue_info.update.called 
-        
+        assert issue_info.remove_issue_type_in_issue_title.called
+        assert issue_info.update.called
+
     def test_close_issue_if_not_closed(self):
         issue_info = MagicMock()
         with patch(
-                "shared.ci_event_type.CiEventType.should_ci_running_in_manual"
-            ) as should_ci_running_in_manual_method:
+            "shared.ci_event_type.CiEventType.should_ci_running_in_manual"
+        ) as should_ci_running_in_manual_method:
             should_ci_running_in_manual_method.return_value = True
             issue_info.issue_state = IssueState.open
             platform = MagicMock()
@@ -251,7 +252,7 @@ class TestIssueProcessor():
             )
             assert platform.close_issue.called
             del platform
-            
+
             should_ci_running_in_manual_method.return_value = True
             issue_info.issue_state = IssueState.closed
             platform = MagicMock()
@@ -262,7 +263,7 @@ class TestIssueProcessor():
             )
             assert platform.close_issue.called is False
             del platform
-            
+
             should_ci_running_in_manual_method.return_value = False
             platform = MagicMock()
             platform.close_issue.return_value = None
@@ -272,6 +273,3 @@ class TestIssueProcessor():
             )
             assert platform.close_issue.called is False
             del platform
-        
-        
-        

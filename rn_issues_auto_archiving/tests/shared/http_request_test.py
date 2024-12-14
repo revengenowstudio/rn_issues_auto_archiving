@@ -37,8 +37,7 @@ class TestHttpRequest():
         )
 
     @patch('httpx.request')
-    @patch('builtins.print')
-    def test_404_not_found(self, mock_print, mock_request):
+    def test_404_not_found(self, mock_request):
         # 模拟 404 Not Found 错误
         error_message = "Not Found"
         mock_response = MagicMock()
@@ -58,8 +57,7 @@ class TestHttpRequest():
         context.match(error_message)
 
     @patch('httpx.request')
-    @patch('builtins.print')
-    def test_http_status_error(self, mock_print, mock_request):
+    def test_http_status_error(self, mock_request):
         # 模拟其他 HTTP 错误
         error_message = "Bad Request"
         mock_response = MagicMock()
