@@ -84,6 +84,3 @@ class Config():
     introduced_version_reges: list[str] = field(
         default_factory=list)
     archived_document: ArchivedDocument = ArchivedDocument()
-    
-    # def to_dict(self) -> ConfigJson:
-    #     return ConfigJson(**asdict(self))

@@ -61,7 +61,7 @@ class JsonConfigDataSource(DataSource):
         print(Log.loading_something
               .format(something=config_path))
 
-        raw_json: dict = (
+        raw_json: dict = dict(
             json.loads(
                 Path(config_path
                      ).read_text(encoding="utf-8")
@@ -71,8 +71,8 @@ class JsonConfigDataSource(DataSource):
               .format(something=config_path))
 
         apply_place_holder(
-            obj=dict(raw_json),
-            place_holder=dict(raw_json)
+            obj=raw_json,
+            place_holder=raw_json
         )
 
         issue_type = Config.IssueType(
