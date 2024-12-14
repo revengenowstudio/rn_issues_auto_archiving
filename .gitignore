@@ -11,3 +11,4 @@ webhook.json
 output
 .VSCodeCounter
 .pytest_cache
+issue_info.json
