@@ -1,3 +1,5 @@
+name: "Unit test"
+run-name: "Unit test"
 
 on:
     push:
