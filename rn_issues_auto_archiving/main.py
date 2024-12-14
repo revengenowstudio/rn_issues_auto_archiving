@@ -87,32 +87,35 @@ def main() -> None:
         )
 
         # 将issue内容写入归档文件
-        archive_document = ArchiveDocument(
-            config.archived_document_path
-        )
+        archive_document = ArchiveDocument()
+        archive_document.file_load(config.archived_document_path)
+
         if (CiEventType.should_ci_running_in_issue_event()
-                and archive_document.should_issue_archived(
-                    issue_info.issue_id,
-                    issue_info.issue_repository
-        )
-        ):
+                and archive_document.should_issue_record_exists(
+                    issue_info.issue_repository,
+                    issue_info.issue_id
+        )):
             print(Log.issue_already_archived
                   .format(issue_id=issue_info.issue_id,
                           issue_repository=issue_info.issue_repository))
             return
 
         archive_document.archive_issue(
-            rjust_character=config.archived_document.rjust_character,
+            # 归档内容格式规则
             rjust_space_width=config.archived_document.rjust_space_width,
+            rjust_character=config.archived_document.rjust_character,
             table_separator=config.archived_document.table_separator,
             archive_template=config.archived_document.archive_template,
             issue_title_processing_rules=config.archived_document.issue_title_processing_rules,
+            
+            # 归档所需issue数据
             issue_id=issue_info.issue_id,
             issue_type=issue_info.issue_type,
             issue_title=issue_info.issue_title,
             issue_repository=issue_info.issue_repository,
             introduced_version=issue_info.introduced_version,
             archive_version=issue_info.archive_version,
+            
             replace_mode=(
                 issue_info.ci_event_type in CiEventType.manual
             )
@@ -140,7 +143,6 @@ def main() -> None:
         platform.close()
         try:
             archive_document.save()
-            archive_document.close()
         except Exception:
             pass
 
