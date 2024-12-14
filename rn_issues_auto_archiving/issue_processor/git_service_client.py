@@ -28,6 +28,7 @@ class Urls():
     issue_url: str
     comments_url: str
 
+
 @dataclass()
 class Issue():
     id: int
@@ -131,11 +132,16 @@ class GitServiceClient(ABC):
                 response.raise_for_status()
                 return response
             except httpx.HTTPStatusError:
+                reason = Log.unknown
+                try:
+                    reason = json_dumps(
+                        response.json(),
+                    )
+                except Exception:
+                    pass
                 print(Log.http_status_error
                       .format(
-                          reason=json_dumps(
-                              response.json(),
-                          ),
+                          reason=reason,
                       ))
                 raise
             except Exception as e:
@@ -181,7 +187,6 @@ class GitServiceClient(ABC):
         )
         print(Log.sending_something_success
               .format(something=Log.announcement_comment))
-
 
 
 class GithubClient(GitServiceClient):
@@ -365,32 +370,6 @@ class GitlabClient(GitServiceClient):
         return {
             "state_event": "close"
         }
-
-    def issue_web_url_to_issue_api_url(self,
-                                       web_url: str,
-                                       project_id: int) -> str:
-        project_name_index = -4
-        owner_name_index = 3
-
-        # api样例：https://{gitlab_host}/api/v4/projects/{project_id}/issues/{issues_id}
-        # web_url样例：https://{gitlab_host}/｛owner｝/{project_name}/-/issues/{issues_id}
-
-        # ['https:', '', '{gitlab_host}', '｛owner｝', '{project_name}', '-', 'issues', '1']
-
-        url_split = web_url.split("/")
-        url_split.pop(project_name_index)  # 删掉project_name
-        url_split.pop(owner_name_index)  # 删掉project_name
-        url_split.remove('-')
-
-        # ['https:', '', '{gitlab_host}', 'issues', '1']
-
-        url_split.insert(3, ApiPath.base)
-        url_split.insert(4, ApiPath.projects)
-        url_split.insert(5, str(project_id))
-
-        # ['https:', '', '{gitlab_host}', 'api/v4', 'projects', '｛project_id｝', 'issues', '1']
-
-        return '/'.join(url_split)
 
     def _init_http_client(self) -> None:
         self._http_header = self.create_http_header(self._token)

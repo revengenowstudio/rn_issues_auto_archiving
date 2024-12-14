@@ -13,6 +13,7 @@ class Log():
     issue_label = "Issue标签"
     dispatch_request = "工作流调度请求"
     uninitialized_message = "未初始化的信息"
+    unknown = "Unknown"
 
     getting_something = '''获取 {something} 中'''
     getting_something_from = '''正在从 {another} 中获取 {something}'''
