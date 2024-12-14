@@ -10,7 +10,8 @@ from shared.json_config import Config
 
 FORMAT_MAP_BLACK_LIST = [
     "version_regex",
-    "introduced_version_reges"
+    "introduced_version_reges",
+    "archive_template"
 ]
 
 
