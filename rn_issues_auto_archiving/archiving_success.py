@@ -25,9 +25,8 @@ def main():
         issue_info = IssueInfo()
         issue_info.json_load(issue_output_path)
         print(Log.print_issue_info
-              .format(issue_info=json_dumps(
-                  issue_info.to_print_string()
-              )))
+              .format(issue_info=issue_info.to_print_string()
+                      ))
 
     except FileNotFoundError:
         print(Log.issue_output_not_found)
