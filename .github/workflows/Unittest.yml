@@ -3,7 +3,6 @@ run-name: "Unit test"
 
 on:
     push:
-    pull_request:
 
 jobs:
   auto_archiving:
