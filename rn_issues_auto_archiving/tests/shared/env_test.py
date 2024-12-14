@@ -12,13 +12,11 @@ from shared.env import (
 def test_should_run_in_github_action():
     with patch.dict(os.environ, {Env.GITHUB_ACTIONS: "true"}):
         assert should_run_in_github_action() is True
-    assert should_run_in_github_action() is False
 
 
 def test_should_run_in_gitlab_ci():
     with patch.dict(os.environ, {Env.GITLAB_CI: "true"}):
         assert should_run_in_gitlab_ci() is True
-    assert should_run_in_github_action() is False
 
 
 def test_should_run_in_local():

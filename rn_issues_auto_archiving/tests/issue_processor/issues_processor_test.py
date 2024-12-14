@@ -80,13 +80,11 @@ class TestIssueProcessor():
                     IssueProcessor.init_git_service_client(
                         None, config), GitlabClient)
 
-        with patch.dict(
-            os.environ,
-            {}
-        ):
-            with pytest.raises(UnexpectedPlatform):
-                IssueProcessor.init_git_service_client(
-                    None, config)
+                should_run_in_github_action.return_value = False
+                should_run_in_gitlab_ci.return_value = False
+                with pytest.raises(UnexpectedPlatform):
+                    IssueProcessor.init_git_service_client(
+                        None, config)
 
     @pytest.mark.parametrize(
         "platform_type,data_source_type", [
