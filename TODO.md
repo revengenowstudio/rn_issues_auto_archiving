@@ -1,5 +1,3 @@
-- [ ] 配置文件里或许不需要黑名单？
-
 - [ ] 归档流程失败，告警文本里主动@触发issue关闭的用户（或许不需要？）
 
 - [ ] 两个仓库出错时，告警评论需要携带流水线url（或许不需要？）
@@ -18,13 +16,12 @@
 
 - [ ] 添加对本仓库commit自动部署到外部issue和内部issue仓库的流水线，以简化部署流程
 
-- [ ] 归档成功建议单独放一个脚本，等所有流程脚本都运行玩再到发成功评论脚本，不然那个阶段炸了又成功评论又失败评论的
+- [x] 单独分离一个脚本用于发送归档成功评论
 
 - [ ] 完成“从两个issue仓库归档文件提取某个版本号范围的归档记录”归档记录收集汇总流水线（这是另一个仓库的任务）
 
-- [ ] 编写单元测试（重要）
-    - 将`_read_platform_environments`等读取环境变量的函数，统一抽象为data_source的子类，判断data_source只管从命令行参数或者环境变量中读取内容，data_source抽象类抽象出函数接口以供子类实现。数据类分为两种，一个是配置数据类，一个是IssueData，data_source类将有一个方法将读取内容输出成数据类以供后续使用。GithubService和GitlabService类创建时需要获取到这个数据类，而数据类本身还需要提供一个json输出接口，用于最后保存成json或者打印信息
+- [x] 编写单元测试（重要）
 
-- [ ] 要不吧获取信息和归档内容写入脚本两个合一起吧，不是更好维护一点吗？
-- config的定义和json配置已经合并到一起了，就差吧两个main合并成一个，并且还要重构gitlab和github类的东西。记得吧`issue_content_to_json`干掉，因为已经不需要了，issue_info数据类自己有to_json方法
-- `rn_issues_auto_archiving\archiving_success.py`的内容也合并到 `rn_issues_auto_archiving\main.py`中
+- [ ] 归档内容写入归档文件时，将issue的web_url 以 markdown link 形式嵌入到 x部Issue#xx 中
+
+- [ ] 存在归档记录的情况下，需要issue_info.json上添加一个布尔字段，然后在send success comment的部分读取这个布尔，以控制是否发送归档成功评论
