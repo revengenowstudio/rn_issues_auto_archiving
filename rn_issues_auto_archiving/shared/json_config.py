@@ -1,5 +1,5 @@
 import os
-from dataclasses import dataclass, field,asdict
+from dataclasses import dataclass, field
 from typing import TypedDict, TypeAlias
 
 IssueType: TypeAlias = str
