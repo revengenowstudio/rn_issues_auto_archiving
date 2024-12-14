@@ -47,7 +47,7 @@ on:
 env:
   ARCHIVED_DOCUMENT_PATH: "./修改归档.md"
   TARGET_BRANCH: main
-  ISSUE_OUTPUT_PATH: "./output.json"
+  ISSUE_OUTPUT_PATH: "./issue_info.json"
   ISSUE_REPOSITORY: "外部Issue"
   COMMIT_TITLE: "Closed 外部Issue#"
   CI_EVENT_TYPE: ${{ github.event_name }} 
@@ -90,11 +90,7 @@ jobs:
           MANUAL_ISSUE_URL: "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.inputs.issue_number }}"
           MANUAL_COMMENTS_URL: "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.inputs.issue_number }}/comments"
         run: |
-          python ./rn_issues_auto_archiving/issue_processor_main.py --config "./config/issue_processor.json"
-
-      - name: Archiving closed issues
-        run: |
-          python ./rn_issues_auto_archiving/auto_archiving_main.py --config "./config/auto_archiving.json" --failed-record "./归档失败记录.json"
+          python ./rn_issues_auto_archiving/main.py --config "./config/auto_archiving.json"
           
       - name: Add and commit changes
         run: |

@@ -4,14 +4,13 @@ from pathlib import Path
 
 from shared.log import Log
 from shared.issue_info import IssueInfo
-from shared.get_args import get_value_from_args
-from shared.issue_info import IssueInfoJson
+from shared.issue_info import IssueInfo
 from shared.json_dumps import json_dumps
 from shared.env import (Env,
                         should_run_in_local
                         )
-from auto_archiving.send_comment import send_comment
-from issue_processor.issue_platform import Gitlab, Github
+from shared.send_comment import send_comment
+from rn_issues_auto_archiving.issue_processor.git_service_client import GitlabClient, GithubClient
 
 
 def main():
@@ -20,38 +19,30 @@ def main():
         from dotenv import load_dotenv
         load_dotenv()
 
-    output_path = os.environ[Env.ISSUE_OUTPUT_PATH]
+    issue_output_path = os.environ[Env.ISSUE_OUTPUT_PATH]
     issue_repository = os.environ[Env.ISSUE_REPOSITORY]
     token = os.environ[Env.TOKEN]
-    
-    issue_info_json: IssueInfoJson
+
     issue_info: IssueInfo
     try:
-        issue_info_json = json.loads(
-            Path(output_path
-                 ).read_text(encoding="utf-8")
-        )
+        issue_info = IssueInfo()
+        issue_info.json_load(issue_output_path)
         print(Log.print_issue_info
               .format(issue_info=json_dumps(
-                  IssueInfoJson.remove_sensitive_info(issue_info_json)
+                  issue_info.to_print_string()
               )))
-        issue_info = IssueInfo(
-            reopen_info=IssueInfo.ReopenInfo(
-                **issue_info_json.pop("reopen_info")
-            ),
-            **issue_info_json
-        )
+
     except FileNotFoundError:
         print(Log.issue_output_not_found)
         return
 
     http_header: dict[str, str]
-    if issue_info.platform_type == Github.name:
-        http_header = Github.create_http_header(
+    if issue_info.platform_type == GithubClient.name:
+        http_header = GithubClient.create_http_header(
             token=token
         )
-    elif issue_info.platform_type == Gitlab.name:
-        http_header = Gitlab.create_http_header(
+    elif issue_info.platform_type == GitlabClient.name:
+        http_header = GitlabClient.create_http_header(
             token=token
         )
     else:
@@ -62,7 +53,7 @@ def main():
             ))
     try:
         send_comment(
-            comment_url=issue_info.reopen_info.comment_url,
+            comment_url=issue_info.links.comment_url,
             http_header=http_header,
             message=Log.issue_archived_success.format(
                 issue_id=issue_info.issue_id,

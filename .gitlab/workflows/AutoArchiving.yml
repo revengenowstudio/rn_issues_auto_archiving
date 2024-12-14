@@ -8,7 +8,7 @@ variables:
   GIT_STRATEGY: fetch
   TARGET_BRANCH: main
   TOKEN: $TOKEN
-  ISSUE_OUTPUT_PATH: "./output.json"
+  ISSUE_OUTPUT_PATH: "./issue_info.json"
   ISSUE_REPOSITORY: "内部Issue"
   CI_EVENT_TYPE: $CI_PIPELINE_SOURCE
   ARCHIVED_DOCUMENT_PATH: "./修改归档.md"
@@ -55,8 +55,7 @@ auto_archiving:
       cp $TRIGGER_PAYLOAD $WEBHOOK_OUTPUT_PATH
     fi
     export WEBHOOK_PAYLOAD=$(cat $TRIGGER_PAYLOAD)
-    python ./rn_issues_auto_archiving/issue_processor_main.py  -c "./config/issue_processor.json"
-    python ./rn_issues_auto_archiving/auto_archiving_main.py -c "./config/auto_archiving.json" -fr "./归档失败记录.json"
+    python ./rn_issues_auto_archiving/main.py  -c "./config/auto_archiving.json"
     export author_email=RN-Bot-CI@$CI_SERVER_HOST
     export author_name=RN-Bot-CI
     export commit_message="Close $ISSUE_REPOSITORY#{issue_id}"

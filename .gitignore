@@ -1,5 +1,5 @@
 .venv
-*test*.py
+test.py
 *.env
 __pycache__
 !example.env
@@ -9,3 +9,5 @@ webhook.json
 !output.ps1
 !output.nu
 output
+.VSCodeCounter
+.pytest_cache
