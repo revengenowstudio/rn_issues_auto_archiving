@@ -50,6 +50,7 @@ env:
   ISSUE_OUTPUT_PATH: "./issue_info.json"
   ISSUE_REPOSITORY: "外部Issue"
   COMMIT_TITLE: "Closed 外部Issue#"
+  TOKEN: ${{ secrets.GITHUB_TOKEN }}
   CI_EVENT_TYPE: ${{ github.event_name }} 
   # 具体有什么事件类型：https://docs.github.com/zh/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#about-events-that-trigger-workflows
   ISSUE_NUMBER: ${{ github.event.issue.number }}
@@ -74,7 +75,6 @@ jobs:
   
       - name: Processing issue content
         env:
-          TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # 自动流水线变量
           ISSUE_TITLE: ${{ github.event.issue.title }}
           ISSUE_STATE: ${{ github.event.issue.state }}
