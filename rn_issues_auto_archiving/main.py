@@ -95,9 +95,14 @@ def main() -> None:
                     issue_info.issue_repository,
                     issue_info.issue_id
         )):
-            print(Log.issue_already_archived
-                  .format(issue_id=issue_info.issue_id,
-                          issue_repository=issue_info.issue_repository))
+            comment_message = (Log.issue_already_archived
+                               .format(issue_id=issue_info.issue_id,
+                                       issue_repository=issue_info.issue_repository))
+            print(comment_message)
+            platform.send_comment(
+                issue_info.links.comment_url,
+                comment_message
+            )
             return
 
         archive_document.archive_issue(
