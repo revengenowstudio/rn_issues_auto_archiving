@@ -1,16 +1,13 @@
-import json
 import os
-from pathlib import Path
 
 from shared.log import Log
-from shared.issue_info import IssueInfo
 from shared.issue_info import IssueInfo
 from shared.json_dumps import json_dumps
 from shared.env import (Env,
                         should_run_in_local
                         )
 from shared.send_comment import send_comment
-from rn_issues_auto_archiving.issue_processor.git_service_client import GitlabClient, GithubClient
+from issue_processor.git_service_client import GitlabClient, GithubClient
 
 
 def main():
@@ -34,6 +31,9 @@ def main():
 
     except FileNotFoundError:
         print(Log.issue_output_not_found)
+        return
+
+    if not issue_info.should_archived_success():
         return
 
     http_header: dict[str, str]

@@ -31,6 +31,7 @@ class TestData():
         "reopen_body": {
             "state_event": "reopen"
         },
+        "archived_success": False,
         "links": {
             "issue_url": "https://example.com/api/v4/projects/xx/issues/1",
             "comment_url": "https://example.com/api/v4/projects/xx/issues/1/notes"
@@ -53,6 +54,7 @@ class TestData():
         "http_header": {},
         "reopen_http_method": "",
         "reopen_body": {},
+        "archived_success": False,
         "links": {
             "issue_url": "",
             "comment_url": ""
@@ -517,3 +519,16 @@ def test_remove_issue_type_in_issue_title(
     assert expected_result == issue_info.remove_issue_type_in_issue_title(
         type_keyword
     )
+
+
+def test_set_archived_success():
+    issue_info = IssueInfo()
+    issue_info.set_archived_success()
+    assert issue_info.archived_success is True
+
+
+def test_should_archived_success():
+    issue_info = IssueInfo()
+    assert issue_info.archived_success is False
+    issue_info.archived_success = True
+    assert issue_info.archived_success is True

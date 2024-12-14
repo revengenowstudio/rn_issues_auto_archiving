@@ -107,7 +107,7 @@ def main() -> None:
             table_separator=config.archived_document.table_separator,
             archive_template=config.archived_document.archive_template,
             issue_title_processing_rules=config.archived_document.issue_title_processing_rules,
-            
+
             # 归档所需issue数据
             issue_id=issue_info.issue_id,
             issue_type=issue_info.issue_type,
@@ -115,11 +115,12 @@ def main() -> None:
             issue_repository=issue_info.issue_repository,
             introduced_version=issue_info.introduced_version,
             archive_version=issue_info.archive_version,
-            
+
             replace_mode=(
                 issue_info.ci_event_type in CiEventType.manual
             )
         )
+        issue_info.set_archived_success()
 
         # 为了后续推送文档和发送归档成功评论的脚本
         # 而将issue信息输出一个json文件

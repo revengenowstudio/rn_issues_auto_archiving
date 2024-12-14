@@ -38,6 +38,7 @@ class IssueInfoJson(TypedDict):
     http_header: dict[str, str]
     reopen_http_method: str
     reopen_body: dict[str, str]
+    archived_success: bool
     links: LinksJson
 
 
@@ -72,6 +73,7 @@ class IssueInfo():
     reopen_http_method: str = str()
     reopen_body: dict[str, str] = field(
         default_factory=dict)
+    archived_success: bool = False
     links: Links = Links()
 
     @staticmethod
@@ -287,3 +289,9 @@ class IssueInfo():
                     key, '').strip()
                 break
         return title
+
+    def set_archived_success(self) -> None:
+        self.archived_success = True
+
+    def should_archived_success(self) -> bool:
+        return self.archived_success
