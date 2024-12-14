@@ -65,10 +65,17 @@ class IssueProcessor():
         platform: GitServiceClient,
     ) -> IssueInfo:
         issue_info = IssueInfo()
+        
         if isinstance(platform, GithubClient):
             GithubIssueDataSource().load(issue_info)
+            issue_info.update(
+            platform_type=platform.name
+        )
         elif isinstance(platform, GitlabClient):
             GitlabIssueDataSource().load(issue_info)
+            issue_info.update(
+            platform_type=platform.name
+        )
         else:
             raise UnexpectedPlatform(
                 Log.unexpected_platform_type
