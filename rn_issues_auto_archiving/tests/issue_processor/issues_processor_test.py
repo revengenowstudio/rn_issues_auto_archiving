@@ -5,6 +5,7 @@ from unittest.mock import patch, MagicMock
 from issue_processor.issues_processor import IssueProcessor
 from issue_processor.git_service_client import (
     GitServiceClient, GithubClient, GitlabClient)
+from shared.env import Env
 from shared.issue_state import IssueState
 from shared.exception import MissingArchiveVersionAndArchiveLabel, UnexpectedPlatform
 from shared.issue_info import AUTO_ISSUE_TYPE, IssueInfo
@@ -41,14 +42,21 @@ class TestIssueProcessor():
         expected_result: type[GitServiceClient] | None,
     ):
         config = Config()
-        if expected_result is None:
-            with pytest.raises(UnexpectedPlatform):
-                IssueProcessor.init_git_service_client(
-                    test_platform_type, config)
-        else:
-            assert isinstance(
-                IssueProcessor.init_git_service_client(
-                    test_platform_type, config), expected_result)
+        with patch.dict(
+            os.environ,
+            {
+                Env.GITHUB_ACTIONS: "false",
+                Env.GITLAB_CI: "false"
+            }
+        ):
+            if expected_result is None:
+                with pytest.raises(UnexpectedPlatform):
+                    IssueProcessor.init_git_service_client(
+                        test_platform_type, config)
+            else:
+                assert isinstance(
+                    IssueProcessor.init_git_service_client(
+                        test_platform_type, config), expected_result)
 
     def test_init_git_service_client_with_env(
         self,
@@ -57,18 +65,20 @@ class TestIssueProcessor():
         with patch(
             "issue_processor.issues_processor.should_run_in_github_action"
         ) as should_run_in_github_action:
-            should_run_in_github_action.return_value = True
-            assert isinstance(
-                IssueProcessor.init_git_service_client(
-                    None, config), GithubClient)
+            with patch(
+                "issue_processor.issues_processor.should_run_in_gitlab_ci"
+            ) as should_run_in_gitlab_ci:
+                should_run_in_github_action.return_value = True
+                should_run_in_gitlab_ci.return_value = False
+                assert isinstance(
+                    IssueProcessor.init_git_service_client(
+                        None, config), GithubClient)
 
-        with patch(
-            "issue_processor.issues_processor.should_run_in_gitlab_ci"
-        ) as should_run_in_gitlab_ci:
-            should_run_in_gitlab_ci.return_value = True
-            assert isinstance(
-                IssueProcessor.init_git_service_client(
-                    None, config), GitlabClient)
+                should_run_in_github_action.return_value = False
+                should_run_in_gitlab_ci.return_value = True
+                assert isinstance(
+                    IssueProcessor.init_git_service_client(
+                        None, config), GitlabClient)
 
         with patch.dict(
             os.environ,
