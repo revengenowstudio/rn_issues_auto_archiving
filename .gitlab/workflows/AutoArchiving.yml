@@ -46,7 +46,8 @@ auto_archiving:
   #   - pushes
   #   - merge_requests
 
-  image: m.daocloud.io/docker.io/library/python:3.10.13-slim-bullseye
+  # image: m.daocloud.io/docker.io/library/python:3.10.13-slim-bullseye
+  image: anolis-registry.cn-zhangjiakou.cr.aliyuncs.com/openanolis/python:3.10.13-23-minimal
   resource_group: auto_archiving_group
   script: |
     pip install -r ./rn_issues_auto_archiving/issue_processor/requirements.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
@@ -55,10 +56,10 @@ auto_archiving:
       cp $TRIGGER_PAYLOAD $WEBHOOK_OUTPUT_PATH
     fi
     export WEBHOOK_PAYLOAD=$(cat $TRIGGER_PAYLOAD)
-    python ./rn_issues_auto_archiving/main.py  -c "./config/auto_archiving.json"
+    python3 ./rn_issues_auto_archiving/main.py  -c "./config/auto_archiving.json"
     export author_email=RN-Bot-CI@$CI_SERVER_HOST
     export author_name=RN-Bot-CI
     export commit_message="Close $ISSUE_REPOSITORY#{issue_id}"
-    python ./rn_issues_auto_archiving/push_document.py
-    python ./rn_issues_auto_archiving/archiving_success.py
+    python3 ./rn_issues_auto_archiving/push_document.py
+    python3 ./rn_issues_auto_archiving/archiving_success.py
 

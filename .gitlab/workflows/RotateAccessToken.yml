@@ -16,7 +16,8 @@ variables:
   TARGET_VARIABLE_NAME: TOKEN
 
 rotate_access_token:
-  image: m.daocloud.io/docker.io/library/python:3.10.13-slim-bullseye
+  # image: m.daocloud.io/docker.io/library/python:3.10.13-slim-bullseye
+  image: anolis-registry.cn-zhangjiakou.cr.aliyuncs.com/openanolis/python:3.10.13-23-minimal
   tags: 
     - ubuntu
   stage: rotate_access_token
@@ -24,5 +25,5 @@ rotate_access_token:
     - schedules
   script: |
     pip install -r ./rn_issues_auto_archiving/issue_processor/requirements.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
-    python ./rn_issues_auto_archiving/utils/rotate_access_token.py
+    python3 ./rn_issues_auto_archiving/utils/rotate_access_token.py
   
