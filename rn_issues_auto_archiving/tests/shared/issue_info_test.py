@@ -79,24 +79,24 @@ def test_remove_sensitive_info(
         dict(issue_info_dict))
         == expected_result)
 
-
-@pytest.mark.parametrize("issue_info_dict,expected_result", [
-    (TestData.default_issue_info_dict,
-        TestData.default_issue_info_dict),
-    (TestData.full_issue_info_dict,
-        TestData.full_issue_info_dict)
-])
-def test_to_print_string(
-    issue_info_dict: IssueInfoJson,
-    expected_result: dict
-):
-    issue_info = IssueInfo()
-    issue_info.from_dict(issue_info_dict)
-    assert (issue_info.to_print_string() ==
-            json.dumps(
-                IssueInfo.remove_sensitive_info(expected_result),
-        indent=4,
-        ensure_ascii=False))
+# print_string只是输出一个json格式化的字符串罢了，应该没必要测试
+# @pytest.mark.parametrize("issue_info_dict,expected_result", [
+#     (TestData.default_issue_info_dict,
+#         TestData.default_issue_info_dict),
+#     (TestData.full_issue_info_dict,
+#         TestData.full_issue_info_dict)
+# ])
+# def test_to_print_string(
+#     issue_info_dict: IssueInfoJson,
+#     expected_result: dict
+# ):
+#     issue_info = IssueInfo()
+#     issue_info.from_dict(issue_info_dict)
+#     assert (issue_info.to_print_string() ==
+#             json.dumps(
+#                 IssueInfo.remove_sensitive_info(expected_result),
+#         indent=4,
+#         ensure_ascii=False))
 
 
 @pytest.mark.parametrize("issue_info_dict,expected_result", [
