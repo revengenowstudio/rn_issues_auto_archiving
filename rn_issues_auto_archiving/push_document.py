@@ -74,7 +74,7 @@ def get_remote_file_sha256(
         url=f'https://{gitlab_host}/api/v4/projects/{project_id}/repository/files/{file_path}?ref={branch_name}',
         headers=http_header
     )
-    result = response.headers.get("X-GitlabClient-Content-Sha256")
+    result = response.headers.get("X-Gitlab-Content-Sha256")
     print(Log.get_remote_file_sha256_success
           .format(file_path=file_path,
                   sha256=result))
