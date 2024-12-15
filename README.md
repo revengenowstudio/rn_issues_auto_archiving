@@ -5,53 +5,13 @@
 
 - 系统架构图：
 
-![1731168073296](image/README/RN-issue自动归档流程.jpg)
+![1731168073296](image/README/RN-Issue自动归档流程.jpg)
 
-# 手动流水线相关变量
-## Github Action
-- `Issue单号` 
-    - 必填
-    - 类型：正整数，不支持多个单号
-- `Issue标题` 
-    - 选填
-    - 类型：字符串
-    - 描述：此值将成为对应单号的Issue在归档文件中的描述，若为空则自动从Issue标题中获取
-- `引入版本号` 
-    - 选填
-    - 类型：字符串
-    - 描述：此值将成为对应单号的Issue在归档文件中的引入版本号，此值为空则自动从对应的Issue描述中获取引入版本号
-- `归档版本号` 
-    - 选填
-    - 类型：字符串
-    - 描述：此值将成为对应单号的Issue在归档文件中的归档版本号，此值为空则自动从对应的Issue评论中获取归档版本号
-- `Issue类型` 
-    - 选填
-    - 类型：枚举选项
-    - 描述：此值将成为对应单号的Issue在归档文件中的Issue类型，选择"自动判断"在自动从对应的Issue标签中获取Issue类型
-    
-## Gitlab CI
-- 由于 Gitlab CI 需要手动填写流水线变量的键名，请手动运行归档流水线时将下述键名粘贴进流水线变量的`输入变量的名称`文本框中（选填变量不填写时可以直接不填键名），如下图所示
-![1732106624384](image/README/1732106624384.png)
+# 自动归档流水线使用说明
+- 参见[自动归档流水线使用指南](./自动归档流水线使用指南.md)
 
-- `ISSUE_NUMBER` 
-    - 必填
-    - 类型：正整数，不支持多个单号
-- `ISSUE_TITLE` 
-    - 选填
-    - 类型：字符串
-    - 描述：此值将成为对应单号的Issue在归档文件中的描述，若为空则自动从Issue标题中获取
-- `INTRODUCED_VERSION` 
-    - 选填
-    - 类型：字符串
-    - 描述：此值将成为对应单号的Issue在归档文件中的引入版本号，此值为空则自动从对应的Issue描述中获取引入版本号
-- `ARCHIVE_VERSION` 
-    - 选填
-    - 类型：字符串
-    - 描述：此值将成为对应单号的Issue在归档文件中的归档版本号，此值为空则自动从对应的Issue评论中获取归档版本号
-- `ISSUE_TYPE` 
-    - 选填
-    - 类型：字符串
-    - 描述：此值将成为对应单号的Issue在归档文件中的Issue类型，可填“自动判断”以及归档文档中支持的Issue类型
+# 手动触发流水线
+- 参见[手动运行归档流水线指南](./手动运行归档流水线指南.md)
  
 
 # 部署/维护指南
@@ -69,9 +29,9 @@
 
 - 需要部署/管理的仓库变量：
 
-    |变量名|变量类型|描述|
-    |---|---|---|
-    |TOKEN|secret|此token用于获取Issue信息，需要个人账号的PAT（个人访问令牌）的`API读写权限`和`仓库读写权限`，且需要PAT所属用户是目标仓库的`maintainer`或`owner`级别成员|
+    | 变量名 | 变量类型 | 描述                                                                                                                                                   |
+    | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+    | TOKEN  | secret   | 此token用于获取Issue信息，需要个人账号的PAT（个人访问令牌）的`API读写权限`和`仓库读写权限`，且需要PAT所属用户是目标仓库的`maintainer`或`owner`级别成员 |
     
 - 现有生产环境下，使用的是`RN-Bot`账号的PAT，如果PAT失效或者异常，请联系拥有`RN-Bot`账号管理权限的管理员
 
@@ -106,26 +66,23 @@
 
 # Config配置
 - `auto_archiving.json`负责定义Issue信息收集相关内容
-    |变量名|变量类型|正则表达式支持|描述|
-    |---|---|---|---|
-    |version_regex|str|是|匹配版本号的正则表达式，最外层必须有一对小括号`()`，因为这个值会被其他值引用|
-    |introduced_version_reges|list[str]|是|匹配Issue描述中引入版本号的正则表达式，填写多个正则表达式流水线会用每个正则都匹配一次，直到匹配成功|
-    |issue_type.type_keyword|dict[str,str]|否|匹配Issue标题中Issue类型关键字的字典，用来转换成归档内容中的Issue类型文本，由于不再通过Issue标题判断Issue类型，此项可以无视|
-    |issue_type.need_introduced_version_issue_type|list[str]|否|归档时需要`引入版本号`的Issue类型，填写的内容为归档文档中定义的Issue类型，可填多个，匹配到任意一个即要求Issue描述中带有`引入版本号`，若Issue属于列表中的Issue类型但Issue描述中没有找到`引入版本号`，则归档流水线会报错并reopen此Issue|
-    |issue_type.label_map|dict[str,str]|否|Issue标签（labels）映射为归档文档中定义的Issue类型，流水线通过这个字典来判断Issue是什么类型的，key为Issue标签名称，value为归档文档中定义的Issue类型名称|
-    |archive_necessary_labels|list[str]|否|归档所必须的Issue标签，流水线会检查issue是否包含这些标签，若不包含则报错并reopen此Issue。若填写多个Issue标签，则Issue必须同时具有这些标签才可以被流水线归档|
-    |archive_version_reges_for_comments|list[str]|是|从Issue评论中匹配`归档版本号`的正则表达式，可组合引用`{version_regex}`。若流水线用任意一个列表内的正则均无法在Issue评论中匹配成功，则报错并reopen此Issue|
-    |black_list.labels|list[str]|否|保留字段，暂未实现功能|
-    |black_list.comments|list[str]|是|保留字段，暂未实现功能|
-
-- `auto_archiving.json`负责定义Issue归档格式相关内容
-    |变量名|变量类型|正则表达式支持|描述|
-    |---|---|---|---|
-    |rjust_space_width|int|否|归档内容中的描述部分的目标字符的长度，若归档内容描述的字符长度不够会用空格填充，具体位置请见`archive_template`的定义|
-    |rjust_character|str|否|`rjust_space_width`填充的字符，空格即可|
-    |table_separator|str|否|用来区分归档列表每一项的分隔符，由于归档文档是markdown列表格式，所以`\|`即可|
-    |archive_template|str|否|归档内容的标准模版，定义了流水线归档内容的格式，可用的预定义变量有`{table_id}` `{issue_type}` `{issue_title}` `{rjust_space}` `{issue_repository}` `{issue_id}` `{introduced_version}` `{archive_version}`|
-    |issue_title_processing_rules|dict[str,dict[str,str\|list]]|否|Issue标题预处理规则，用来对特定类型的Issue标题进行文本的添加或者修改，第一层key为Issue类型，第二层key是固定的，必须要填写`add_prefix` `add_suffix` `remove_keyword`，`add_prefix`是在Issue标题前添加的字符串，`add_suffix`是在Issue标题后添加的字符串，`remove_keyword`是Issue标题中若存在匹配的关键字则删除这些关键字|
+    | 变量名                                              | 变量类型                      | 正则表达式支持 | 描述                                                                                                                                                                                                                                                                                                                   |
+    | --------------------------------------------------- | ----------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | version_regex                                       | str                           | 是             | 匹配版本号的正则表达式，最外层必须有一对小括号`()`，因为这个值会被其他值引用                                                                                                                                                                                                                                           |
+    | introduced_version_reges                            | list[str]                     | 是             | 匹配Issue描述中引入版本号的正则表达式，填写多个正则表达式流水线会用每个正则都匹配一次，直到匹配成功                                                                                                                                                                                                                    |
+    | issue_type.type_keyword                             | dict[str,str]                 | 否             | 匹配Issue标题中Issue类型关键字的字典，用来转换成归档内容中的Issue类型文本，由于不再通过Issue标题判断Issue类型，此项可以无视                                                                                                                                                                                            |
+    | issue_type.need_introduced_version_issue_type       | list[str]                     | 否             | 归档时需要`引入版本号`的Issue类型，填写的内容为归档文档中定义的Issue类型，可填多个，匹配到任意一个即要求Issue描述中带有`引入版本号`，若Issue属于列表中的Issue类型但Issue描述中没有找到`引入版本号`，则归档流水线会报错并reopen此Issue                                                                                  |
+    | issue_type.label_map                                | dict[str,str]                 | 否             | Issue标签（labels）映射为归档文档中定义的Issue类型，流水线通过这个字典来判断Issue是什么类型的，key为Issue标签名称，value为归档文档中定义的Issue类型名称                                                                                                                                                                |
+    | archive_necessary_labels                            | list[str]                     | 否             | 归档所必须的Issue标签，流水线会检查issue是否包含这些标签，若不包含则报错并reopen此Issue。若填写多个Issue标签，则Issue必须同时具有这些标签才可以被流水线归档                                                                                                                                                            |
+    | archive_version_reges_for_comments                  | list[str]                     | 是             | 从Issue评论中匹配`归档版本号`的正则表达式，可组合引用`{version_regex}`。若流水线用任意一个列表内的正则均无法在Issue评论中匹配成功，则报错并reopen此Issue                                                                                                                                                               |
+    | black_list.labels                                   | list[str]                     | 否             | 保留字段，暂未实现功能                                                                                                                                                                                                                                                                                                 |
+    | black_list.comments                                 | list[str]                     | 是             | 保留字段，暂未实现功能                                                                                                                                                                                                                                                                                                 |
+    | archived_document.rjust_space_width                 | int                           | 否             | 归档内容中的描述部分的目标字符的长度，若归档内容描述的字符长度不够会用空格填充，具体位置请见`archive_template`的定义                                                                                                                                                                                                   |
+    | archived_document.rjust_character                   | str                           | 否             | `rjust_space_width`填充的字符，空格即可                                                                                                                                                                                                                                                                                |
+    | archived_document.table_separator                   | str                           | 否             | 用来区分归档列表每一项的分隔符，由于归档文档是markdown列表格式，所以`\|`即可                                                                                                                                                                                                                                           |
+    | archived_document.archive_template                  | str                           | 否             | 归档内容的标准模版，定义了流水线归档内容的格式，可用的预定义变量有`{table_id}` `{issue_type}` `{issue_title}` `{rjust_space}` `{issue_repository}` `{issue_id}` `{introduced_version}` `{archive_version}` `{issue_url}` `{issue_url_parents}`                                                                         |
+    | archived_document.fill_issue_url_by_repository_type | list[str]                     | 否             | 根据Issue所属的`repository_type`内容（例如“外部Issue”等），判断`archive_template`中的`{issue_url}` `{issue_url_parents}`值是否需要被填充。如果Issue的`repository_type`的值不在此列表，则不填充url相关占位符                                                                                                            |
+    | archived_document.issue_title_processing_rules      | dict[str,dict[str,str\|list]] | 否             | Issue标题预处理规则，用来对特定类型的Issue标题进行文本的添加或者修改，第一层key为Issue类型，第二层key是固定的，必须要填写`add_prefix` `add_suffix` `remove_keyword`，`add_prefix`是在Issue标题前添加的字符串，`add_suffix`是在Issue标题后添加的字符串，`remove_keyword`是Issue标题中若存在匹配的关键字则删除这些关键字 |
 
 
 # 开发
