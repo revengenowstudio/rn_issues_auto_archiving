@@ -85,10 +85,12 @@ class IssueInfo():
         return result
 
     def to_print_string(self) -> str:
-        return json_dumps(
-            IssueInfo.remove_sensitive_info(
+        result = IssueInfo.remove_sensitive_info(
                 asdict(self)
             )
+        result.pop("issue_comments")
+        return json_dumps(
+            result
         )
 
     def to_dict(self) -> IssueInfoJson:
