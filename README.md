@@ -5,7 +5,7 @@
 
 - 系统架构图：
 
-![1](image/README/RN-Issue自动归档流程.jpg)
+![1](./image/README/Architecture.jpg)
 
 # 自动归档流水线使用说明
 - 参见[自动归档流水线使用指南](./自动归档流水线使用指南.md)
