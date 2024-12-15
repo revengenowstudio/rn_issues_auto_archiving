@@ -104,6 +104,13 @@ Copy-Item -Recurse -Force "./.gitlab" -Destination "./output/.gitlab"
 Copy-Item -Force "./.gitlab-ci.yml" -Destination "./output/.gitlab-ci.yml"
 Copy-Item -Recurse -Force "./rn_issues_auto_archiving" -Destination "./output/rn_issues_auto_archiving"
 
+Write-Host "copy markdown and images to output dir"
+Copy-Item -Force "./手动运行归档流水线指南.md" -Destination "./output/"
+Copy-Item -Force "./自动归档流水线使用指南.md" -Destination "./output/"
+Copy-Item -Recurse -Force "./image" -Destination "./output/"
+Remove-Item -Recurse -Force -Path "./output/image/README"
+
+
 Write-Host "remove unnecessary files"
 Remove-Item -Recurse -Force -Path "./output/rn_issues_auto_archiving/__pycache__"
 Remove-Item -Recurse -Force -Path "./output/rn_issues_auto_archiving/auto_archiving/__pycache__"
@@ -125,7 +132,7 @@ Update-BranchInFile -fileName "./output/.gitlab/workflows/AutoArchiving.yml"
 
 Remove-UnittestInFile -fileName "./output/.gitlab-ci.yml"
 
-Add-IncludeInGitlabCi -fileName "./output/.gitlab-ci.yml"
+# Add-IncludeInGitlabCi -fileName "./output/.gitlab-ci.yml"
 
 # 主程序入口
 $RN_ALL_ISSUES_REPO_PATH = Get-CommandLineParameter -parameterName "--RN_ALL_ISSUES_REPO_PATH" -cmdArgs $args
@@ -135,20 +142,28 @@ $RN_INTERNAL_ISSUES_REPO_PATH = Get-CommandLineParameter -parameterName "--RN_IN
 Write-Host "copy output file to `"$RN_ALL_ISSUES_REPO_PATH`""
 Remove-Item -Recurse -Force "$RN_ALL_ISSUES_REPO_PATH/config"
 Remove-Item -Recurse -Force "$RN_ALL_ISSUES_REPO_PATH/rn_issues_auto_archiving"
+Remove-Item -Recurse -Force "$RN_ALL_ISSUES_REPO_PATH/image"
 
 Copy-Item -Recurse -Force "./output/config" -Destination "$RN_ALL_ISSUES_REPO_PATH"
 Copy-Item -Recurse -Force "./output/.github" -Destination "$RN_ALL_ISSUES_REPO_PATH/"
 Copy-Item -Recurse -Force "./output/rn_issues_auto_archiving" -Destination "$RN_ALL_ISSUES_REPO_PATH/"
+Copy-Item -Force "./output/手动运行归档流水线指南.md" -Destination "$RN_ALL_ISSUES_REPO_PATH/手动运行归档流水线指南.md"
+Copy-Item -Force "./output/自动归档流水线使用指南.md" -Destination "$RN_ALL_ISSUES_REPO_PATH/自动归档流水线使用指南.md"
+Copy-Item -Recurse -Force "./output/image" -Destination "$RN_ALL_ISSUES_REPO_PATH/"
 
 Write-Host "copy output file to `"$RN_INTERNAL_ISSUES_REPO_PATH`""
 Remove-Item -Recurse -Force "$RN_INTERNAL_ISSUES_REPO_PATH/config"
 Remove-Item -Force "$RN_INTERNAL_ISSUES_REPO_PATH/.gitlab-ci.yml"
 Remove-Item -Recurse -Force "$RN_INTERNAL_ISSUES_REPO_PATH/rn_issues_auto_archiving"
+Remove-Item -Recurse -Force "$RN_INTERNAL_ISSUES_REPO_PATH/image"
 
 Copy-Item -Recurse -Force "./output/config" -Destination "$RN_INTERNAL_ISSUES_REPO_PATH"
 Copy-Item -Recurse -Force "./output/.gitlab" -Destination "$RN_INTERNAL_ISSUES_REPO_PATH/"
 Copy-Item -Force "./output/.gitlab-ci.yml" -Destination "$RN_INTERNAL_ISSUES_REPO_PATH/.gitlab-ci.yml"
 Copy-Item -Recurse -Force "./output/rn_issues_auto_archiving" -Destination "$RN_INTERNAL_ISSUES_REPO_PATH/"
+Copy-Item -Force "./output/手动运行归档流水线指南.md" -Destination "$RN_INTERNAL_ISSUES_REPO_PATH/手动运行归档流水线指南.md"
+Copy-Item -Force "./output/自动归档流水线使用指南.md" -Destination "$RN_INTERNAL_ISSUES_REPO_PATH/自动归档流水线使用指南.md"
+Copy-Item -Recurse -Force "./output/image" -Destination "$RN_INTERNAL_ISSUES_REPO_PATH/"
 
 # 输出完成信息
 Write-Host "output done"
