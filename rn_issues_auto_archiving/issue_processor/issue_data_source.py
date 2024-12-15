@@ -50,16 +50,23 @@ class GithubIssueDataSource(IssusDataSource):
             issue_info.archive_version = os.environ[
                 Env.ARCHIVE_VERSION].strip()
             issue_info.issue_type = os.environ[Env.ISSUE_TYPE]
-
-            print(Log.print_input_variables
-                  .format(
-                      input_variables=issue_info.to_print_string()
-                  ))
-
             issue_info.links.issue_url = (
                 os.environ[Env.MANUAL_ISSUE_URL])
             issue_info.links.comment_url = (
                 os.environ[Env.MANUAL_COMMENTS_URL])
+
+            print(Log.print_input_variables
+                  .format(
+                      input_variables=json_dumps(
+                          {
+                              "issue_number": issue_info.issue_id,
+                              "issue_title": issue_info.issue_title,
+                              "issue_type": issue_info.issue_type,
+                              "introduced_version": issue_info.introduced_version,
+                              "archive_version": issue_info.archive_version,
+                          }
+                      )
+                  ))
 
         # 自动触发流水线时应该读取的环境变量
         else:
