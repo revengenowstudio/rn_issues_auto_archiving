@@ -24,21 +24,13 @@ def get_issue_id_from_url(url: str) -> int:
 
 
 @dataclass()
-class Urls():
-    issue_url: str
-    comments_url: str
-
-
-@dataclass()
 class Issue():
     id: int
     title: str
     state: str
     body: str
     labels: list[str]
-    introduced_version: str = ""
-    archive_version: str = ""
-    issue_type: str = AUTO_ISSUE_TYPE
+    issue_web_url: str
 
 
 @dataclass()
@@ -160,6 +152,7 @@ class GitServiceClient(ABC):
             issue_info.links.issue_url
         )
         issue_info.issue_labels = new_issue_info.labels
+        issue_info.links.issue_web_url = new_issue_info.issue_web_url
         if CiEventType.should_ci_running_in_manual():
             issue_info.issue_state = new_issue_info.state
             if issue_info.issue_title == "":
@@ -277,6 +270,7 @@ class GithubClient(GitServiceClient):
             body=raw_json["body"],
             labels=[label["name"]
                     for label in raw_json["labels"]],
+            issue_web_url=raw_json["html_url"],
         )
 
     def reopen_issue(self, issue_url: str) -> None:
@@ -428,8 +422,7 @@ class GitlabClient(GitServiceClient):
             state=parse_issue_state(raw_json["state"]),
             body=raw_json["description"],
             labels=raw_json["labels"],
-            introduced_version="",
-            archive_version=""
+            issue_web_url=raw_json["web_url"],
         )
 
     def reopen_issue(self, issue_url: str) -> None:

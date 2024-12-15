@@ -111,6 +111,7 @@ def main() -> None:
             rjust_character=config.archived_document.rjust_character,
             table_separator=config.archived_document.table_separator,
             archive_template=config.archived_document.archive_template,
+            fill_issue_url_by_repository_type=config.archived_document.fill_issue_url_by_repository_type,
             issue_title_processing_rules=config.archived_document.issue_title_processing_rules,
 
             # 归档所需issue数据
@@ -119,6 +120,7 @@ def main() -> None:
             issue_title=issue_info.issue_title,
             issue_repository=issue_info.issue_repository,
             introduced_version=issue_info.introduced_version,
+            issue_url=issue_info.links.issue_web_url,
             archive_version=issue_info.archive_version,
 
             replace_mode=(

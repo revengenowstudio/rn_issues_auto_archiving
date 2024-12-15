@@ -50,7 +50,10 @@
         "rjust_space_width": 60,
         "rjust_character": " ",
         "table_separator": "|",
-        "archive_template": "|{table_id}|({issue_type}){issue_title}{rjust_space}[{issue_repository}#{issue_id}] |{introduced_version}|{archive_version}|",
+        "archive_template": "|{table_id}|({issue_type}){issue_title}{rjust_space}[{issue_repository}#{issue_id}]{issue_url_parents} |{introduced_version}|{archive_version}|",
+        "fill_issue_url_by_repository_type": [
+            "外部Issue"
+        ],
         "issue_title_processing_rules": {
             "Bug修复": {
                 "add_prefix": "修复了",

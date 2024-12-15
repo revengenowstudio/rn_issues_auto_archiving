@@ -14,6 +14,7 @@ AUTO_ISSUE_TYPE = "自动判断"
 
 class LinksJson(TypedDict):
     issue_url: str
+    issue_web_url: str
     comment_url: str
 
 
@@ -48,6 +49,7 @@ class IssueInfo():
     @dataclass()
     class Links():
         issue_url: str = str()
+        issue_web_url: str = str()
         comment_url: str = str()
 
     @dataclass()
@@ -86,8 +88,8 @@ class IssueInfo():
 
     def to_print_string(self) -> str:
         result = IssueInfo.remove_sensitive_info(
-                asdict(self)
-            )
+            asdict(self)
+        )
         result.pop("issue_comments")
         return json_dumps(
             result

@@ -17,7 +17,8 @@ class ArchivedDocumentJson(TypedDict):
     rjust_character: str
     table_separator: str
     archive_template: str
-    action_name_map: dict[str, str]
+    fill_issue_url_by_repository_type: list[str]
+    action_name_to_repository_type_map: dict[str, str]
     issue_title_processing_rules: dict[IssueType,
                                        ProcessingActionJson]
     reopen_workflow_prefix_map: dict[str, str]
@@ -56,7 +57,9 @@ class Config():
         rjust_character: str = str()
         table_separator: str = str()
         archive_template: str = str()
-        action_name_map: dict[str, str] = field(
+        fill_issue_url_by_repository_type: list[str] = field(
+            default_factory=list)
+        action_name_to_repository_type_map: dict[str, str] = field(
             default_factory=dict)
         issue_title_processing_rules: dict[IssueType,
                                            ProcessingActionJson] = field(
