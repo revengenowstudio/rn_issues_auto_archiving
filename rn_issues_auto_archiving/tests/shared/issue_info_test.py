@@ -34,6 +34,7 @@ class TestData():
         "archived_success": False,
         "links": {
             "issue_url": "https://example.com/api/v4/projects/xx/issues/1",
+            "issue_web_url": "https://example.com/xx/xx/issues/1",
             "comment_url": "https://example.com/api/v4/projects/xx/issues/1/notes"
         }
     }
@@ -57,6 +58,7 @@ class TestData():
         "archived_success": False,
         "links": {
             "issue_url": "",
+            "issue_web_url": "",
             "comment_url": ""
         }
     }
@@ -197,10 +199,12 @@ def test_update(
 
     issue_info.update(links=IssueInfo.Links(
         issue_url="https://example.com",
+        issue_web_url="https://example.com/1",
         comment_url="https://example.com/2"
     ))
     expected_result["links"] = {
         "issue_url": "https://example.com",
+        "issue_web_url": "https://example.com/1",
         "comment_url": "https://example.com/2"
     }
     assert issue_info.to_dict() == expected_result

@@ -161,6 +161,7 @@ class ArchiveDocument():
                       rjust_character: str,
                       table_separator: str,
                       archive_template: str,
+                      fill_issue_url_by_repository_type: list[str],
                       issue_title_processing_rules: dict[
                           IssueType,
                           ProcessingActionJson
@@ -169,6 +170,7 @@ class ArchiveDocument():
                       issue_type: str,
                       issue_title: str,
                       issue_repository: str,
+                      issue_url: str,
                       introduced_version: str,
                       archive_version: str,
                       replace_mode: bool = False,
@@ -197,6 +199,12 @@ class ArchiveDocument():
             table_id = self.__get_last_table_number(
                 table_separator) + 1
 
+        issue_url_parents = ""
+        if issue_repository in fill_issue_url_by_repository_type:
+            issue_url_parents = f'({issue_url})'
+        else:
+            issue_url = ""
+
         new_content = archive_template.format(
             table_id=table_id,
             issue_type=issue_type,
@@ -210,6 +218,8 @@ class ArchiveDocument():
                          * rjust_character),
             issue_repository=issue_repository,
             issue_id=issue_id,
+            issue_url=issue_url,
+            issue_url_parents=issue_url_parents,
             introduced_version=introduced_version,
             archive_version=archive_version
         )

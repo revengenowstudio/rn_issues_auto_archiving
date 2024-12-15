@@ -146,12 +146,14 @@ class TestGitServiceClient():
         test_issue_state = "test_state"
         test_issue_title = "test_title"
         test_issue_body = "test_body"
+        test_issue_web_url = "test_url"
         return_issue = Issue(
             id=123456,
             title=test_issue_title,
             state=test_issue_state,
             body=test_issue_body,
             labels=test_issue_labels,
+            issue_web_url=test_issue_web_url
         )
         issue_info = MagicMock()
 
@@ -164,13 +166,12 @@ class TestGitServiceClient():
                     git_service_client.enrich_missing_issue_info(issue_info)
                     assert issue_info.issue_comments == test_issue_comments
                     assert issue_info.issue_labels == test_issue_labels
+                    assert issue_info.links.issue_web_url == test_issue_web_url
 
                     should_ci_running_in_manual.return_value = True
                     issue_info.issue_title = ""
                     issue_info.issue_body = ""
                     git_service_client.enrich_missing_issue_info(issue_info)
-                    assert issue_info.issue_comments == test_issue_comments
-                    assert issue_info.issue_labels == test_issue_labels
                     assert issue_info.issue_state == test_issue_state
                     assert issue_info.issue_title == test_issue_title
                     assert issue_info.issue_body == test_issue_body
@@ -180,8 +181,6 @@ class TestGitServiceClient():
                     issue_info.issue_title = test_data
                     issue_info.issue_body = test_data
                     git_service_client.enrich_missing_issue_info(issue_info)
-                    assert issue_info.issue_comments == test_issue_comments
-                    assert issue_info.issue_labels == test_issue_labels
                     assert issue_info.issue_state == test_issue_state
                     assert issue_info.issue_title == test_data
                     assert issue_info.issue_body == test_data
@@ -263,7 +262,8 @@ class TestGitServiceClient():
                     {
                         "name": "test_label2"
                     }
-                ]
+                ],
+                "html_url": "test_url"
             }
             mock_response = MagicMock()
             mock_response.json.return_value = test_issue_data
@@ -280,6 +280,7 @@ class TestGitServiceClient():
                 assert issue.state == test_issue_data["state"]
                 assert issue.body == test_issue_data["body"]
                 assert len(issue.labels) == len(test_issue_data["labels"])
+                assert issue.issue_web_url == test_issue_data["html_url"]
 
         def test_reopen_issue(
             self,
@@ -386,7 +387,8 @@ class TestGitServiceClient():
                 "labels": [
                     "test_label",
                     "test_label2"
-                ]
+                ],
+                "web_url": "test_url"
             }
             mock_response = MagicMock()
             mock_response.json.return_value = test_issue_data
@@ -403,6 +405,7 @@ class TestGitServiceClient():
                 assert issue.state == test_issue_data["state"]
                 assert issue.body == test_issue_data["description"]
                 assert len(issue.labels) == len(test_issue_data["labels"])
+                assert issue.issue_web_url == test_issue_data["web_url"]
 
         def test_reopen_issue(
             self,
