@@ -62,7 +62,10 @@ class TestArchiveDocument():
             "rjust_space_width": 0,
             "rjust_character": " ",
             "table_separator": "|",
-            "archive_template": "|{table_id}|({issue_type}){issue_title}{rjust_space}[{issue_repository}#{issue_id}] |{introduced_version}|{archive_version}|",
+            "archive_template": "|{table_id}|({issue_type}){issue_title}{rjust_space}[{issue_repository}#{issue_id}]{issue_url_parents} |{introduced_version}|{archive_version}|",
+            "fill_issue_url_by_repository_type": [
+                "外部Issue"
+            ],
             "issue_title_processing_rules": {
                 "Bug修复": {
                     "add_prefix": "修复了",
@@ -86,11 +89,23 @@ class TestArchiveDocument():
             "issue_type": "Bug修复",
             "issue_title": "测试标题",
             "issue_repository": "外部Issue",
+            "issue_url": "https://api.example.com/issues/2",
             "introduced_version": "0.99.914",
             "archive_version": "0.99.915",
         }
-        not_replaced_result = "|2|(Bug修复)修复了测试标题的Bug[外部Issue#2] |0.99.914|0.99.915|\n"
-        replaced_result = "|1|(Bug修复)修复了测试标题的Bug[外部Issue#1] |0.99.914|0.99.915|\n"
+        not_replaced_result = "|2|(Bug修复)修复了测试标题的Bug[外部Issue#2](https://api.example.com/issues/2) |0.99.914|0.99.915|\n"
+        replaced_result = "|1|(Bug修复)修复了测试标题的Bug[外部Issue#1](https://api.example.com/issues/2) |0.99.914|0.99.915|\n"
+        
+        test_issue_data_no_url = {
+            "issue_id": 3,
+            "issue_type": "Bug修复",
+            "issue_title": "测试标题",
+            "issue_repository": "内部Issue",
+            "issue_url": "https://api.example.com/issues/3",
+            "introduced_version": "0.99.914",
+            "archive_version": "0.99.915",
+        }
+        not_replaced_result_no_url = "|2|(Bug修复)修复了测试标题的Bug[内部Issue#3] |0.99.914|0.99.915|\n"
 
         test_filename = "test_filename"
         mock_file = MagicMock(spec=TextIOWrapper)
@@ -126,6 +141,14 @@ class TestArchiveDocument():
         )
         assert (archive_document.show_new_line()[-1]
                 == not_replaced_result)
+        
+        archive_document.archive_issue(
+            replace_mode=True,
+            **test_issue_data_no_url,
+            **archive_rules
+        )
+        assert (archive_document.show_new_line()[-1]
+                == not_replaced_result_no_url)
 
     def test_save(
         self,
@@ -147,7 +170,7 @@ class TestArchiveDocument():
         assert (test_file.read_text(
             encoding="utf-8").split("\n") == test_lines)
         test_file.unlink(missing_ok=True)
-        
+
         test_file.write_text(
             "\n".join(test_lines),
             encoding="utf-8"
@@ -155,7 +178,7 @@ class TestArchiveDocument():
         archive_document.add_new_line("6666")
         archive_document.file_load(str(test_file))
         archive_document.save()
-        
+
         expected_lines = [
             "123",
             "5555",
@@ -164,5 +187,3 @@ class TestArchiveDocument():
         ]
         assert (test_file.read_text(
             encoding="utf-8").split("\n") == expected_lines)
-        
-        

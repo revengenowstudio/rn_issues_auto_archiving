@@ -346,7 +346,8 @@ class TestGitlabIssueDataSource:
             del issue_info
 
         without_webhook_json_data = TestIssueData.gitlab_auto_ci_issue_data.copy()
-        without_webhook_json_data.pop(Env.WEBHOOK_PAYLOAD)
+        # without_webhook_json_data.pop(Env.WEBHOOK_PAYLOAD)
+        without_webhook_json_data[Env.WEBHOOK_PAYLOAD] = ""
         with patch.dict(
             os.environ,
             without_webhook_json_data
