@@ -33,20 +33,6 @@
             "cwd": "${workspaceFolder}"
         },
         {
-            "name": "auto_archiving",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "rn_issues_auto_archiving/auto_archiving_main.py",
-            "args": [
-                "--config",
-                "./config/auto_archiving.json",
-                "--failed-record",
-                "./归档失败记录.json"
-            ],
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}"
-        },
-        {
             "name": "push_document gitlab",
             "type": "debugpy",
             "request": "launch",
