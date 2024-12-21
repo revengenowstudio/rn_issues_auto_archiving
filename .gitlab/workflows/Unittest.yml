@@ -8,9 +8,11 @@ unittest:
     - if: $CI_PIPELINE_SOURCE == "web"
       when: never
     - if: $CI_PIPELINE_SOURCE == "push"
-      when: always
+      changes:
+        - rn_issues_auto_archiving/**/*.py
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      when: always
+      changes:
+        - rn_issues_auto_archiving/**/*.py
   # image: m.daocloud.io/docker.io/library/python:3.10.13-slim-bullseye
   image: anolis-registry.cn-zhangjiakou.cr.aliyuncs.com/openanolis/python:3.10.13-23-minimal
   script: |

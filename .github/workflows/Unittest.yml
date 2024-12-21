@@ -2,7 +2,9 @@ name: "Unit test"
 run-name: "Unit test"
 
 on:
-    push:
+  push:
+    paths: 
+    - 'rn_issues_auto_archiving/**/*.py'
 
 jobs:
   auto_archiving:
