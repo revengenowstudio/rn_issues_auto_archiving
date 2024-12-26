@@ -86,15 +86,33 @@
 
 
 # 开发
-## 测试环境
 
-- 为了方便本地测试，项目引入了`python-dotenv`模块，它提供了读取本地`.env`文件内容并立刻设置为环境变量的能力
+## 开发配置
 
 - 环境需求：
     - Python : 3.10 或以上
     - IDE : visual studio code
     - `pip install ./develop-requirements.txt`
     - 一个符合脚本运行所需的`.env`文件内容，请参考`example.env`编写`.env`，并将`.env`文件放入`项目根目录`目录下
+
+- 项目开发时已经使用类型注解覆盖了绝大部分变量了,所以可以使用 Pylance Language Server 并启用 `Type Checking` 配置以达到最佳开发体验。
+
+1. 在 VSCode 插件视图搜索并安装 `Python (ms-python.python)` 和 `Pylance (ms-python.vscode-pylance)` 插件。
+2. 修改 VSCode 配置
+   在 VSCode 设置视图搜索配置项 `Python: Language Server` 并将其值设置为 `Pylance`，搜索配置项 `Python > Analysis: Type Checking Mode` 并将其值设置为 `basic`。
+
+   或者向项目 `.vscode` 文件夹中配置文件添加以下内容：
+
+   ```json title=settings.json
+   {
+     "python.languageServer": "Pylance",
+     "python.analysis.typeCheckingMode": "basic"
+   }
+   ```
+
+## 测试环境
+
+- 为了方便本地测试，项目引入了`python-dotenv`模块，它提供了读取本地`.env`文件内容并立刻设置为环境变量的能力
 
 - 项目包含了`launch.json`文件，可以快速启动项目进行调试，在VSCode`运行与调试页`面可以选择调试的项目，选择对应启动项后按下`F5`即可启动调试
 - vsc项目启动项分别有
