@@ -116,9 +116,8 @@
 
 - 项目包含了`launch.json`文件，可以快速启动项目进行调试，在VSCode`运行与调试页`面可以选择调试的项目，选择对应启动项后按下`F5`即可启动调试
 - vsc项目启动项分别有
-    - github issue_processor （gitlab归档流水线第一步，用于整理issue信息和判断issue是否满足归档条件）
-    - gitlab issue_processor （gitlab归档流水线第一步，用于整理issue信息和判断issue是否满足归档条件）
-    - auto_archiving  （归档流水线第二步，将上一步整理好的issue内容格式化成新归档内容写入归档文档）
+    - github issue_processor （gitlab归档流水线第一步，用于整理issue信息和判断issue是否满足归档条件,并将整理好的issue内容格式化成新归档内容写入归档文档）
+    - gitlab issue_processor （gitlab归档流水线第一步，用于整理issue信息和判断issue是否满足归档条件,并将整理好的issue内容格式化成新归档内容写入归档文档）
     - ~~push_document github~~ github侧的“提交归档文件”部分是shell脚本[push_document.sh](src/push_document.sh)完成的，所以无需使用python解释器进行调试
     - push_document gitlab （gitlab测归档流水线第三步，使用gitlab RESTful API 将新归档文档提交到仓库中）
     - check_config （检查config文件夹下的json文件格式是否正确的脚本，push和pr事件会触发这个检查流水线）
