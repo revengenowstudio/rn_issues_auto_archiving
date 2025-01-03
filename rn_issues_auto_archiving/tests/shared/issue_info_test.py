@@ -536,3 +536,40 @@ def test_should_archived_success():
     assert issue_info.archived_success is False
     issue_info.archived_success = True
     assert issue_info.archived_success is True
+
+
+def test_should_skip_archived_process():
+    issue_info = IssueInfo()
+    reges = ["跳过归档流程", "test_regex"]
+
+    assert issue_info.should_skip_archived_process(
+        reges
+    ) is False
+
+    issue_info.issue_comments = [
+        IssueInfo.Comment(
+            author="test",
+            body="跳过归档流程"
+        ),
+        IssueInfo.Comment(
+            author="test",
+            body="qewqio\n\nsdjio跳过归档流程\n\n\n\1e13123"
+        ),
+    ]
+    assert issue_info.should_skip_archived_process(
+        reges
+    ) is True
+
+    issue_info.issue_comments = [
+        IssueInfo.Comment(
+            author="test",
+            body="test_regex"
+        ),
+        IssueInfo.Comment(
+            author="test",
+            body="qewqiojisdtest_regexdsadas1e13123"
+        ),
+    ]
+    assert issue_info.should_skip_archived_process(
+        reges
+    ) is True

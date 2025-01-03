@@ -25,3 +25,5 @@
 - [ ] 归档内容写入归档文件时，将issue的web_url 以 markdown link 形式嵌入到 x部Issue#xx 中
 
 - [x] 存在归档记录的情况下，需要issue_info.json上添加一个布尔字段，然后在send success comment的部分读取这个布尔，以控制是否发送归档成功评论
+
+- [x] 优先判断是否存在跳过归档流程的关键字,如果评论中存在跳过归档流程的关键字,则跳过归档流程直接关闭issue
