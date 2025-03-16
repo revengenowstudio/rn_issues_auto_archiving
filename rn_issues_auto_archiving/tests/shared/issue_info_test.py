@@ -63,6 +63,12 @@ class TestData():
         }
     }
     issue_body_with_introduced_version = "【发现版本号】：0.99.918\n"
+    issue_body_with_note = '''【发现版本号】：0.99.918\n
+[注释]:【发现版本号】：0.99.F1028A \n 
+[注释]:【发现版本号】：0.99.F1028A
+[注释]:【发现版本号】：0.99.F1028A [注释]:[发现版本号]:0.99.F1028A \n
+[注释]:[发现版本号]:0.99.F1028A
+    '''
     empty_issue_body = ""
 
 
@@ -213,11 +219,17 @@ def test_update(
 @pytest.mark.parametrize("issue_body,with_introduced_version,issue_type,expected_version", [
 
     (TestData.issue_body_with_introduced_version,
-        True, "Bug修复", "0.99.918"),  # 描述里有归档版本号
+     True, "Bug修复", "0.99.918"),  # 描述里有归档版本号
     (TestData.issue_body_with_introduced_version,
      True, "设定调整", "0.99.918"),  # 描述里有归档版本号
     (TestData.issue_body_with_introduced_version,
      True, "设定引入", "0.99.918"),  # 描述里有归档版本号
+    (TestData.issue_body_with_note,
+     True, "Bug修复", "0.99.918"),  # 描述里有注释
+    (TestData.issue_body_with_note,
+     True, "设定调整", "0.99.918"),  # 描述里有注释
+    (TestData.issue_body_with_note,
+     True, "设定引入", "0.99.918"),  # 描述里有注释
     (TestData.empty_issue_body, False, "Bug修复", ""),  # 描述里没有归档版本号
     (TestData.empty_issue_body, False, "设定调整", ""),  # 描述里没有归档版本号
     (TestData.empty_issue_body, False, "设定引入", ""),  # 描述里没有归档版本号
