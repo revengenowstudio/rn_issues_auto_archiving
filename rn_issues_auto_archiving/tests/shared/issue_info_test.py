@@ -448,6 +448,10 @@ def test_should_archive_issue(
         "(\\d\\.\\d{2}\\.\\d{3}[a-zA-Z]?\\d{0,2})测试通过",
         "已验证[,，]版本号[:：](\\d\\.\\d{2}\\.\\d{3}[a-zA-Z]?\\d{0,2})"
     ]
+    raw_archive_version_reges_for_comments = [
+        "{version_regex}测试通过",
+        "已验证[,，]版本号[:：]{version_regex}"
+    ]
 
     # 不是归档对象：缺少归档评论，缺少归档所需标签
     # 是归档对象，不满足归档条件：有归档评论，缺少归档所需标签
@@ -465,6 +469,7 @@ def test_should_archive_issue(
         ):
             issue_info.should_archive_issue(
                 archive_version_reges_for_comments,
+                raw_archive_version_reges_for_comments,
                 archive_necessary_labels
             )
 
@@ -475,6 +480,7 @@ def test_should_archive_issue(
         ):
             issue_info.should_archive_issue(
                 archive_version_reges_for_comments,
+                raw_archive_version_reges_for_comments,
                 archive_necessary_labels
             )
 
@@ -486,6 +492,7 @@ def test_should_archive_issue(
     )):
         assert expected_result == issue_info.should_archive_issue(
             archive_version_reges_for_comments,
+            raw_archive_version_reges_for_comments,
             archive_necessary_labels
         )
 
