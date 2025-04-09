@@ -309,7 +309,7 @@ def test_get_introduced_version_from_description(
         {
             "body": "已验证，版本号：0.99.918"
         }
-    ], 2, "0.99.918"),
+    ], 1, "0.99.918"),
     ([
         {
             "body": ""
@@ -318,6 +318,14 @@ def test_get_introduced_version_from_description(
             "body": ""
         }
     ], 0, ""),
+    ([
+        {
+            "body": "0.99.919测试通过"
+        },
+        {
+            "body": "已验证，版本号：0.99.918"
+        }
+    ], 2, ""),
 ])
 def test_get_archive_version_from_comments(
     comments: list[CommentJson],
