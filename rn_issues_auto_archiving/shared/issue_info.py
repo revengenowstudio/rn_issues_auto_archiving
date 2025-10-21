@@ -74,7 +74,7 @@ class IssueInfo:
     reopen_http_method: str = str()
     reopen_body: dict[str, str] = field(default_factory=dict)
     archived_success: bool = False
-    links: Links = Links()
+    links: Links = field(default_factory=Links)
 
     @staticmethod
     def remove_sensitive_info(issue_info: dict[str, Any]) -> dict[str, Any]:
