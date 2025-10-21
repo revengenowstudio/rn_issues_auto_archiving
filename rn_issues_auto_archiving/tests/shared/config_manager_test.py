@@ -6,7 +6,6 @@ from shared.config_manager import ConfigManager
 
 
 class TestConfigManager:
-
     @pytest.fixture()
     def data_sources(self):
         data_sources_list = []
@@ -22,23 +21,20 @@ class TestConfigManager:
 
     def test_init(self, data_sources: list[DataSource]):
         config_manager = ConfigManager(data_sources)
-        assert len(getattr(
-            config_manager,
-            "_ConfigManager__data_sources"
-        )) == len(data_sources)
+        assert len(getattr(config_manager, "_ConfigManager__data_sources")) == len(
+            data_sources
+        )
 
     def test_register_data_source(self, data_sources: list[DataSource]):
         config_manager = ConfigManager()
         for data_source in data_sources:
             config_manager.register_data_source(data_source)
-        assert len(getattr(
-            config_manager,
-            "_ConfigManager__data_sources"
-        )) == len(data_sources)
+        assert len(getattr(config_manager, "_ConfigManager__data_sources")) == len(
+            data_sources
+        )
 
     def test_load_all(self, data_sources: list[DataSource], config):
         config_manager = ConfigManager(data_sources)
         config_manager.load_all(config)
         for data_source in data_sources:
-            data_source.load.assert_called_once_with(
-                config)  # type: ignore
+            data_source.load.assert_called_once_with(config)  # type: ignore
