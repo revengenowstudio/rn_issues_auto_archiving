@@ -5,7 +5,7 @@ from shared.env import (
     should_run_in_github_action,
     should_run_in_gitlab_ci,
     should_run_in_local,
-    Env
+    Env,
 )
 
 
@@ -24,8 +24,5 @@ def test_should_run_in_local():
         assert should_run_in_local() is False
     with patch.dict(os.environ, {Env.GITLAB_CI: "true"}):
         assert should_run_in_local() is False
-    with patch.dict(os.environ, {
-            Env.GITLAB_CI: "false",
-            Env.GITHUB_ACTIONS: "false"
-    }):
+    with patch.dict(os.environ, {Env.GITLAB_CI: "false", Env.GITHUB_ACTIONS: "false"}):
         assert should_run_in_local() is True

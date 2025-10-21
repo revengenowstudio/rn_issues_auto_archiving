@@ -7,7 +7,6 @@ from shared.env import Env
 
 
 def test_should_ci_running_in_manual():
-
     for manual_event_type in CiEventType.manual:
         with patch.dict(os.environ, {Env.CI_EVENT_TYPE: manual_event_type}):
             assert CiEventType.should_ci_running_in_manual()
