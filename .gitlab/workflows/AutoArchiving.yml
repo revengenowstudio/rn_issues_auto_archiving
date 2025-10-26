@@ -5,8 +5,8 @@
 
 cache:
   paths:
-    - ~/.cache/uv
-    - ~/.local/bin/uv
+    - /usr/local/lib/python3.10/site-packages   # 系统包装在这里
+    - /usr/local/uv                             # uv 二进制
   key: "$CI_COMMIT_REF_SLUG"
 
 variables:

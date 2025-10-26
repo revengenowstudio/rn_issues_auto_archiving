@@ -6,29 +6,29 @@ variables:
 
 cache:
   paths:
-    - ~/.cache/uv
-    - ~/.local/bin/uv
+    - /usr/local/lib/python3.10/site-packages   # 系统包装在这里
+    - /usr/local/uv                             # uv 二进制
   key: "$CI_COMMIT_REF_SLUG"
 
 before_script:
   # 如果镜像里没 uv，就现装一个（用国内 pip 源）
-  - command -v uv || pip install uv -i https://pypi.tuna.tsinghua.edu.cn/simple
+  - command -v uv || pip install uv -i $PIP_MIRROR_URL
 
 unittest:
   tags: 
     - ubuntu
   stage: unittest
   rules:
-    - if: $CI_PIPELINE_SOURCE == "trigger" 
+    # 1. 触发器/WEB 一律不跑
+    - if: '$CI_PIPELINE_SOURCE == "trigger" || $CI_PIPELINE_SOURCE == "web"'
       when: never
-    - if: $CI_PIPELINE_SOURCE == "web"
-      when: never
-    - if: $CI_PIPELINE_SOURCE == "push"
+    # 2. PUSH/MR 且 **至少改了一个 .py** → 跑
+    - if: '$CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"'
       changes:
-        - rn_issues_auto_archiving/**/*.py
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      changes:
-        - rn_issues_auto_archiving/**/*.py
+        - "rn_issues_auto_archiving/**/*.py"
+      when: on_success
+    # 3. 其余情况（包括 PUSH/MR 但无 .py 改动）→ 不跑
+    - when: never
   # image: m.daocloud.io/docker.io/library/python:3.10.13-slim-bullseye
   image: anolis-registry.cn-zhangjiakou.cr.aliyuncs.com/openanolis/python:3.10.13-23-minimal
   script: |

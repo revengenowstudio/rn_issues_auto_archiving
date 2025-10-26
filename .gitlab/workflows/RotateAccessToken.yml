@@ -10,8 +10,8 @@
 
 cache:
   paths:
-    - ~/.cache/uv
-    - ~/.local/bin/uv
+    - /usr/local/lib/python3.10/site-packages   # 系统包装在这里
+    - /usr/local/uv                             # uv 二进制
   key: "$CI_COMMIT_REF_SLUG"
 
 variables:
@@ -25,7 +25,7 @@ variables:
 
 before_script:
   # 如果镜像里没 uv，就现装一个（用国内 pip 源）
-  - command -v uv || pip install uv -i https://pypi.tuna.tsinghua.edu.cn/simple
+  - command -v uv || pip install uv -i $PIP_MIRROR_URL
 
 rotate_access_token:
   # image: m.daocloud.io/docker.io/library/python:3.10.13-slim-bullseye
