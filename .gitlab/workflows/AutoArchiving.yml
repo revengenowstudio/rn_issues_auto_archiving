@@ -62,7 +62,7 @@ auto_archiving:
   resource_group: auto_archiving_group
   script: |
     uv pip install -r ./pyproject.toml --system
-    if [ -e $TRIGGER_PAYLOAD ]; then
+    if [ -e "$TRIGGER_PAYLOAD" ]; then
       cp $TRIGGER_PAYLOAD $WEBHOOK_OUTPUT_PATH
     fi
     export WEBHOOK_PAYLOAD=$(cat $TRIGGER_PAYLOAD)
