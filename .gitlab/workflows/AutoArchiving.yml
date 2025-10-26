@@ -12,9 +12,6 @@ cache:
 variables:
   # GITLAB_HOST: $CI_SERVER_HOST # 这两个环境变量在另一个流水线定义了,但是这里也用得到
   # PROJECT_ID: $CI_PROJECT_ID # 这两个环境变量在另一个流水线定义了,但是这里也用得到
-  PIP_MIRROR_URL: https://mirrors.aliyun.com/pypi/simple  # PIP镜像源,其他流水线也用到了
-  UV_INDEX_URL: $PIP_MIRROR_URL # uv用的PIP镜像源,其他流水线也用到了
-  UV_SYSTEM_PYTHON: 1 # uv配置,默认使用系统预装的python解释器,其他流水线也用到了
   SLEEP_INTERVAL: 0   # 流水线sleep时间间隔 , 缓解多个流水线执行提交流程时会导致内容被覆盖的问题
   GIT_STRATEGY: fetch
   TARGET_BRANCH: main

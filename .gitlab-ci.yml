@@ -7,6 +7,12 @@
 # gitlab ci里可用的预定义变量
 # https://docs.gitlab.com/ee/ci/variables/predefined_variables.html#predefined-variables
 # https://docs.gitlab.com/ee/ci/variables/index.html
+
+variables:
+  PIP_MIRROR_URL: https://mirrors.aliyun.com/pypi/simple  # PIP镜像源,其他流水线也用到了
+  UV_INDEX_URL: $PIP_MIRROR_URL # uv用的PIP镜像源,其他流水线也用到了
+  UV_SYSTEM_PYTHON: 1 # uv配置,默认使用系统预装的python解释器,其他流水线也用到了
+
 stages:
   - rotate_access_token
   - auto_archiving
