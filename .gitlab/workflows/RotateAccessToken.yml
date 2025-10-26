@@ -19,9 +19,6 @@ variables:
   PROJECT_ID: $CI_PROJECT_ID         # example: 123456  
   TOKEN_TTL_DAYS: 93                 # 单位：天
   TARGET_VARIABLE_NAME: TOKEN
-  # PIP_MIRROR_URL: https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple  # 这个环境变量在AutoArchiving.yml定义了,但是这里也用得到
-  # UV_SYSTEM_PYTHON: 1 # 这个环境变量在AutoArchiving.yml定义了,但是这里也用得到
-  # UV_INDEX_URL: https://mirrors.aliyun.com/pypi/simple # 这个环境变量在AutoArchiving.yml定义了,但是这里也用得到
 
 before_script:
   # 如果镜像里没 uv，就现装一个（用国内 pip 源）

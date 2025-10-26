@@ -1,9 +1,3 @@
-variables:
-  # PIP_MIRROR_URL: https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple  # 这个环境变量在AutoArchiving.yml定义了,但是这里也用得到
-  # UV_SYSTEM_PYTHON: 1 # 这个环境变量在AutoArchiving.yml定义了,但是这里也用得到
-  # UV_INDEX_URL: https://mirrors.aliyun.com/pypi/simple # 这个环境变量在AutoArchiving.yml定义了,但是这里也用得到
-
-
 cache:
   paths:
     - /usr/local/lib/python3.10/site-packages   # 系统包装在这里
