@@ -32,5 +32,5 @@ unittest:
   # image: m.daocloud.io/docker.io/library/python:3.10.13-slim-bullseye
   image: anolis-registry.cn-zhangjiakou.cr.aliyuncs.com/openanolis/python:3.10.13-23-minimal
   script: |
-    uv pip install -r ./pyproject.toml --extra unittest
+    uv pip install -r ./pyproject.toml --system --extra unittest
     pytest

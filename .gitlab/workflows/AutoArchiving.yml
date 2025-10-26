@@ -64,7 +64,7 @@ auto_archiving:
   image: anolis-registry.cn-zhangjiakou.cr.aliyuncs.com/openanolis/python:3.10.13-23-minimal
   resource_group: auto_archiving_group
   script: |
-    uv pip install -r ./pyproject.toml
+    uv pip install -r ./pyproject.toml --system
     if [ -e "$TRIGGER_PAYLOAD" ]; then
       cp "$TRIGGER_PAYLOAD" "$WEBHOOK_OUTPUT_PATH"
     fi

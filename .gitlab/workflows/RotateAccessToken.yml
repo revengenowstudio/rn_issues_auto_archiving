@@ -36,6 +36,6 @@ rotate_access_token:
   only:
     - schedules
   script: |
-    uv pip install -r ./pyproject.toml
+    uv pip install -r ./pyproject.toml --system
     python3 ./rn_issues_auto_archiving/utils/rotate_access_token.py
   
