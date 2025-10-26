@@ -5,8 +5,8 @@
 
 cache:
   paths:
-    - /usr/local/lib/python3.10/site-packages   # 系统包装在这里
-    - /usr/local/uv                             # uv 二进制
+    - .cache/uv      # 轮子缓存
+    - .local/bin/uv  # uv 本体缓存
   key: "$CI_COMMIT_REF_SLUG"
 
 variables:
@@ -37,7 +37,11 @@ before_script:
   - export author_email=RN-Bot-CI@$CI_SERVER_HOST
   - export author_name=RN-Bot-CI
   - export commit_message="Close $ISSUE_REPOSITORY#{issue_id}"
-  - command -v uv || pip install uv -i $PIP_MIRROR_URL
+  - export PATH="$CI_PROJECT_DIR/.local/bin:$PATH"  
+  - |
+    if [ ! -x "$UV_BIN" ]; then
+      pip install --target "$CI_PROJECT_DIR/.local" uv -i "$PIP_MIRROR_URL"
+    fi
 
 auto_archiving:
   tags: 

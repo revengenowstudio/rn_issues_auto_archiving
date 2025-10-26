@@ -10,9 +10,11 @@
 
 variables:
   # PIP_MIRROR_URL: https://mirrors.aliyun.com/pypi/simple  # PIP镜像源,其他流水线也用到了
-  PIP_MIRROR_URL: https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple  # PIP镜像源,其他流水线也用到了
-  UV_INDEX_URL: $PIP_MIRROR_URL # uv用的PIP镜像源,其他流水线也用到了
-  UV_SYSTEM_PYTHON: 1 # uv配置,默认使用系统预装的python解释器,其他流水线也用到了
+  PIP_MIRROR_URL: https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple  # PIP镜像源
+  UV_INDEX_URL: $PIP_MIRROR_URL # uv用的PIP镜像源
+  UV_SYSTEM_PYTHON: 1 # uv配置,默认使用系统预装的python解释器
+  UV_CACHE_DIR: "$CI_PROJECT_DIR/.cache/uv"   # 让uv把三方包安装到放流水线的相对路径里
+  UV_BIN: "$CI_PROJECT_DIR/.local/bin/uv"     # uv的二进制文件安装位置
   GIT_DEPTH: 1
 
 stages:
