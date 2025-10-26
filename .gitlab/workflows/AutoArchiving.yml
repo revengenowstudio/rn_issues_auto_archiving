@@ -2,10 +2,19 @@
 # https://docs.gitlab.com/ee/ci/resource_groups/
 # https://docs.gitlab.com/ee/ci/yaml/#resource_group
 
+
+cache:
+  paths:
+    - ~/.cache/uv
+    - ~/.local/bin/uv
+  key: "$CI_COMMIT_REF_SLUG"
+
 variables:
   # GITLAB_HOST: $CI_SERVER_HOST # 这两个环境变量在另一个流水线定义了,但是这里也用得到
   # PROJECT_ID: $CI_PROJECT_ID # 这两个环境变量在另一个流水线定义了,但是这里也用得到
   PIP_MIRROR_URL: https://mirrors.aliyun.com/pypi/simple  # PIP镜像源,其他流水线也用到了
+  UV_INDEX_URL: $PIP_MIRROR_URL # uv用的PIP镜像源,其他流水线也用到了
+  UV_SYSTEM_PYTHON: 1 # uv配置,默认使用系统预装的python解释器,其他流水线也用到了
   SLEEP_INTERVAL: 0   # 流水线sleep时间间隔 , 缓解多个流水线执行提交流程时会导致内容被覆盖的问题
   GIT_STRATEGY: fetch
   TARGET_BRANCH: main
@@ -25,19 +34,22 @@ variables:
   ISSUE_TYPE: "自动判断"
   
 
+before_script:
+  # 如果镜像里没 uv，就现装一个
+  - export PATH="$HOME/.local/bin:$PATH"
+  - export author_email=RN-Bot-CI@$CI_SERVER_HOST
+  - export author_name=RN-Bot-CI
+  - export commit_message="Close $ISSUE_REPOSITORY#{issue_id}"
+  - command -v uv || pip install uv -i $PIP_MIRROR_URL
+
 auto_archiving:
   tags: 
     - ubuntu
   stage: auto_archiving
   rules:
-    - if: $CI_PIPELINE_SOURCE == "trigger" 
+    - if: $CI_PIPELINE_SOURCE == "trigger" || $CI_PIPELINE_SOURCE == "web"
       when: always
-    - if: $CI_PIPELINE_SOURCE == "web"
-      when: always
-    - if: $CI_PIPELINE_SOURCE == "push"
-      when: never
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      when: never
+    - when: never          # 其余情况一律不跑
     # - when: manual
     # - when: triggers
   # when:
@@ -52,16 +64,12 @@ auto_archiving:
   image: anolis-registry.cn-zhangjiakou.cr.aliyuncs.com/openanolis/python:3.10.13-23-minimal
   resource_group: auto_archiving_group
   script: |
-    pip install -r ./rn_issues_auto_archiving/issue_processor/requirements.txt -i $PIP_MIRROR_URL
-    pip install -r ./rn_issues_auto_archiving/auto_archiving/requirements.txt -i $PIP_MIRROR_URL
+    uv pip install -r ./pyproject.toml
     if [ -e "$TRIGGER_PAYLOAD" ]; then
-      cp $TRIGGER_PAYLOAD $WEBHOOK_OUTPUT_PATH
+      cp "$TRIGGER_PAYLOAD" "$WEBHOOK_OUTPUT_PATH"
     fi
-    export WEBHOOK_PAYLOAD=$(cat $TRIGGER_PAYLOAD)
+    export WEBHOOK_PAYLOAD=$(cat "$TRIGGER_PAYLOAD")
     python3 ./rn_issues_auto_archiving/main.py  -c "./config/auto_archiving.json"
-    export author_email=RN-Bot-CI@$CI_SERVER_HOST
-    export author_name=RN-Bot-CI
-    export commit_message="Close $ISSUE_REPOSITORY#{issue_id}"
     python3 ./rn_issues_auto_archiving/push_document.py
     python3 ./rn_issues_auto_archiving/archiving_success.py
     echo "task done , sleep $SLEEP_INTERVAL second"
