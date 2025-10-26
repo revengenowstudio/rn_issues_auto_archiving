@@ -51,16 +51,6 @@ auto_archiving:
     - if: $CI_PIPELINE_SOURCE == "trigger" || $CI_PIPELINE_SOURCE == "web"
       when: always
     - when: never          # 其余情况一律不跑
-    # - when: manual
-    # - when: triggers
-  # when:
-  #   - manual
-  # only:
-  #   - triggers
-  # except:
-  #   - pushes
-  #   - merge_requests
-
   # image: m.daocloud.io/docker.io/library/python:3.10.13-slim-bullseye
   image: anolis-registry.cn-zhangjiakou.cr.aliyuncs.com/openanolis/python:3.10.13-23-minimal
   resource_group: auto_archiving_group
