@@ -14,6 +14,7 @@ variables:
   PROJECT_ID: $CI_PROJECT_ID         # example: 123456  
   TOKEN_TTL_DAYS: 93                 # 单位：天
   TARGET_VARIABLE_NAME: TOKEN
+  # PIP_MIRROR_URL: https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple  # 这个环境变量在AutoArchiving.yml定义了,但是这里也用得到
 
 rotate_access_token:
   # image: m.daocloud.io/docker.io/library/python:3.10.13-slim-bullseye
@@ -24,6 +25,6 @@ rotate_access_token:
   only:
     - schedules
   script: |
-    pip install -r ./rn_issues_auto_archiving/issue_processor/requirements.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+    pip install -r ./rn_issues_auto_archiving/issue_processor/requirements.txt -i $PIP_MIRROR_URL
     python3 ./rn_issues_auto_archiving/utils/rotate_access_token.py
   

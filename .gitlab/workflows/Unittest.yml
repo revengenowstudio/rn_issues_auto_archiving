@@ -1,3 +1,7 @@
+variables:
+  # PIP_MIRROR_URL: https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple  # 这个环境变量在AutoArchiving.yml定义了,但是这里也用得到
+
+
 unittest:
   tags: 
     - ubuntu
@@ -16,6 +20,6 @@ unittest:
   # image: m.daocloud.io/docker.io/library/python:3.10.13-slim-bullseye
   image: anolis-registry.cn-zhangjiakou.cr.aliyuncs.com/openanolis/python:3.10.13-23-minimal
   script: |
-    pip install -r ./rn_issues_auto_archiving/issue_processor/requirements.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+    pip install -r ./rn_issues_auto_archiving/issue_processor/requirements.txt -i $PIP_MIRROR_URL
     pip install pytest -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
     pytest
