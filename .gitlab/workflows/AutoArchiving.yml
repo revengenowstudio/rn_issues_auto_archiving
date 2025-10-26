@@ -12,7 +12,7 @@ cache:
 variables:
   # GITLAB_HOST: $CI_SERVER_HOST # 这两个环境变量在另一个流水线定义了,但是这里也用得到
   # PROJECT_ID: $CI_PROJECT_ID # 这两个环境变量在另一个流水线定义了,但是这里也用得到
-  SLEEP_INTERVAL: 0   # 流水线sleep时间间隔 , 缓解多个流水线执行提交流程时会导致内容被覆盖的问题
+  SLEEP_INTERVAL: 10   # 流水线sleep时间间隔 , 缓解多个流水线执行提交流程时会导致内容被覆盖的问题
   GIT_STRATEGY: fetch
   TARGET_BRANCH: main
   TOKEN: $TOKEN
