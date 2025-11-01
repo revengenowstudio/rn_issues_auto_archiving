@@ -12,3 +12,4 @@ output
 .VSCodeCounter
 .pytest_cache
 issue_info.json
+*egg-info

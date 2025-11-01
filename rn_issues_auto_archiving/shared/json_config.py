@@ -73,9 +73,9 @@ class Config:
     archive_version_reges_for_comments: list[str] = field(default_factory=list)
     skip_archived_reges_for_comments: list[str] = field(default_factory=list)
     version_regex: str = str()
-    issue_type: IssueType = IssueType()
+    issue_type: IssueType = str()
     introduced_version_reges: list[str] = field(default_factory=list)
-    archived_document: ArchivedDocument = ArchivedDocument()
+    archived_document: ArchivedDocument = field(default_factory=ArchivedDocument)
 
     @property
     def raw_archive_version_reges_for_comments(self) -> list[str]:
