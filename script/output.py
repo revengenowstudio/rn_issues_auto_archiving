@@ -17,12 +17,24 @@ COMMON_FILE_LIST = [
     Path(".python-version"),
     Path("uv.lock"),
 ]
-BLACK_LIST = ["__pycache__"]
+BLACK_LIST = [
+    "__pycache__",
+    "tests",
+    "Unittest.yml",
+    "README",
+    "develop-requirements.txt",
+]
 GITLAB_FILE_LIST = [Path("./.gitlab-ci.yml"), Path("./.gitlab")]
 GITHUB_FILE_LIST = [Path("./.github")]
 
 ARG_ALL_ISSUE_PATH = "--all_issue_path"
 ARG_INTERNAL_ISSUE_PATH = "--internal_issue_path"
+
+REPLACE_FILE_CONTENT_LIST = [
+    ("AutoArchiving.yml", "TARGET_BRANCH: main", "TARGET_BRANCH: master"),
+    (".gitlab-ci.yml", "  - unittest\n", ""),
+    (".gitlab-ci.yml", '  - local: "/.gitlab/workflows/Unittest.yml"\n', ""),
+]
 
 help_args_list = ["--help", "-h", "help", "h"]
 help_message = """
@@ -36,6 +48,13 @@ def path_in_black_list(file_path: Path, black_list: Iterable[str]) -> bool:
         if black_path in str(file_path.absolute()):
             return True
     return False
+
+
+def replace_file_content(file_path: Path, old: str, new: str) -> None:
+    print(f'替换文件 : "{str(file_path)}" 中的 "{old}" 为 "{new}"')
+    raw_content = file_path.read_text(encoding="utf-8")
+    raw_content = raw_content.replace(old, new)
+    file_path.write_text(raw_content, encoding="utf-8")
 
 
 def copy_files(
@@ -58,6 +77,14 @@ def copy_files(
         if not target_path.exists():
             target_path.mkdir(parents=True, exist_ok=True)
         shutil.copy2(src=file_path, dst=target_path, follow_symlinks=False)
+
+        target_file_path = target_path.joinpath(file_path.name)
+        for target_file_name, target_str, new_str in REPLACE_FILE_CONTENT_LIST:
+            if file_path.name != target_file_name:
+                continue
+            replace_file_content(
+                file_path=target_file_path, old=target_str, new=new_str
+            )
         print(f'复制文件 : "{str(file_path)}" 到 "{str(target_path)}"')
 
 
@@ -83,7 +110,6 @@ def is_show_help(args: dict[str, str]) -> bool:
     for key in args.keys():
         if key.lower() in help_args_list:
             return True
-
     return False
 
 
