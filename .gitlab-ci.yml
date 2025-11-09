@@ -9,6 +9,9 @@
 # https://docs.gitlab.com/ee/ci/variables/index.html
 
 variables:
+  # GITLAB_HOST: $CI_SERVER_HOST       # example: gitlab.com
+  GITLAB_HOST: "$CI_SERVER_HOST:61443"       # example: gitlab.com:61443
+  PROJECT_ID: $CI_PROJECT_ID         # example: 123456 
   # PIP_MIRROR_URL: https://mirrors.aliyun.com/pypi/simple  # PIP镜像源,其他流水线也用到了
   PIP_MIRROR_URL: https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple  # PIP镜像源
   UV_INDEX_URL: $PIP_MIRROR_URL # uv用的PIP镜像源
