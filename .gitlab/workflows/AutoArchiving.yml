@@ -10,8 +10,8 @@ cache:
   key: "$CI_COMMIT_REF_SLUG"
 
 variables:
-  # GITLAB_HOST: $CI_SERVER_HOST # 这两个环境变量在另一个流水线定义了,但是这里也用得到
-  # PROJECT_ID: $CI_PROJECT_ID # 这两个环境变量在另一个流水线定义了,但是这里也用得到
+  # GITLAB_HOST: $CI_SERVER_HOST # 在gitlab-ci.yaml中定义
+  # PROJECT_ID: $CI_PROJECT_ID # 在gitlab-ci.yaml中定义
   SLEEP_INTERVAL: 10   # 流水线sleep时间间隔 , 缓解多个流水线执行提交流程时会导致内容被覆盖的问题
   GIT_STRATEGY: fetch
   TARGET_BRANCH: main
@@ -20,7 +20,7 @@ variables:
   ISSUE_REPOSITORY: "内部Issue"
   CI_EVENT_TYPE: $CI_PIPELINE_SOURCE
   ARCHIVED_DOCUMENT_PATH: "./修改归档.md"
-  API_BASE_URL: https://$CI_SERVER_HOST/api/v4/projects/$CI_PROJECT_ID/
+  API_BASE_URL: https://$GITLAB_HOST/api/v4/projects/$CI_PROJECT_ID/
   WEBHOOK_OUTPUT_PATH : "./webhook.json"
   # 手动流水线变量
   ISSUE_NUMBER: ""

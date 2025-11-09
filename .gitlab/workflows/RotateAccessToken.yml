@@ -15,8 +15,8 @@ cache:
   key: "$CI_COMMIT_REF_SLUG"
 
 variables:
-  GITLAB_HOST: $CI_SERVER_HOST       # example: gitlab.com
-  PROJECT_ID: $CI_PROJECT_ID         # example: 123456  
+  # GITLAB_HOST: $CI_SERVER_HOST       # 在gitlab-ci.yaml中定义
+  # PROJECT_ID: $CI_PROJECT_ID         # 在gitlab-ci.yaml中定义
   TOKEN_TTL_DAYS: 93                 # 单位：天
   TARGET_VARIABLE_NAME: TOKEN
 
