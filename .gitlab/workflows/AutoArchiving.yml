@@ -34,9 +34,6 @@ variables:
 before_script:
   # 如果镜像里没 uv，就现装一个
   - export PATH="$HOME/.local/bin:$PATH"
-  - export author_email=RN-Bot-CI@$CI_SERVER_HOST
-  - export author_name=RN-Bot-CI
-  - export commit_message="Close $ISSUE_REPOSITORY#{issue_id}"
   - export PATH="$CI_PROJECT_DIR/.local/bin:$PATH"  
   - |
     if [ ! -x "$UV_BIN" ]; then
@@ -61,6 +58,10 @@ auto_archiving:
     fi
     export WEBHOOK_PAYLOAD=$(cat $TRIGGER_PAYLOAD)
     python3 ./rn_issues_auto_archiving/main.py  -c "./config/auto_archiving.json"
+
+    export author_email=RN-Bot-CI@$CI_SERVER_HOST
+    export author_name=RN-Bot-CI
+    export commit_message="Close $ISSUE_REPOSITORY#{issue_id}"
     python3 ./rn_issues_auto_archiving/push_document.py
     python3 ./rn_issues_auto_archiving/archiving_success.py
     echo "task done , sleep $SLEEP_INTERVAL second"
