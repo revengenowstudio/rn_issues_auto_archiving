@@ -5,6 +5,20 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "output.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "script/output.py",
+            "args": [
+                // "--all_issue_path",
+                // "./test",   // 输入绝对路径即可
+                // "--internal_issue_path",
+                // "./test",   // 输入绝对路径即可
+                // "--help"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
             "name": "github issue_processor",
             "type": "debugpy",
             "request": "launch",

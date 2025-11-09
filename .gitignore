@@ -13,3 +13,5 @@ output
 .pytest_cache
 issue_info.json
 *egg-info
+test
+!script/output.py
