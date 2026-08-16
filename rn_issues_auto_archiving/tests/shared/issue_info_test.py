@@ -275,6 +275,18 @@ def test_get_introduced_version_from_description(
         ),
         ([{"body": ""}, {"body": ""}], 0, ""),
         ([{"body": "0.99.919测试通过"}, {"body": "已验证，版本号：0.99.918"}], 2, ""),
+        (
+            [
+                {  # `>` 的回复部分会忽略
+                    "body": """> <img alt="Image" width="173" height="149" src="https://example.com"> 0.99.918a1测试通过，先军要塞仍然会对临近单位进行攻击而不是主动拉开距离，并且无法造成伤害。
+
+@Crossfield-ClassDestroyer 请驱逐确认修改生效"""
+                },
+                {"body": "0.99.918a2测试通过，先军要塞现在可以正常攻击临近单位"},
+            ],
+            1,
+            "0.99.918a2",
+        ),
     ],
 )
 def test_get_archive_version_from_comments(
@@ -293,15 +305,19 @@ def test_get_archive_version_from_comments(
         "(\\d\\.\\d{2}\\.\\d{3}[a-zA-Z]?\\d{0,2})测试通过",
         "已验证[,，]版本号[:：](\\d\\.\\d{2}\\.\\d{3}[a-zA-Z]?\\d{0,2})",
     ]
+    archive_version_ignore_line_reges_for_comments = ["^> "]
+
     if include_archive_version_number >= 2:
         with pytest.raises(ArchiveVersionError):
             issue_info.get_archive_version_from_comments(
-                archive_version_reges_for_comments
+                archive_version_reges_for_comments,
+                archive_version_ignore_line_reges_for_comments,
             )
 
     else:
         assert expected_version == issue_info.get_archive_version_from_comments(
-            archive_version_reges_for_comments
+            archive_version_reges_for_comments,
+            archive_version_ignore_line_reges_for_comments,
         )
 
 
@@ -373,6 +389,8 @@ def test_should_archive_issue(
         "已验证[,，]版本号[:：]{version_regex}",
     ]
 
+    archive_version_ignore_line_reges_for_comments = ["^> "]
+
     # 不是归档对象：缺少归档评论，缺少归档所需标签
     # 是归档对象，不满足归档条件：有归档评论，缺少归档所需标签
     # 是归档对象，不满足归档条件：缺少归档评论，有归档所需标签
@@ -390,6 +408,7 @@ def test_should_archive_issue(
         with pytest.raises(ArchiveLabelError):
             issue_info.should_archive_issue(
                 archive_version_reges_for_comments,
+                archive_version_ignore_line_reges_for_comments,
                 raw_archive_version_reges_for_comments,
                 archive_necessary_labels,
             )
@@ -398,6 +417,7 @@ def test_should_archive_issue(
         with pytest.raises(ArchiveVersionError):
             issue_info.should_archive_issue(
                 archive_version_reges_for_comments,
+                archive_version_ignore_line_reges_for_comments,
                 raw_archive_version_reges_for_comments,
                 archive_necessary_labels,
             )
@@ -407,6 +427,7 @@ def test_should_archive_issue(
     ):
         assert expected_result == issue_info.should_archive_issue(
             archive_version_reges_for_comments,
+            archive_version_ignore_line_reges_for_comments,
             raw_archive_version_reges_for_comments,
             archive_necessary_labels,
         )
