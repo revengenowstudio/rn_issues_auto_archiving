@@ -35,6 +35,7 @@
 
 - PAT轮换流水线配置
   - 由于gitlab在某个版本后PAT不能设置成永不过期了，需要一个定时运行的任务自动轮换（rotate）PAT，所以通过`流水线任务`+`调度器（scheduler）`来完成这件事
+  - 注意, PAT目前所属账号为`Revenge-Now-Bot`, 若遇到rotate流水线报错 http 401 或 http 403, 一般是PAT因为某些原因过期导致的, 需要登陆`Revenge-Now-Bot`账号重新生成一个带`api, read_repository, write_repository`3个权限的 `rn_internal_issues_auto_archiving_ci_token` PAT, 然后将PAT塞入`rn_internal_issues`仓库变量的`TOKEN`变量中, 即可恢复rotate流水线
 
   - 配置说明：
     - 在Gitlab仓库页面左侧菜单栏的`Settings（设置）`里的`构建`选项里找到`流水线计划`选项，点击后进入新建流水线页面，点击页面右上角按钮`新建计划`
