@@ -35,7 +35,9 @@ class MatchRules:
 def join_hints(match_rules_list: list[MatchRules]) -> str:
     """把多条MatchRules里非空的hint拼成多行文本，方便评论里逐行阅读"""
     return "\n".join(
-        match_rules.hint for match_rules in match_rules_list if match_rules.hint
+        f"- `{match_rules.hint}`"
+        for match_rules in match_rules_list
+        if match_rules.hint
     )
 
 
@@ -78,7 +80,7 @@ class Config:
     archived_document: ArchivedDocument
 
     # 本脚本发送评论时统一加的前缀，用于识别“这是脚本自己发的评论”
-    post_comment_prefix: str = "【归档脚本消息】"
+    post_comment_prefix: str = "【归档脚本消息】："
 
     # 构造时先塞一个空的，main 启动后调用 load_env_config 填充真实值
     from_env: FromEnv = field(default_factory=FromEnv)
