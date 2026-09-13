@@ -56,9 +56,7 @@ class Config:
         table_separator: str
         archive_template: str
         fill_issue_url_by_repository_type: list[str]
-        action_name_to_repository_type_map: dict[str, str]
         issue_title_processing_rules: dict[IssueTypeStr, ProcessingActionJson]
-        reopen_workflow_prefix_map: dict[str, str]
 
     @dataclass
     class FromEnv:
@@ -186,7 +184,5 @@ config = Config(
                 "remove_keyword": [],
             }
         },
-        action_name_to_repository_type_map={},
-        reopen_workflow_prefix_map={},
     ),
 )

@@ -56,8 +56,6 @@ class TestArchiveDocument:
                     "remove_keyword": [],
                 }
             },
-            action_name_to_repository_type_map={},
-            reopen_workflow_prefix_map={},
         )
         test_lines = [
             line + "\n"

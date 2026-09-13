@@ -1,26 +1,26 @@
-import os
-from typing import Any
+import sys
+from pathlib import Path
 from datetime import datetime, timedelta
 
 import httpx
+
+# 本脚本会被直接执行（sys.path[0] 是 utils/ 目录），
+# 需要把包目录加入 sys.path 才能 import 项目内的模块
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from shared.env import Env
+from utils.env import get_env, must_get_env
 
 
 # 由于这个脚本专为gitlab使用
 # 且不属于归档流程范围内
 # 所以并没有将这里的log信息放到shared.log里
 class Log:
-    token_not_found = """token为空或者不存在"""
     rotate_token = """正在轮换token"""
     rotate_success = """token轮换成功，过期时间为：{expire_time}"""
     update_repo_variable = '''正在更新仓库变量"{variable_name}"'''
     update_repo_variable_success = """更新仓库变量"{variable_name}"成功"""
     non_platform_action_env = """未检测到流水线环境，将读取".env"文件"""
-
-
-class AccessTokenNotFound(Exception):
-    """token为空或者不存在"""
-
-    pass
 
 
 def create_http_header(token: str) -> dict[str, str]:
@@ -66,19 +66,17 @@ def update_repository_variable(
 
 
 def main():
-    if os.environ.get("GITLAB_CI") != "true":
+    if not get_env(Env.GITLAB_CI, bool, False):
         print(Log.non_platform_action_env)
         from dotenv import load_dotenv
 
         load_dotenv()
 
-    old_token = os.environ["TOKEN"]
-    gitlab_host = os.environ["GITLAB_HOST"]
-    project_id = os.environ["PROJECT_ID"]
-    token_ttl_days = int(os.environ["TOKEN_TTL_DAYS"])
-    target_variable_name = os.environ["TARGET_VARIABLE_NAME"]
-    if old_token is None:
-        raise AccessTokenNotFound(Log.token_not_found)
+    old_token = must_get_env(Env.TOKEN)
+    gitlab_host = must_get_env(Env.GITLAB_HOST)
+    project_id = must_get_env(Env.PROJECT_ID)
+    token_ttl_days = must_get_env(Env.TOKEN_TTL_DAYS, int)
+    target_variable_name = must_get_env(Env.TARGET_VARIABLE_NAME)
 
     new_token = rotate_token(old_token, gitlab_host, token_ttl_days)
     update_repository_variable(new_token, gitlab_host, project_id, target_variable_name)

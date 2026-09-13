@@ -1,6 +1,5 @@
 import os
 from typing import Any, TypeVar, cast
-import builtins
 
 from shared.log import Log
 
