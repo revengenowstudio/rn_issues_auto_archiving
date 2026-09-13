@@ -80,6 +80,8 @@ class Config:
     archived_document: ArchivedDocument
 
     # 本脚本发送评论时统一加的前缀，用于识别“这是脚本自己发的评论”
+    # 注意! 谨慎修改此值, 因为每个归档脚本报错评论已经会携带"跳过归档流程"关键字
+    # 修改此值会导致脚本扫到以往的归档报错评论后真的跳过归档了
     post_comment_prefix: str = "【归档脚本消息】："
 
     # 构造时先塞一个空的，main 启动后调用 load_env_config 填充真实值
