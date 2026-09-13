@@ -93,7 +93,7 @@ jobs:
           MANUAL_ISSUE_URL: "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.inputs.issue_number }}"
           MANUAL_COMMENTS_URL: "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.inputs.issue_number }}/comments"
         run: |
-          uv run ./rn_issues_auto_archiving/main.py --config "./config/auto_archiving.json"
+          uv run ./rn_issues_auto_archiving/main.py
           
       - name: Add and commit changes
         run: |

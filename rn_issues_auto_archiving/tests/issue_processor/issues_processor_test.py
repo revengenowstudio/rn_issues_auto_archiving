@@ -12,7 +12,7 @@ from shared.env import Env
 from shared.issue_state import IssueState
 from shared.exception import MissingArchiveVersionAndArchiveLabel, UnexpectedPlatform
 from shared.issue_info import AUTO_ISSUE_TYPE, IssueInfo
-from shared.json_config import Config
+from app_config import Config
 
 
 class TestIssueProcessor:

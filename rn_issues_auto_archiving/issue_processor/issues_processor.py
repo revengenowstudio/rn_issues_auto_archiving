@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from app_config import Config, config
 from issue_processor.git_service_client import GitServiceClient
 from issue_processor.issue_data_source import (
     GithubIssueDataSource,
@@ -12,7 +13,6 @@ from shared.env import should_run_in_github_action, should_run_in_gitlab_ci
 from shared.issue_state import IssueState
 from shared.exception import ErrorMessage, MissingArchiveVersionAndArchiveLabel
 from shared.issue_info import AUTO_ISSUE_TYPE, IssueInfo
-from shared.json_config import Config
 from shared.log import Log
 from shared.exception import UnexpectedPlatform
 
@@ -26,7 +26,6 @@ class IssueProcessor:
 
     @staticmethod
     def init_config(config_manager: ConfigManager) -> Config:
-        config = Config()
         try:
             config_manager.load_all(config)
         except Exception as exc:

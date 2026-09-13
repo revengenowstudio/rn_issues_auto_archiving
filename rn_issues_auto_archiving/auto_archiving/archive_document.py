@@ -1,4 +1,4 @@
-from shared.json_config import IssueType, ProcessingActionJson
+from app_config import IssueTypeStr, ProcessingActionJson
 from shared.log import Log
 
 
@@ -83,7 +83,7 @@ class ArchiveDocument:
     def __parse_issue_title(
         issue_title: str,
         issue_type: str,
-        issue_title_processing_rules: dict[IssueType, ProcessingActionJson],
+        issue_title_processing_rules: dict[IssueTypeStr, ProcessingActionJson],
     ) -> str:
         action_map = issue_title_processing_rules.get(issue_type)
         if action_map is None:
@@ -140,7 +140,7 @@ class ArchiveDocument:
         table_separator: str,
         archive_template: str,
         fill_issue_url_by_repository_type: list[str],
-        issue_title_processing_rules: dict[IssueType, ProcessingActionJson],
+        issue_title_processing_rules: dict[IssueTypeStr, ProcessingActionJson],
         issue_id: int,
         issue_type: str,
         issue_title: str,

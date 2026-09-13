@@ -16,7 +16,7 @@ from shared.issue_state import parse_issue_state
 from shared.ci_event_type import CiEventType
 from shared.json_dumps import json_dumps
 from shared.api_path import ApiPath
-from shared.json_config import Config
+from app_config import Config
 
 
 def get_issue_id_from_url(url: str) -> int:

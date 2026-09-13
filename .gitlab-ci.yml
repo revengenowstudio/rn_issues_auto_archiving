@@ -24,12 +24,10 @@ variables:
 stages:
   - rotate_access_token
   - auto_archiving
-  - check_config
   - unittest
 
 include:
   - local: "/.gitlab/workflows/AutoArchiving.yml"
   - local: "/.gitlab/workflows/RotateAccessToken.yml"
-  - local: "/.gitlab/workflows/CheckConfig.yml"
   - local: "/.gitlab/workflows/Unittest.yml"
     

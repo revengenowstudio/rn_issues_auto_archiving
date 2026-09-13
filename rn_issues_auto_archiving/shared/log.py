@@ -20,7 +20,6 @@ class Log:
     getting_something_from = """正在从 {another} 中获取 {something}"""
     parse_something = """处理 {something} 中"""
     loading_something = """加载 {something} 中"""
-    config_path_not_found = """未在命令行参数中获取到配置文件路径，请正确使用"-c"或"--config"参数传入配置文件路径"""
     parse_config_failed = """读取配置相关内容时发生错误，错误信息 ： {exc}"""
     getting_issue_info = """正在请求并获取Issue相关信息"""
     non_platform_action_env = """未检测到流水线环境，将读取".env"文件"""

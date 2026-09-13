@@ -8,7 +8,6 @@ from typing import Generator, Iterable
 COMMON_FILE_LIST = [
     Path("./rn_issues_auto_archiving"),
     Path("./image"),
-    Path("./config"),
     Path("./手动运行归档流水线指南.md"),
     Path("./自动归档流水线使用指南.md"),
     Path("pyproject.toml"),

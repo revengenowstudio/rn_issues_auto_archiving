@@ -57,7 +57,7 @@ auto_archiving:
       cp $TRIGGER_PAYLOAD $WEBHOOK_OUTPUT_PATH
     fi
     export WEBHOOK_PAYLOAD=$(cat $TRIGGER_PAYLOAD)
-    python3 ./rn_issues_auto_archiving/main.py  -c "./config/auto_archiving.json"
+    python3 ./rn_issues_auto_archiving/main.py
 
     export author_email=RN-Bot-CI@$CI_SERVER_HOST
     export author_name=RN-Bot-CI

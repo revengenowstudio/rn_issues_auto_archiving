@@ -7,7 +7,7 @@ from issue_processor.git_service_client import (
 from issue_processor.issues_processor import IssueProcessor
 from auto_archiving.archive_document import ArchiveDocument
 from shared.config_manager import ConfigManager
-from shared.config_data_source import EnvConfigDataSource, JsonConfigDataSource
+from shared.config_data_source import EnvConfigDataSource
 from shared.ci_event_type import CiEventType
 from shared.env import Env
 from shared.log import Log
@@ -34,21 +34,11 @@ def main() -> None:
         short_arg="-pt",
         long_arg="--platform-type",
     )
-    config_path = get_value_from_args(
-        short_arg="-c",
-        long_arg="--config",
-    )
-
-    if config_path is None:
-        print(Log.config_path_not_found)
-        return
 
     if not GitlabClient.should_issue_type_webhook():
         return
 
-    config = IssueProcessor.init_config(
-        ConfigManager([EnvConfigDataSource(), JsonConfigDataSource(config_path)])
-    )
+    config = IssueProcessor.init_config(ConfigManager([EnvConfigDataSource()]))
 
     platform = IssueProcessor.init_git_service_client(test_platform_type, config)
 

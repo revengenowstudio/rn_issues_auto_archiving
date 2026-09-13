@@ -4,7 +4,7 @@
 - Python脚本全部位于`./src/`目录下
 - Github流水线脚本全部位于`./.github/workflows/`目录下，配置文件则在`./.github/configs/`
 - Gitlab流水线脚本全部位于`./gitlab-ci.yml`，配置文件则在`./.gitlab/configs/`
-- 脚本配置文件`auto_archiving.json`负责存储脚本处理Issue的行为，例如匹配所需的关键字，匹配Issue标签的类型等等。部分配置支持正则表达式，具体内容请参见[Config配置文档](./config/README.md)来修改[auto_archiving.json](./config/auto_archiving.json)
+- 脚本配置由`rn_issues_auto_archiving/config/config.py`负责存储脚本处理Issue的行为，例如匹配所需的关键字，匹配Issue标签的类型等等。部分配置支持正则表达式，具体内容请参见[Config配置文档](./rn_issues_auto_archiving/app_config/README.md)来修改[config.py](./rn_issues_auto_archiving/app_config/config.py)
 
 ## github侧
 
