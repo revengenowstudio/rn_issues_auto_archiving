@@ -1,8 +1,10 @@
+import re
+
 import pytest
 import json
 from pathlib import Path
 
-from app_config import MatchRules, config
+from app_config.config import MatchRules, config
 from shared.issue_info import CommentJson, IssueInfoJson, IssueInfo
 from shared.exception import *
 
@@ -240,7 +242,7 @@ def test_get_introduced_version_from_description(
 
     if issue_type in need_introduced_version_issue_type and not with_introduced_version:
         with pytest.raises(
-            IntroducedVersionError, match=ErrorMessage.missing_introduced_version
+            IntroducedVersionError, match=re.escape(ErrorMessage.missing_introduced_version)
         ):
             issue_info.get_introduced_version_from_description(
                 introduced_version_reges, need_introduced_version_issue_type

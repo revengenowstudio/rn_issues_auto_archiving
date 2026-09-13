@@ -1,6 +1,6 @@
 import re
 
-from app_config import Config, config
+from app_config.config import Config, config
 
 
 class TestConfigSingleton:

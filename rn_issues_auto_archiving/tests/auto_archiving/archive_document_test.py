@@ -4,7 +4,7 @@ from io import TextIOWrapper
 from pathlib import Path
 
 from auto_archiving.archive_document import ArchiveDocument
-from app_config import Config
+from app_config.config import Config
 from shared.issue_info import IssueInfo
 
 
