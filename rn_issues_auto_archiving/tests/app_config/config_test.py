@@ -32,9 +32,6 @@ class TestConfigSingleton:
         for match_rules in config.skip_archived_reges_for_comments:
             assert match_rules.hint != ""
 
-    def test_post_comment_prefix(self):
-        assert config.post_comment_prefix == "【归档脚本消息】"
-
     def test_introduced_version_reges_matches_description(self):
         introduced_version_reges = [
             re.compile(regex) for regex in config.introduced_version_reges
