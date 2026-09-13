@@ -84,18 +84,6 @@ class Log:
     write_content_to_document = """正在将内容写入归档文件"""
     time_used = """脚本总耗时：{time} s"""
     reopen_issue_request = """正在尝试发送reopen Issue请求"""
-    read_failed_recording = """正在读取归档失败记录：{failed_record_path}"""
-    create_failed_recording = (
-        """未在 {failed_record_path} 检测到归档失败记录文件，即将创建"""
-    )
-    failed_record_json_broken = (
-        """归档失败记录损坏严重，无法读取有效内容，即将覆写 {failed_record_path}"""
-    )
-    unrecognized_issue_id = """传入了无法识别的issue_id，值为 {issue_id}"""
-    remove_failed_record_item = """正在移除归档失败记录条目：{record}"""
-    failed_record_issue_id_not_found = (
-        """无法归档失败记录条目中找到需要移除的条目，issue_id为 {issue_id}"""
-    )
     issue_id_found_in_archive_record = "发现了issue_id为 {issue_id} 的归档记录"
     issue_id_not_found_in_archive_record = "找不到issue_id为 {issue_id} 的归档记录"
     unexpected_archive_number = """匹配到无法使用的非整数的归档序号字符串，将使用归档序号默认值 {default_number} 进行归档。匹配到移仓归档序号的行内容为： {line}"""
@@ -108,7 +96,6 @@ class Log:
     format_issue_content_success = """格式化Issue内容成功"""
     write_content_to_document_success = """成功将内容写入归档文件"""
     reopen_issue_request_success = """reopen Issue请求成功"""
-    remove_failed_record_item_success = """成功移除归档失败记录条目：{record}"""
     issue_archived_success = """{issue_repository}#{issue_id} 自动归档成功"""
 
     # push_document
