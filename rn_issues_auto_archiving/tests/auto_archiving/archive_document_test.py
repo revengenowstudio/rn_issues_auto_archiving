@@ -4,6 +4,8 @@ from io import TextIOWrapper
 from pathlib import Path
 
 from auto_archiving.archive_document import ArchiveDocument
+from app_config import Config
+from shared.issue_info import IssueInfo
 
 
 class TestArchiveDocument:
@@ -41,20 +43,22 @@ class TestArchiveDocument:
     def test_archive_issue(
         self, mock_open: MagicMock, archive_document: ArchiveDocument
     ):
-        archive_rules = {
-            "rjust_space_width": 0,
-            "rjust_character": " ",
-            "table_separator": "|",
-            "archive_template": "|{table_id}|({issue_type}){issue_title}{rjust_space}[{issue_repository}#{issue_id}]{issue_url_parents} |{introduced_version}|{archive_version}|",
-            "fill_issue_url_by_repository_type": ["外部Issue"],
-            "issue_title_processing_rules": {
+        archived_document = Config.ArchivedDocument(
+            rjust_space_width=0,
+            rjust_character=" ",
+            table_separator="|",
+            archive_template="|{table_id}|({issue_type}){issue_title}{rjust_space}[{issue_repository}#{issue_id}]{issue_url_parents} |{introduced_version}|{archive_version}|",
+            fill_issue_url_by_repository_type=["外部Issue"],
+            issue_title_processing_rules={
                 "Bug修复": {
                     "add_prefix": "修复了",
                     "add_suffix": "的Bug",
                     "remove_keyword": [],
                 }
             },
-        }
+            action_name_to_repository_type_map={},
+            reopen_workflow_prefix_map={},
+        )
         test_lines = [
             line + "\n"
             for line in [
@@ -66,27 +70,8 @@ class TestArchiveDocument:
                 "|1|(Bug修复)修复了这是issues标题的Bug  [外部Issue#1] |0.99.914a9|0.99.966|",
             ]
         ]
-        test_issue_data = {
-            "issue_id": 2,
-            "issue_type": "Bug修复",
-            "issue_title": "测试标题",
-            "issue_repository": "外部Issue",
-            "issue_url": "https://api.example.com/issues/2",
-            "introduced_version": "0.99.914",
-            "archive_version": "0.99.915",
-        }
         not_replaced_result = "|2|(Bug修复)修复了测试标题的Bug[外部Issue#2](https://api.example.com/issues/2) |0.99.914|0.99.915|\n"
         replaced_result = "|1|(Bug修复)修复了测试标题的Bug[外部Issue#1](https://api.example.com/issues/2) |0.99.914|0.99.915|\n"
-
-        test_issue_data_no_url = {
-            "issue_id": 3,
-            "issue_type": "Bug修复",
-            "issue_title": "测试标题",
-            "issue_repository": "内部Issue",
-            "issue_url": "https://api.example.com/issues/3",
-            "introduced_version": "0.99.914",
-            "archive_version": "0.99.915",
-        }
         not_replaced_result_no_url = (
             "|2|(Bug修复)修复了测试标题的Bug[内部Issue#3] |0.99.914|0.99.915|\n"
         )
@@ -97,30 +82,37 @@ class TestArchiveDocument:
         mock_open.return_value.__enter__.return_value = mock_file
         archive_document.file_load(test_filename)
 
+        issue_info = IssueInfo()
+        issue_info.issue_id = 2
+        issue_info.issue_type = "Bug修复"
+        issue_info.issue_title = "测试标题"
+        issue_info.issue_repository = "外部Issue"
+        issue_info.links.issue_web_url = "https://api.example.com/issues/2"
+        issue_info.introduced_version = "0.99.914"
+        issue_info.archive_version = "0.99.915"
+
         # 非替换模式，直接 __add_line
         # 替换模式，检索issue_id是否已经存在，
         # 若咩有在lines里找到issue_id，则 __add_line
         # 若找到，则 __replace_line
-        archive_document.archive_issue(
-            replace_mode=False, **test_issue_data, **archive_rules
-        )
+        # ci_event_type 不在 CiEventType.manual 里就是非替换模式
+        issue_info.ci_event_type = "issues"
+        archive_document.archive_issue(archived_document, issue_info)
         assert archive_document.show_new_line()[0] == not_replaced_result
 
-        test_issue_data["issue_id"] = 1
-        archive_document.archive_issue(
-            replace_mode=True, **test_issue_data, **archive_rules
-        )
+        issue_info.ci_event_type = "web"
+        issue_info.issue_id = 1
+        archive_document.archive_issue(archived_document, issue_info)
         assert archive_document.show_lines()[-1] == replaced_result
-        test_issue_data["issue_id"] = 2
 
-        archive_document.archive_issue(
-            replace_mode=True, **test_issue_data, **archive_rules
-        )
+        issue_info.issue_id = 2
+        archive_document.archive_issue(archived_document, issue_info)
         assert archive_document.show_new_line()[-1] == not_replaced_result
 
-        archive_document.archive_issue(
-            replace_mode=True, **test_issue_data_no_url, **archive_rules
-        )
+        issue_info.issue_id = 3
+        issue_info.issue_repository = "内部Issue"
+        issue_info.links.issue_web_url = "https://api.example.com/issues/3"
+        archive_document.archive_issue(archived_document, issue_info)
         assert archive_document.show_new_line()[-1] == not_replaced_result_no_url
 
     def test_save(self, archive_document: ArchiveDocument, tmp_path: Path):

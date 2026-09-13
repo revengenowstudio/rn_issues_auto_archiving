@@ -44,6 +44,10 @@ def main() -> None:
     try:
         issue_info = IssueProcessor.init_issue_info(platform)
     except WebhookPayloadError:
+        # gitlab的webhook无法像github那样按事件类型订阅，
+        # 非Issue事件（例如push事件）也会把本流水线拉起来，
+        # 这种情况下读不到webhook payload，属于“无关事件”而不是错误，
+        # 所以静默return：不reopen issue、不发告警评论，也不让流水线失败
         return
 
     try:
@@ -83,24 +87,7 @@ def main() -> None:
             platform.send_comment(issue_info.links.comment_url, comment_message)
             return
 
-        archive_document.archive_issue(
-            # 归档内容格式规则
-            rjust_space_width=config.archived_document.rjust_space_width,
-            rjust_character=config.archived_document.rjust_character,
-            table_separator=config.archived_document.table_separator,
-            archive_template=config.archived_document.archive_template,
-            fill_issue_url_by_repository_type=config.archived_document.fill_issue_url_by_repository_type,
-            issue_title_processing_rules=config.archived_document.issue_title_processing_rules,
-            # 归档所需issue数据
-            issue_id=issue_info.issue_id,
-            issue_type=issue_info.issue_type,
-            issue_title=issue_info.issue_title,
-            issue_repository=issue_info.issue_repository,
-            introduced_version=issue_info.introduced_version,
-            issue_url=issue_info.links.issue_web_url,
-            archive_version=issue_info.archive_version,
-            replace_mode=(issue_info.ci_event_type in CiEventType.manual),
-        )
+        archive_document.archive_issue(config.archived_document, issue_info)
         issue_info.set_archived_success()
 
         # 为了后续推送文档和发送归档成功评论的脚本
