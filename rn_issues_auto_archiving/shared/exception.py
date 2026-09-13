@@ -11,6 +11,10 @@ example_user_age_and_docs = """
 class ErrorMessage:
     """自定义异常信息"""
 
+    # 此消息会被拼接在  too_many_introduced_version 后面
+    skip_archived_hint = """如果需要跳过归档流程, 请发送带有如下关键字的评论并再次关闭issue即可:
+    {hints}"""
+
     missing_introduced_version = (
         """Issue描述中找不到引入版本号，请确保Issue描述格式正确且包含“发现版本号”等版本号关键字。补全必要信息后请再次关闭Issue重新触发归档流程。
     """
@@ -27,12 +31,6 @@ class ErrorMessage:
     missing_archive_version = (
         """Issue评论中找不到归档版本号关键字，请确保Issue评论中归档关键字格式正确且包含归档版本号。补全必要信息后请再次关闭Issue重新触发归档流程。  
     归档关键字格式有：
-{hints}"""
-        + example_user_age_and_docs
-    )
-
-    skip_archived_hint = (
-        """如果需要跳过归档流程, 请发送带有如下关键字的评论并再次关闭issue即可:
 {hints}"""
         + example_user_age_and_docs
     )
