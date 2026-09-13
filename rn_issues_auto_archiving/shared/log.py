@@ -7,6 +7,7 @@ class Log:
     env_value_convert_failed = (
         """环境变量 "{key}" 的值 "{value}" 无法转换成 "{type}" 类型"""
     )
+    command_failed = """执行命令 "{cmd}" 失败 {code} , 错误信息: "{err_msg}" """
 
     # issue_processor
     env = "环境变量"
@@ -131,6 +132,8 @@ class Log:
     pushing_document = """正在提交归档文档"""
     pushing_document_success = """提交归档文档成功"""
     push_document_failed = """提交归档文档失败，错误信息：{exc}"""
+    archived_document_no_change = """归档文档没有发生变化，跳过提交流程"""
+    archived_document_has_change = """归档文档发生了变化，执行提交流程"""
     issue_state_is_open_skip_push = """Issue状态为“Open”，不执行归档文件推送流程"""
     document_not_found = """未找到归档文档，跳过推送流程"""
     issue_output_not_found_skip_push = (

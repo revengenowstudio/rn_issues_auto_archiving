@@ -14,7 +14,7 @@
                 // "./test",   // 输入绝对路径即可
                 // "--internal_issue_path",
                 // "./test",   // 输入绝对路径即可
-                // "--help"
+                "--help"
             ],
             "console": "integratedTerminal"
         },
@@ -24,8 +24,6 @@
             "request": "launch",
             "program": "rn_issues_auto_archiving/main.py",
             "args": [
-                "--config",
-                "./config/auto_archiving.json",
                 "--platform-type",
                 "github"
             ],
@@ -38,8 +36,6 @@
             "request": "launch",
             "program": "rn_issues_auto_archiving/main.py",
             "args": [
-                "--config",
-                "./config/auto_archiving.json",
                 "--platform-type",
                 "gitlab"
             ],
@@ -47,10 +43,18 @@
             "cwd": "${workspaceFolder}"
         },
         {
+            "name": "push_document github",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "rn_issues_auto_archiving/push_document_github.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}"
+        },
+        {
             "name": "push_document gitlab",
             "type": "debugpy",
             "request": "launch",
-            "program": "rn_issues_auto_archiving/push_document.py",
+            "program": "rn_issues_auto_archiving/push_document_gitlab.py",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}"
         },
@@ -59,18 +63,6 @@
             "type": "debugpy",
             "request": "launch",
             "program": "rn_issues_auto_archiving/archiving_success.py",
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}"
-        },
-        {
-            "name": "check_config",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "rn_issues_auto_archiving/utils/check_config.py",
-            "args": [
-                "--config-dir",
-                "./config"
-            ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}"
         },
@@ -108,7 +100,7 @@
             "name": "Bash-Debug (select script from list of sh files)",
             "cwd": "${workspaceFolder}",
             "program": "${command:SelectScriptName}",
-            "args": []
+            // "args": []
         }
     ]
 }

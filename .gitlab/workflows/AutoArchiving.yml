@@ -62,7 +62,7 @@ auto_archiving:
     export author_email=RN-Bot-CI@$CI_SERVER_HOST
     export author_name=RN-Bot-CI
     export commit_message="Close $ISSUE_REPOSITORY#{issue_id}"
-    python3 ./rn_issues_auto_archiving/push_document.py
+    python3 ./rn_issues_auto_archiving/push_document_gitlab.py
     python3 ./rn_issues_auto_archiving/archiving_success.py
     echo "task done , sleep $SLEEP_INTERVAL second"
     sleep $SLEEP_INTERVAL

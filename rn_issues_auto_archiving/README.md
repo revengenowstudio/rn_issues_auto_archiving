@@ -10,7 +10,7 @@
     - issue不符合归档条件时（或处理时发生异常），发送告警评论并重新打开issue
     - 从已经获取的的issue信息中将内容格式化成归档文件的格式将内容写入归档文件
     - 若上述流程中的归档内容获取和处理时发生异常，发送告警评论并重新打开issue
-- `push_document.py`(Github流水线中使用) , `push_document.py`(Gitlab流水线中使用)
+- `push_document_github.py`(Github流水线中使用) , `push_document_gitlab.py`(Gitlab流水线中使用)
   - 流水线的第二步
     - 判断第一步生成的归档文件是否有新内容，如果有则将上一步处理好的归档文件推送到文档仓库
 - `archiving_success.py`
@@ -19,8 +19,8 @@
     
 
 - 由于gitlab ci配置git和ssh过于繁琐，gitlab ci 流水线使用了RESTful API来提交归档文件，所以github和gitlab流水线的推送流程使用了不同的脚本
-    - github 流水线使用 [push_document.sh](./push_document.sh) 脚本来提交归档文件
-    - gitlab 流水线使用 [push_document.py](./push_document.py) 脚本来提交归档文件
+    - github 流水线使用 [push_document_github.py](./push_document_github.py) 脚本来提交归档文件
+    - gitlab 流水线使用 [push_document_gitlab.py](./push_document_gitlab.py) 脚本来提交归档文件
 
 
 # 开发
@@ -54,7 +54,7 @@
 - 项目包含了`launch.json`文件，可以快速启动项目进行调试，在VSCode`运行与调试页`面可以选择调试的项目，选择对应启动项后按下`F5`即可启动调试
 - vsc项目启动项分别有
     - github issue_processor （gitlab归档流水线第一步，用于整理issue信息和判断issue是否满足归档条件,并将整理好的issue内容格式化成新归档内容写入归档文档）
-    - ~~push_document github~~ github侧的“提交归档文件”部分是shell脚本[push_document.sh](src/push_document.sh)完成的，所以无需使用python解释器进行调试
+    - push_document github （github侧归档流水线第二步，使用 git 命令将新归档文档提交到仓库中）
     - push_document gitlab （gitlab测归档流水线第二步，使用gitlab RESTful API 将新归档文档提交到仓库中）
     - archiving_success （流水线的第三步，发送归档成功的issue评论）
 
