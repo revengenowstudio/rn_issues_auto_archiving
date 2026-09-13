@@ -1,4 +1,3 @@
-import os
 import json
 from pathlib import Path
 import hashlib
@@ -13,6 +12,7 @@ from shared.reopen_issue import reopen_issue
 from shared.http_request import http_request
 from issue_processor.git_service_client import GitlabClient
 from shared.issue_info import IssueInfoJson
+from utils.env import must_get_env
 
 
 def get_issue_id_from_issue_info(webhook_path: str) -> int:
@@ -101,14 +101,14 @@ def push_document(
 
 
 def main():
-    issue_id = get_issue_id_from_issue_info(os.environ[Env.ISSUE_OUTPUT_PATH])
+    issue_id = get_issue_id_from_issue_info(must_get_env(Env.ISSUE_OUTPUT_PATH))
     if issue_id == -1:
         return
 
-    archived_document_path = os.environ[Env.ARCHIVED_DOCUMENT_PATH]
-    gitlab_host = os.environ[Env.GITLAB_HOST]
-    project_id = int(os.environ[Env.PROJECT_ID])
-    token = os.environ[Env.TOKEN]
+    archived_document_path = must_get_env(Env.ARCHIVED_DOCUMENT_PATH)
+    gitlab_host = must_get_env(Env.GITLAB_HOST)
+    project_id = must_get_env(Env.PROJECT_ID, int)
+    token = must_get_env(Env.TOKEN)
     http_header = GitlabClient.create_http_header(token)
 
     try:
@@ -118,7 +118,7 @@ def main():
             gitlab_host,
             project_id,
             archived_document_path,
-            os.environ[Env.TARGET_BRANCH],
+            must_get_env(Env.TARGET_BRANCH),
         )
         if should_no_change(local_sha256, remote_sha256):
             print(
@@ -134,10 +134,10 @@ def main():
             project_id,
             archived_document_path,
             Path(archived_document_path).read_text("utf-8"),
-            os.environ[Env.TARGET_BRANCH],
-            os.environ["author_email"],
-            os.environ["author_name"],
-            os.environ["commit_message"].format(issue_id=issue_id),
+            must_get_env(Env.TARGET_BRANCH),
+            must_get_env(Env.AUTHOR_EMAIL),
+            must_get_env(Env.AUTHOR_NAME),
+            must_get_env(Env.COMMIT_MESSAGE).format(issue_id=issue_id),
         )
     except Exception as exc:
         print(Log.push_document_failed.format(exc=str(exc)))

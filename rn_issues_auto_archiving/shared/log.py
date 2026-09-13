@@ -1,6 +1,13 @@
 class Log:
     """日志信息"""
 
+    # internal log
+    env_not_found_or_empty = """环境变量 "{key}" 为空或者不存在"""
+    # env_value_not_valid = """环境变量 "{key}" 的值 "{value}" 不合法 , 应为 "{expected_type}" 类型而不是 "{value_type}" """
+    env_value_convert_failed = (
+        """环境变量 "{key}" 的值 "{value}" 无法转换成 "{type}" 类型"""
+    )
+
     # issue_processor
     env = "环境变量"
     issue_comment = "Issue评论"
@@ -20,7 +27,6 @@ class Log:
     getting_something_from = """正在从 {another} 中获取 {something}"""
     parse_something = """处理 {something} 中"""
     loading_something = """加载 {something} 中"""
-    parse_config_failed = """读取配置相关内容时发生错误，错误信息 ： {exc}"""
     getting_issue_info = """正在请求并获取Issue相关信息"""
     non_platform_action_env = """未检测到流水线环境，将读取".env"文件"""
     get_test_platform_type = (

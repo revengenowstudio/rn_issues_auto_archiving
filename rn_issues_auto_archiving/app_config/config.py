@@ -9,6 +9,9 @@
 from dataclasses import dataclass, field
 from typing import TypedDict, TypeAlias
 
+from shared.env import Env
+from utils.env import must_get_env
+
 IssueTypeStr: TypeAlias = str
 
 
@@ -22,40 +25,42 @@ class ProcessingActionJson(TypedDict):
 class Config:
     @dataclass
     class IssueType:
-        type_keyword: dict[str, str] = field(default_factory=dict)
-        need_introduced_version_issue_type: list[str] = field(default_factory=list)
-        label_map: dict[str, str] = field(default_factory=dict)
+        type_keyword: dict[str, str]
+        need_introduced_version_issue_type: list[str]
+        label_map: dict[str, str]
 
     @dataclass
     class ArchivedDocument:
-        rjust_space_width: int = 0
-        rjust_character: str = str()
-        table_separator: str = str()
-        archive_template: str = str()
-        fill_issue_url_by_repository_type: list[str] = field(default_factory=list)
-        action_name_to_repository_type_map: dict[str, str] = field(default_factory=dict)
-        issue_title_processing_rules: dict[IssueTypeStr, ProcessingActionJson] = field(
-            default_factory=dict
-        )
-        reopen_workflow_prefix_map: dict[str, str] = field(default_factory=dict)
+        rjust_space_width: int
+        rjust_character: str
+        table_separator: str
+        archive_template: str
+        fill_issue_url_by_repository_type: list[str]
+        action_name_to_repository_type_map: dict[str, str]
+        issue_title_processing_rules: dict[IssueTypeStr, ProcessingActionJson]
+        reopen_workflow_prefix_map: dict[str, str]
 
-    # 从env读取，由 EnvConfigDataSource 在运行时覆盖
-    token: str = str()
-    issue_output_path: str = str()
-    ci_event_type: str = str()
-    archived_document_path: str = str()
+    @dataclass
+    class FromEnv:
+        # 从env读取，由 load_env_config 在运行时填充
+        token: str = str()
+        issue_output_path: str = str()
+        ci_event_type: str = str()
+        archived_document_path: str = str()
 
     # 以下为归档行为配置
-    archive_necessary_labels: list[str] = field(default_factory=list)
-    archive_version_reges_for_comments: list[str] = field(default_factory=list)
-    archive_version_ignore_line_reges_for_comments: list[str] = field(
-        default_factory=list
-    )
-    skip_archived_reges_for_comments: list[str] = field(default_factory=list)
-    version_regex: str = str()
-    issue_type: "Config.IssueType" = IssueType()
-    introduced_version_reges: list[str] = field(default_factory=list)
-    archived_document: ArchivedDocument = field(default_factory=ArchivedDocument)
+    archive_necessary_labels: list[str]
+    archive_version_reges_for_comments: list[str]
+    archive_version_ignore_line_reges_for_comments: list[str]
+
+    skip_archived_reges_for_comments: list[str]
+    version_regex: str
+    issue_type: "Config.IssueType"
+    introduced_version_reges: list[str]
+    archived_document: ArchivedDocument
+
+    # 构造时先塞一个空的，main 启动后调用 load_env_config 填充真实值
+    from_env: FromEnv = field(default_factory=FromEnv)
 
     @property
     def raw_archive_version_reges_for_comments(self) -> list[str]:
@@ -63,6 +68,19 @@ class Config:
             regex.replace(self.version_regex, "{version_regex}")
             for regex in self.archive_version_reges_for_comments
         ]
+
+    def load_env_config(self) -> None:
+        """从环境变量读取配置。\n
+        需要在 load_dotenv() 之后调用，
+        否则本地开发时读不到 .env 里配置的值 \n
+        缺失或为空的环境变量会抛出 ValueError
+        """
+        self.from_env = Config.FromEnv(
+            token=must_get_env(Env.TOKEN),
+            issue_output_path=must_get_env(Env.ISSUE_OUTPUT_PATH),
+            ci_event_type=must_get_env(Env.CI_EVENT_TYPE),
+            archived_document_path=must_get_env(Env.ARCHIVED_DOCUMENT_PATH),
+        )
 
 
 version_regex = r"(\d\.\d{2}\.\d{3}[a-zA-Z]?\d{0,2})"
@@ -149,5 +167,7 @@ config = Config(
                 "remove_keyword": [],
             }
         },
+        action_name_to_repository_type_map={},
+        reopen_workflow_prefix_map={},
     ),
 )

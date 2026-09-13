@@ -12,21 +12,10 @@ from shared.env import Env
 from shared.issue_state import IssueState
 from shared.exception import MissingArchiveVersionAndArchiveLabel, UnexpectedPlatform
 from shared.issue_info import AUTO_ISSUE_TYPE, IssueInfo
-from app_config import Config
+from app_config import config
 
 
 class TestIssueProcessor:
-    def test_init_config(self):
-        config_manager = MagicMock()
-        config_manager.load_all.return_value = None
-        assert isinstance(IssueProcessor.init_config(config_manager), Config)
-        config_manager.load_all.assert_called()
-
-        error_message = "test error"
-        config_manager.load_all.side_effect = Exception(error_message)
-        with pytest.raises(Exception, match=error_message):
-            IssueProcessor.init_config(config_manager)
-
     @pytest.mark.parametrize(
         "test_platform_type, expected_result",
         [
@@ -40,7 +29,6 @@ class TestIssueProcessor:
         test_platform_type: str | None,
         expected_result: type[GitServiceClient] | None,
     ):
-        config = Config()
         with patch.dict(
             os.environ, {Env.GITHUB_ACTIONS: "false", Env.GITLAB_CI: "false"}
         ):
@@ -56,7 +44,6 @@ class TestIssueProcessor:
     def test_init_git_service_client_with_env(
         self,
     ):
-        config = Config()
         with patch(
             "issue_processor.issues_processor.should_run_in_github_action"
         ) as should_run_in_github_action:

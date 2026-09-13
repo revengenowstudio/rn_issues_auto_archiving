@@ -12,6 +12,7 @@ from shared.log import Log
 from shared.env import Env
 from shared.exception import *
 from shared.issue_info import AUTO_ISSUE_TYPE, IssueInfo
+from utils.env import must_get_env
 from shared.issue_state import parse_issue_state
 from shared.ci_event_type import CiEventType
 from shared.json_dumps import json_dumps
@@ -297,14 +298,14 @@ class GitlabClient(GitServiceClient):
         https://docs.gitlab.com/ee/user/project/integrations/webhook_events.html#push-events
         """
         try:
-            webhook_payload = json.loads(os.environ[Env.WEBHOOK_PAYLOAD])
+            webhook_payload = json.loads(must_get_env(Env.WEBHOOK_PAYLOAD))
             if webhook_payload["event_name"] == "issue":
                 print(Log.issue_type_webhook_detected)
                 return True
             else:
                 print(Log.other_type_webhook_detected)
                 return False
-        except KeyError:
+        except (KeyError, ValueError):
             # 如果读取不到环境变量，说明是github流水线环境
             return True
 

@@ -1,3 +1,3 @@
-from config import Config
-from config import config
-from config import IssueTypeStr, ProcessingActionJson
+from app_config.config import Config
+from app_config.config import config
+from app_config.config import IssueTypeStr, ProcessingActionJson
