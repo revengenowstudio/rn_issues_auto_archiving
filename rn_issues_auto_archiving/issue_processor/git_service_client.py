@@ -12,6 +12,7 @@ from shared.log import Log
 from shared.env import Env
 from shared.exception import *
 from shared.issue_info import AUTO_ISSUE_TYPE, IssueInfo
+from shared.send_comment import format_comment
 from utils.env import must_get_env
 from shared.issue_state import parse_issue_state
 from shared.ci_event_type import CiEventType
@@ -156,7 +157,7 @@ class GitServiceClient(ABC):
             if issue_info.issue_body == "":
                 issue_info.issue_body = new_issue_info.body
 
-    def send_comment(self, comment_url: str, comment_body: str) -> None:
+    def send_comment(self, comment_url: str, comment_body: str, prefix: str) -> None:
         """api结构详见：\n
         Github ： https://docs.github.com/zh/rest/issues/comments?apiVersion=2022-11-28#create-an-issue-comment \n
         Gitlab ： https://docs.gitlab.com/ee/api/notes.html#create-new-issue-note \n
@@ -164,7 +165,9 @@ class GitServiceClient(ABC):
         """
         print(Log.sending_something.format(something=Log.announcement_comment))
         self.http_request(
-            method="POST", url=comment_url, json_content={"body": comment_body}
+            method="POST",
+            url=comment_url,
+            json_content={"body": format_comment(comment_body, prefix)},
         )
         print(Log.sending_something_success.format(something=Log.announcement_comment))
 

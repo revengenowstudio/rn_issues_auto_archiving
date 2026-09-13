@@ -4,10 +4,11 @@ import hashlib
 
 import httpx
 
+from app_config import config
 from shared.env import Env
 from shared.log import Log
 from shared.exception import ErrorMessage
-from shared.send_comment import send_comment
+from shared.send_comment import build_error_comment, send_comment
 from shared.reopen_issue import reopen_issue
 from shared.http_request import http_request
 from issue_processor.git_service_client import GitlabClient
@@ -153,7 +154,10 @@ def main():
         send_comment(
             http_header=http_header,
             comment_url=f"{base_url}/notes",
-            message=ErrorMessage.push_document_failed.format(exc=str(exc)),
+            message=build_error_comment(
+                ErrorMessage.push_document_failed.format(exc=str(exc))
+            ),
+            prefix=config.post_comment_prefix,
         )
         raise
 

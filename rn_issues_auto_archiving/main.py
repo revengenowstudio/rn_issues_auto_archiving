@@ -12,6 +12,7 @@ from shared.log import Log
 from shared.env import should_run_in_local
 from shared.get_args import get_value_from_args
 from shared.exception import *  # noqa: F403
+from shared.send_comment import build_error_comment
 from utils.env import get_env
 
 
@@ -53,9 +54,7 @@ def main() -> None:
     try:
         platform.enrich_missing_issue_info(issue_info)
 
-        if IssueProcessor.should_skip_archived_process(
-            issue_info, config.skip_archived_reges_for_comments
-        ):
+        if IssueProcessor.should_skip_archived_process(issue_info, config):
             print(Log.manually_skip_archived_process)
             IssueProcessor.close_issue_if_not_closed(issue_info, platform)
             return
@@ -84,7 +83,11 @@ def main() -> None:
                 issue_repository=issue_info.issue_repository,
             )
             print(comment_message)
-            platform.send_comment(issue_info.links.comment_url, comment_message)
+            platform.send_comment(
+                issue_info.links.comment_url,
+                comment_message,
+                config.post_comment_prefix,
+            )
             return
 
         archive_document.archive_issue(config.archived_document, issue_info)
@@ -97,7 +100,11 @@ def main() -> None:
     except ArchiveBaseError as exc:
         print(Log.archiving_condition_not_satisfied)
         platform.reopen_issue(issue_info.links.issue_url)
-        platform.send_comment(issue_info.links.comment_url, str(exc))
+        platform.send_comment(
+            issue_info.links.comment_url,
+            build_error_comment(str(exc)),
+            config.post_comment_prefix,
+        )
         raise
     finally:
         platform.close()

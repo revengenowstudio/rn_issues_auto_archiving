@@ -12,6 +12,7 @@ class Log:
     # issue_processor
     env = "环境变量"
     issue_comment = "Issue评论"
+    skip_self_comment = """检测到本脚本发送的评论，跳过对此评论的内容匹配"""
     issue_description = "Issue描述"
     introduced_version = "引入版本号"
     archive_version = "归档版本号"

@@ -199,7 +199,9 @@ class TestGitServiceClient:
         with patch.object(git_service_client, "http_request") as http_request:
             http_request.return_value = None
             git_service_client.send_comment(
-                comment_url="https://example.com", comment_body="test_comment"
+                comment_url="https://example.com",
+                comment_body="test_comment",
+                prefix="【归档脚本消息】",
             )
             assert http_request.call_count == 1
 

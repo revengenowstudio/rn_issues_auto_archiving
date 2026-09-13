@@ -1,3 +1,4 @@
+from app_config import config
 from shared.log import Log
 from shared.issue_info import IssueInfo
 from shared.env import Env, should_run_in_local
@@ -46,6 +47,7 @@ def main():
             message=Log.issue_archived_success.format(
                 issue_id=issue_info.issue_id, issue_repository=issue_repository
             ),
+            prefix=config.post_comment_prefix,
         )
     except Exception as exc:
         # 归档成功评论发送失败并不重要，失败就失败了

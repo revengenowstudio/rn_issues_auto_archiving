@@ -1,6 +1,6 @@
 import re
 
-from app_config.config import Config, config
+from app_config import Config, config
 
 
 class TestConfigSingleton:
@@ -15,17 +15,25 @@ class TestConfigSingleton:
         assert version_regex.search("abc") is None
 
     def test_archive_version_reges_placeholder_is_expanded(self):
-        for regex in config.archive_version_reges_for_comments:
-            assert "{version_regex}" not in regex
+        for match_rules in config.archive_version_reges_for_comments:
+            assert "{version_regex}" not in match_rules.rules
 
     def test_archive_version_reges_matches_comment(self):
-        version_regex = re.compile(config.archive_version_reges_for_comments[0])
+        version_regex = re.compile(config.archive_version_reges_for_comments[0].rules)
         assert version_regex.search("0.99.918 测试通过")
 
-    def test_raw_archive_version_reges_restores_placeholder(self):
-        raw_reges = config.raw_archive_version_reges_for_comments
-        assert len(raw_reges) == len(config.archive_version_reges_for_comments)
-        assert all("{version_regex}" in regex for regex in raw_reges)
+    def test_archive_version_reges_all_have_hint(self):
+        """归档关键字都给人类提示，否则归档失败的报错评论里会出现空行"""
+        for match_rules in config.archive_version_reges_for_comments:
+            assert match_rules.hint != ""
+
+    def test_skip_archived_reges_all_have_hint(self):
+        """跳过归档流程的关键字也要有提示，报错评论会把它拼给Issue作者"""
+        for match_rules in config.skip_archived_reges_for_comments:
+            assert match_rules.hint != ""
+
+    def test_post_comment_prefix(self):
+        assert config.post_comment_prefix == "【归档脚本消息】"
 
     def test_introduced_version_reges_matches_description(self):
         introduced_version_reges = [

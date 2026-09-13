@@ -22,6 +22,24 @@ class ProcessingActionJson(TypedDict):
 
 
 @dataclass
+class MatchRules:
+    """一条匹配规则以及展示给人看的提示 :\n
+    rules 是实际参与匹配的正则或关键字，
+    hint 是归档失败时展示给Issue作者的帮助提示（默认空字符串，为空时不展示）
+    """
+
+    rules: str
+    hint: str = ""
+
+
+def join_hints(match_rules_list: list[MatchRules]) -> str:
+    """把多条MatchRules里非空的hint拼成多行文本，方便评论里逐行阅读"""
+    return "\n".join(
+        match_rules.hint for match_rules in match_rules_list if match_rules.hint
+    )
+
+
+@dataclass
 class Config:
     @dataclass
     class IssueType:
@@ -50,24 +68,20 @@ class Config:
 
     # 以下为归档行为配置
     archive_necessary_labels: list[str]
-    archive_version_reges_for_comments: list[str]
+    archive_version_reges_for_comments: list[MatchRules]
     archive_version_ignore_line_reges_for_comments: list[str]
 
-    skip_archived_reges_for_comments: list[str]
+    skip_archived_reges_for_comments: list[MatchRules]
     version_regex: str
     issue_type: "Config.IssueType"
     introduced_version_reges: list[str]
     archived_document: ArchivedDocument
 
+    # 本脚本发送评论时统一加的前缀，用于识别“这是脚本自己发的评论”
+    post_comment_prefix: str = "【归档脚本消息】"
+
     # 构造时先塞一个空的，main 启动后调用 load_env_config 填充真实值
     from_env: FromEnv = field(default_factory=FromEnv)
-
-    @property
-    def raw_archive_version_reges_for_comments(self) -> list[str]:
-        return [
-            regex.replace(self.version_regex, "{version_regex}")
-            for regex in self.archive_version_reges_for_comments
-        ]
 
     def load_env_config(self) -> None:
         """从环境变量读取配置。\n
@@ -132,23 +146,24 @@ config = Config(
     archive_version_ignore_line_reges_for_comments=[
         r"^> ",
     ],
-    # 引用了 version_regex，改动 version_regex 时这里的正则同步生效
+    # rules 引用了 version_regex，改动 version_regex 时这里的正则同步生效
+    # hint 里出现的版本号只是示例，脚本自己发的评论会被跳过，不会误匹配
     archive_version_reges_for_comments=[
-        f"{version_regex} *测试通过",
-        f"测试通过 *{version_regex}",
-        f"{version_regex} *验证通过",
-        f"验证通过 *{version_regex}",
-        f"{version_regex} *已通过",
-        f"{version_regex} *通过",
-        f"{version_regex} *测试完成",
-        f"{version_regex} *归档",
-        f"^以{version_regex} *归档",
-        f"^请以{version_regex} *归档",
-        f"{version_regex} *自动归档",
+        MatchRules(rules=f"{version_regex} *测试通过", hint="0.99.918测试通过"),
+        MatchRules(rules=f"测试通过 *{version_regex}", hint="测试通过0.99.918"),
+        MatchRules(rules=f"{version_regex} *验证通过", hint="0.99.918验证通过"),
+        MatchRules(rules=f"验证通过 *{version_regex}", hint="验证通过0.99.918"),
+        # MatchRules(rules=f"{version_regex} *已通过", hint="0.99.918已通过"),
+        # MatchRules(rules=f"{version_regex} *通过", hint="0.99.918通过"),
+        # MatchRules(rules=f"{version_regex} *测试完成", hint="0.99.918测试完成"),
+        # MatchRules(rules=f"{version_regex} *归档", hint="0.99.918归档"),
+        # MatchRules(rules=f"^以{version_regex} *归档", hint="以0.99.918归档"),
+        # MatchRules(rules=f"^请以{version_regex} *归档", hint="请以0.99.918归档"),
+        # MatchRules(rules=f"{version_regex} *自动归档", hint="0.99.918自动归档"),
     ],
     skip_archived_reges_for_comments=[
-        "跳过归档流程",
-        "不进行归档流程",
+        MatchRules(rules="跳过归档流程", hint="跳过归档流程"),
+        MatchRules(rules="不进行归档流程", hint="不进行归档流程"),
     ],
     archived_document=Config.ArchivedDocument(
         rjust_space_width=60,

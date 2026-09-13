@@ -63,9 +63,12 @@ class IssueProcessor:
     @staticmethod
     def should_skip_archived_process(
         issue_info: IssueInfo,
-        skip_archived_reges_for_comments: list[str],
+        config: Config,
     ) -> bool:
-        return issue_info.should_skip_archived_process(skip_archived_reges_for_comments)
+        return issue_info.should_skip_archived_process(
+            config.skip_archived_reges_for_comments,
+            config.post_comment_prefix,
+        )
 
     @staticmethod
     def verify_not_archived_object(issue_info: IssueInfo, config: Config) -> bool:
@@ -89,8 +92,8 @@ class IssueProcessor:
             not_archived_issue = not issue_info.should_archive_issue(
                 config.archive_version_reges_for_comments,
                 config.archive_version_ignore_line_reges_for_comments,
-                config.raw_archive_version_reges_for_comments,
                 config.archive_necessary_labels,
+                config.post_comment_prefix,
             )
             if not running_in_manual and not_archived_issue:
                 print(Log.not_archive_issue)
@@ -129,6 +132,7 @@ class IssueProcessor:
         gather_info.archive_version = issue_info.get_archive_version_from_comments(
             config.archive_version_reges_for_comments,
             config.archive_version_ignore_line_reges_for_comments,
+            config.post_comment_prefix,
         )
 
         return gather_info

@@ -2,6 +2,7 @@ import pytest
 import json
 from pathlib import Path
 
+from app_config import MatchRules, config
 from shared.issue_info import CommentJson, IssueInfoJson, IssueInfo
 from shared.exception import *
 
@@ -302,8 +303,10 @@ def test_get_archive_version_from_comments(
         ]
     )
     archive_version_reges_for_comments = [
-        "(\\d\\.\\d{2}\\.\\d{3}[a-zA-Z]?\\d{0,2})测试通过",
-        "已验证[,，]版本号[:：](\\d\\.\\d{2}\\.\\d{3}[a-zA-Z]?\\d{0,2})",
+        MatchRules(rules="(\\d\\.\\d{2}\\.\\d{3}[a-zA-Z]?\\d{0,2})测试通过"),
+        MatchRules(
+            rules="已验证[,，]版本号[:：](\\d\\.\\d{2}\\.\\d{3}[a-zA-Z]?\\d{0,2})"
+        ),
     ]
     archive_version_ignore_line_reges_for_comments = ["^> "]
 
@@ -312,13 +315,55 @@ def test_get_archive_version_from_comments(
             issue_info.get_archive_version_from_comments(
                 archive_version_reges_for_comments,
                 archive_version_ignore_line_reges_for_comments,
+                config.post_comment_prefix,
             )
 
     else:
         assert expected_version == issue_info.get_archive_version_from_comments(
             archive_version_reges_for_comments,
             archive_version_ignore_line_reges_for_comments,
+            config.post_comment_prefix,
         )
+
+
+def test_get_archive_version_from_comments_skips_self_comment():
+    """脚本自己发的评论要跳过，
+    否则提示里写的示例版本号会被当成Issue作者填写的归档版本号"""
+    issue_info = IssueInfo()
+    issue_info.update(
+        issue_comments=[
+            IssueInfo.Comment(
+                author="test",
+                body=f"{config.post_comment_prefix} 请使用「0.99.918 测试通过」这样的格式",
+            )
+        ]
+    )
+    assert (
+        issue_info.get_archive_version_from_comments(
+            [MatchRules(rules="(\\d\\.\\d{2}\\.\\d{3}[a-zA-Z]?\\d{0,2})测试通过")],
+            [],
+            config.post_comment_prefix,
+        )
+        == ""
+    )
+
+
+def test_get_archive_version_from_comments_empty_prefix_does_not_skip():
+    """prefix 为空时不能把所有评论都跳过"""
+    issue_info = IssueInfo()
+    issue_info.update(
+        issue_comments=[
+            IssueInfo.Comment(author="test", body="0.99.918测试通过"),
+        ]
+    )
+    assert (
+        issue_info.get_archive_version_from_comments(
+            [MatchRules(rules="(\\d\\.\\d{2}\\.\\d{3}[a-zA-Z]?\\d{0,2})测试通过")],
+            [],
+            "",
+        )
+        == "0.99.918"
+    )
 
 
 @pytest.mark.parametrize(
@@ -381,12 +426,10 @@ def test_should_archive_issue(
     )
     archive_necessary_labels = ["resolved 已解决"]
     archive_version_reges_for_comments = [
-        "(\\d\\.\\d{2}\\.\\d{3}[a-zA-Z]?\\d{0,2})测试通过",
-        "已验证[,，]版本号[:：](\\d\\.\\d{2}\\.\\d{3}[a-zA-Z]?\\d{0,2})",
-    ]
-    raw_archive_version_reges_for_comments = [
-        "{version_regex}测试通过",
-        "已验证[,，]版本号[:：]{version_regex}",
+        MatchRules(rules="(\\d\\.\\d{2}\\.\\d{3}[a-zA-Z]?\\d{0,2})测试通过"),
+        MatchRules(
+            rules="已验证[,，]版本号[:：](\\d\\.\\d{2}\\.\\d{3}[a-zA-Z]?\\d{0,2})"
+        ),
     ]
 
     archive_version_ignore_line_reges_for_comments = ["^> "]
@@ -409,8 +452,8 @@ def test_should_archive_issue(
             issue_info.should_archive_issue(
                 archive_version_reges_for_comments,
                 archive_version_ignore_line_reges_for_comments,
-                raw_archive_version_reges_for_comments,
                 archive_necessary_labels,
+                config.post_comment_prefix,
             )
 
     elif "resolved 已解决" in labels and archive_version_number == 0:
@@ -418,8 +461,8 @@ def test_should_archive_issue(
             issue_info.should_archive_issue(
                 archive_version_reges_for_comments,
                 archive_version_ignore_line_reges_for_comments,
-                raw_archive_version_reges_for_comments,
                 archive_necessary_labels,
+                config.post_comment_prefix,
             )
 
     if ("resolved 已解决" not in labels and archive_version_number == 0) or (
@@ -428,8 +471,8 @@ def test_should_archive_issue(
         assert expected_result == issue_info.should_archive_issue(
             archive_version_reges_for_comments,
             archive_version_ignore_line_reges_for_comments,
-            raw_archive_version_reges_for_comments,
             archive_necessary_labels,
+            config.post_comment_prefix,
         )
 
 
@@ -493,9 +536,10 @@ def test_should_archived_success():
 
 def test_should_skip_archived_process():
     issue_info = IssueInfo()
-    reges = ["跳过归档流程", "test_regex"]
+    reges = [MatchRules(rules="跳过归档流程"), MatchRules(rules="test_regex")]
+    prefix = config.post_comment_prefix
 
-    assert issue_info.should_skip_archived_process(reges) is False
+    assert issue_info.should_skip_archived_process(reges, prefix) is False
 
     issue_info.issue_comments = [
         IssueInfo.Comment(author="test", body="跳过归档流程"),
@@ -503,10 +547,27 @@ def test_should_skip_archived_process():
             author="test", body="qewqio\n\nsdjio跳过归档流程\n\n\n\1e13123"
         ),
     ]
-    assert issue_info.should_skip_archived_process(reges) is True
+    assert issue_info.should_skip_archived_process(reges, prefix) is True
 
     issue_info.issue_comments = [
         IssueInfo.Comment(author="test", body="test_regex"),
         IssueInfo.Comment(author="test", body="qewqiojisdtest_regexdsadas1e13123"),
     ]
-    assert issue_info.should_skip_archived_process(reges) is True
+    assert issue_info.should_skip_archived_process(reges, prefix) is True
+
+
+def test_should_skip_archived_process_skips_self_comment():
+    """脚本自己发的告警评论里就写着“跳过归档流程”，
+    不能因此把后续所有流水线都误判成需要跳过归档"""
+    issue_info = IssueInfo()
+    reges = [MatchRules(rules="跳过归档流程")]
+    issue_info.issue_comments = [
+        IssueInfo.Comment(
+            author="test",
+            body=f"{config.post_comment_prefix} 如果需要跳过归档流程, 请发送带有如下关键字的评论",
+        )
+    ]
+    assert (
+        issue_info.should_skip_archived_process(reges, config.post_comment_prefix)
+        is False
+    )

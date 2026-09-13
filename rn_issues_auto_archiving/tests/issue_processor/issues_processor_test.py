@@ -260,7 +260,7 @@ class TestIssueProcessor:
     def test_should_skip_archived_process(self):
         issue_info = MagicMock()
         issue_info.should_skip_archived_process.return_value = True
-        reges = ["1", "2"]
-        assert IssueProcessor().should_skip_archived_process(issue_info, reges) == True
+        config = MagicMock()
+        assert IssueProcessor().should_skip_archived_process(issue_info, config) == True
         issue_info.should_skip_archived_process.return_value = False
-        assert IssueProcessor().should_skip_archived_process(issue_info, []) == False
+        assert IssueProcessor().should_skip_archived_process(issue_info, config) == False
