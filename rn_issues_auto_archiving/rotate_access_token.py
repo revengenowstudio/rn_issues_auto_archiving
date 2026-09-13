@@ -1,12 +1,6 @@
-import sys
-from pathlib import Path
 from datetime import datetime, timedelta
 
 import httpx
-
-# 本脚本会被直接执行（sys.path[0] 是 utils/ 目录），
-# 需要把包目录加入 sys.path 才能 import 项目内的模块
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from shared.env import Env
 from utils.env import get_env, must_get_env
