@@ -4,6 +4,7 @@ import coredumpy
 
 from shared.log import Log
 from shared.exception import ArchiveBaseError
+from shared.env import should_run_in_local
 
 DUMP_DIRECTORY = "dumps"
 
@@ -14,7 +15,7 @@ def patch_except_for_ci() -> None:
     由流水线作为artifact上传，方便事后在本地用 coredumpy load 复现 \n
     本地运行不启用，避免每次报错都在工作区留下dump文件
     """
-    if not os.environ.get("CI"):
+    if should_run_in_local():
         return
     coredumpy.patch_except(
         directory=DUMP_DIRECTORY, exclude=[ArchiveBaseError, KeyboardInterrupt]
