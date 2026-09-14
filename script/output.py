@@ -50,7 +50,7 @@ ARG_ALL_ISSUE_PATH = "--all_issue_path"
 ARG_INTERNAL_ISSUE_PATH = "--internal_issue_path"
 
 REPLACE_FILE_CONTENT_LIST = [
-    # ("AutoArchiving.yml", "TARGET_BRANCH: main", "TARGET_BRANCH: master"),
+    ("AutoArchiving.yml", "TARGET_BRANCH: main", "TARGET_BRANCH: master"),
     (".gitlab-ci.yml", "  - unittest\n", ""),
     (".gitlab-ci.yml", '  - local: "/.gitlab/workflows/Unittest.yml"\n', ""),
 ]
