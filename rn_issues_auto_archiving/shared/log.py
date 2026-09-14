@@ -8,6 +8,7 @@ class Log:
         """环境变量 "{key}" 的值 "{value}" 无法转换成 "{type}" 类型"""
     )
     command_failed = """执行命令 "{cmd}" 失败 {code} , 错误信息: "{err_msg}" """
+    coredumpy_enabled = """检测到CI环境，已启用coredumpy，异常时会把崩溃现场dump到 "{directory}" 目录"""
 
     # issue_processor
     env = "环境变量"

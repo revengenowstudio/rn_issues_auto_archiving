@@ -67,3 +67,9 @@ auto_archiving:
     echo "task done , sleep $SLEEP_INTERVAL second"
     sleep $SLEEP_INTERVAL
 
+  artifacts:
+    when: on_failure
+    paths:
+      - dumps/
+    expire_in: 1 week
+

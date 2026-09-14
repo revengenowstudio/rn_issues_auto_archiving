@@ -108,6 +108,14 @@ jobs:
       - name: Send archiving success comment
         run: |
           uv run ./rn_issues_auto_archiving/archiving_success.py
+
+      - name: Upload coredumpy dumps
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coredumpy-dumps
+          path: dumps/
+          if-no-files-found: ignore
           
 
 

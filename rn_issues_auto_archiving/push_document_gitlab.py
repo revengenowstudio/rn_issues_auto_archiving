@@ -13,6 +13,7 @@ from shared.reopen_issue import reopen_issue
 from shared.http_request import http_request
 from issue_processor.git_service_client import GitlabClient
 from shared.issue_info import IssueInfoJson
+from utils.coredumpy_setup import patch_except_for_ci
 from utils.env import must_get_env
 
 
@@ -102,6 +103,8 @@ def push_document(
 
 
 def main():
+    patch_except_for_ci()
+
     issue_id = get_issue_id_from_issue_info(must_get_env(Env.ISSUE_OUTPUT_PATH))
     if issue_id == -1:
         return

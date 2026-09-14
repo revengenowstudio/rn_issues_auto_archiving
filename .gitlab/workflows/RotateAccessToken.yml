@@ -39,4 +39,10 @@ rotate_access_token:
   script: |
     uv pip install -r ./pyproject.toml --system
     python3 ./rn_issues_auto_archiving/rotate_access_token.py
+
+  artifacts:
+    when: on_failure
+    paths:
+      - dumps/
+    expire_in: 1 week
   

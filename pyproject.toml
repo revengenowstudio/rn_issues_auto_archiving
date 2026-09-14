@@ -5,6 +5,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 version = "0.1.0"
 dependencies = [
+  "coredumpy>=0.5.0",
   "httpx>=0.28.1",
 ]
 

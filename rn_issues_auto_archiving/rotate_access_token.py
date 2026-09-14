@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import httpx
 
 from shared.env import Env
+from utils.coredumpy_setup import patch_except_for_ci
 from utils.env import get_env, must_get_env
 
 
@@ -60,6 +61,8 @@ def update_repository_variable(
 
 
 def main():
+    patch_except_for_ci()
+
     if not get_env(Env.GITLAB_CI, bool, False):
         print(Log.non_platform_action_env)
         from dotenv import load_dotenv

@@ -1,10 +1,13 @@
 from shared.env import Env
 from shared.log import Log
 from utils.cmd import cmd_run
+from utils.coredumpy_setup import patch_except_for_ci
 from utils.env import get_env, must_get_env
 
 
 def main():
+    patch_except_for_ci()
+
     archived_document_path = must_get_env(Env.ARCHIVED_DOCUMENT_PATH)
     target_branch = must_get_env(Env.TARGET_BRANCH)
 

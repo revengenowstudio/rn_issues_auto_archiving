@@ -4,10 +4,13 @@ from shared.issue_info import IssueInfo
 from shared.env import Env, should_run_in_local
 from shared.send_comment import send_comment
 from issue_processor.git_service_client import GitlabClient, GithubClient
+from utils.coredumpy_setup import patch_except_for_ci
 from utils.env import must_get_env
 
 
 def main():
+    patch_except_for_ci()
+
     if should_run_in_local():
         print(Log.non_platform_action_env)
         from dotenv import load_dotenv

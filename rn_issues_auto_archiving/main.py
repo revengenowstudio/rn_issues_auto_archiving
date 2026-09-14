@@ -13,10 +13,13 @@ from shared.env import should_run_in_local
 from shared.get_args import get_value_from_args
 from shared.exception import *  # noqa: F403
 from shared.send_comment import build_error_comment
+from utils.coredumpy_setup import patch_except_for_ci
 from utils.env import get_env
 
 
 def main() -> None:
+    patch_except_for_ci()
+
     start_time = time.time()
 
     if should_run_in_local():
